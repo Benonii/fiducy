@@ -8,8 +8,7 @@ function readEventData(line: string): string | null {
   return data && data !== '[DONE]' ? data : null;
 }
 
-export function createUsageObservingStream(onUsage: (usage: TokenUsage) => void) {
-  const decoder = new TextDecoder();
+function createUsageObserver() {
   let pendingText = '';
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
 
@@ -22,14 +21,28 @@ export function createUsageObservingStream(onUsage: (usage: TokenUsage) => void)
     }
   };
 
-  return new TransformStream<Uint8Array, Uint8Array>({
-    transform: (chunk, controller) => {
-      controller.enqueue(chunk);
-      observeLines(decoder.decode(chunk, { stream: true }));
+  return { observeLines, readUsage: () => usage };
+}
+
+export function observeUsageInBody(
+  body: NonNullable<Response['body']>,
+  onUsage: (usage: TokenUsage) => void
+): ReadableStream<Uint8Array> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  const observer = createUsageObserver();
+  return new ReadableStream<Uint8Array>({
+    pull: async (controller) => {
+      const { done, value } = await reader.read();
+      if (done) {
+        observer.observeLines(`${decoder.decode()}\n`);
+        onUsage(observer.readUsage());
+        controller.close();
+        return;
+      }
+      controller.enqueue(value);
+      observer.observeLines(decoder.decode(value, { stream: true }));
     },
-    flush: () => {
-      observeLines(`${decoder.decode()}\n`);
-      onUsage(usage);
-    }
+    cancel: (reason) => reader.cancel(reason)
   });
 }

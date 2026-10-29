@@ -1,8 +1,8 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 
+import { SAMPLE_API_KEY, SAMPLE_APP_SECRET, SAMPLE_HANDLE } from '@fiducy/testing';
+import { ANTHROPIC_STREAM_CHUNKS, OPENAI_STREAM_CHUNKS, startMockProvider } from '@fiducy/testing';
 import { buildUpstreamRequest, createProviderRegistry, relayResponse } from '../src';
-import { SAMPLE_API_KEY, SAMPLE_APP_SECRET, SAMPLE_HANDLE } from './fixtures';
-import { ANTHROPIC_STREAM_CHUNKS, OPENAI_STREAM_CHUNKS, startMockProvider } from './mockProvider';
 
 import type { ProviderName, TokenUsage } from '../src';
 

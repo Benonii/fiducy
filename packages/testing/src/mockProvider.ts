@@ -1,10 +1,6 @@
 import { SAMPLE_API_KEY } from './fixtures';
 
-export interface RecordedRequest {
-  path: string;
-  headers: Headers;
-  body: string;
-}
+import type { RecordedRequest } from './types';
 
 const encoder = new TextEncoder();
 
@@ -16,9 +12,12 @@ export const OPENAI_STREAM_CHUNKS = [
 ];
 
 export const ANTHROPIC_STREAM_CHUNKS = [
-  'event: message_start\ndata: {"type":"message_start","message":{"usage":{"input_tokens":25,"output_tokens":1}}}\n\n',
-  'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"text":"Hi"}}\n\n',
-  'event: message_delta\ndata: {"type":"message_delta","usage":{"output_tokens":12}}\n\n'
+  'event: message_start\ndata: {"type":"message_start","message":{"id":"msg_01","type":"message","role":"assistant","model":"claude-sonnet-4-5","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":25,"output_tokens":1}}}\n\n',
+  'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}\n\n',
+  'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hi there"}}\n\n',
+  'event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n',
+  'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":12}}\n\n',
+  'event: message_stop\ndata: {"type":"message_stop"}\n\n'
 ];
 
 function streamChunks(chunks: string[]): Response {

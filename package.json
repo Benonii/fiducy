@@ -1,11 +1,11 @@
 {
   "name": "fiducy",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "test": "bun test",
     "lint": "biome check .",
-    "typecheck": "bunx tsc --noEmit -p packages/core && bunx tsc --noEmit -p packages/providers"
+    "typecheck": "for project in packages/core packages/providers packages/testing apps/gateway; do bunx tsc --noEmit -p $project || exit 1; done"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
