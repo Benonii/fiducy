@@ -8,11 +8,13 @@
   },
   "dependencies": {
     "@fiducy/core": "workspace:*",
-    "@fiducy/providers": "workspace:*"
+    "@fiducy/providers": "workspace:*",
+    "@fiducy/widget": "workspace:*"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.32.1",
     "@fiducy/testing": "workspace:*",
-    "openai": "4.73.1"
+    "openai": "4.73.1",
+    "playwright": "1.56.1"
   }
 }
