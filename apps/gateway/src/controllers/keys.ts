@@ -8,7 +8,14 @@ import { readJSONBody, validateStoreKeyBody } from '../validators';
 
 import type { GatewayDependencies } from '../types';
 
+function isFromForeignOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin');
+  return origin !== null && origin !== new URL(request.url).origin;
+}
+
 export async function storeKey(request: Request, dependencies: GatewayDependencies) {
+  if (isFromForeignOrigin(request))
+    return respondWith(403, null, 'Keys can only be added through the key widget');
   const body = validateStoreKeyBody(await readJSONBody(request));
   if (!body.ok) return respondWithFailure(body.error);
   const app = await dependencies.appDirectory.findApp(body.value.appID);

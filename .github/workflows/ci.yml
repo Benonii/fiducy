@@ -16,4 +16,5 @@ jobs:
       - run: bun install
       - run: bun run lint
       - run: bun run typecheck
+      - run: bunx playwright@1.56.1 install --with-deps chromium
       - run: bun test

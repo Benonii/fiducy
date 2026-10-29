@@ -1,6 +1,7 @@
 import { KEY_ROUTE_PATTERN, PROVIDER_ROUTE_PATTERN } from './constants';
 import { releaseKey, revokeKey, storeKey } from './controllers/keys';
 import { proxyProviderRequest } from './controllers/proxy';
+import { serveWidget } from './controllers/widget';
 import { respondWith } from './responses';
 
 import type { ProviderName } from '@fiducy/providers';
@@ -10,6 +11,7 @@ async function routeRequest(request: Request, dependencies: GatewayDependencies)
   const { pathname, search } = new URL(request.url);
   if (request.method === 'GET' && pathname === '/health')
     return respondWith(200, { status: 'ok' }, 'Gateway is up');
+  if (request.method === 'GET' && pathname === '/widget') return serveWidget(request, dependencies);
   if (request.method === 'POST' && pathname === '/keys') return storeKey(request, dependencies);
   if (request.method === 'POST' && pathname === '/release')
     return releaseKey(request, dependencies);
