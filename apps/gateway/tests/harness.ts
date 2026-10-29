@@ -1,0 +1,64 @@
+import { createLocalKeyWrapper } from '@fiducy/core';
+import { createProviderRegistry } from '@fiducy/providers';
+import { startMockProvider } from '@fiducy/testing';
+
+import {
+  createMemoryAppDirectory,
+  createMemoryKeyStore,
+  createMemoryUsageLedger
+} from '../src/memoryStores';
+import { createGateway } from '../src/router';
+
+import type { AppRegistration } from '../src/types';
+import type { StoreKeyResponseBody } from './types';
+
+export const CHAT_APP: AppRegistration = {
+  appID: 'app_chatforge',
+  name: 'Chatforge',
+  appSecret: 'app_sk_chatforge_9Vx2Lr7Tn4Wd6Hc3',
+  accessMode: 'gateway',
+  monthlyRequestLimitPerKey: 3
+};
+
+export const DESK_APP: AppRegistration = {
+  appID: 'app_promptdesk',
+  name: 'Promptdesk',
+  appSecret: 'app_sk_promptdesk_2Qw8Ym1Kp4Lz5Ub',
+  accessMode: 'gateway_and_release',
+  monthlyRequestLimitPerKey: 100
+};
+
+export async function startGatewayHarness() {
+  const mockProvider = startMockProvider();
+  const usageLedger = createMemoryUsageLedger();
+  const keyStore = createMemoryKeyStore();
+  const gateway = createGateway({
+    keyWrapper: createLocalKeyWrapper(crypto.getRandomValues(new Uint8Array(32))),
+    keyStore,
+    appDirectory: await createMemoryAppDirectory([CHAT_APP, DESK_APP]),
+    usageLedger,
+    providerRegistry: createProviderRegistry({
+      openai: mockProvider.baseURL,
+      anthropic: mockProvider.baseURL
+    })
+  });
+  const server = Bun.serve({ port: 0, fetch: gateway });
+  const gatewayURL = `http://localhost:${server.port}`;
+
+  const storeKey = async (appID: string, apiKey: string) => {
+    const response = await fetch(`${gatewayURL}/keys`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ appID, apiKey })
+    });
+    const body = (await response.json()) as StoreKeyResponseBody;
+    return { status: response.status, body };
+  };
+
+  const stop = () => {
+    server.stop(true);
+    mockProvider.server.stop(true);
+  };
+
+  return { gatewayURL, mockProvider, usageLedger, keyStore, storeKey, stop };
+}

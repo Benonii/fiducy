@@ -16,7 +16,7 @@ export interface UpstreamRequestInput {
   path: string;
   method: string;
   headers: Headers;
-  body: string | ReadableStream<Uint8Array> | null;
+  body: string | Request['body'];
   apiKey: string;
 }
 

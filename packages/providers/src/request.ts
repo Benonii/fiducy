@@ -4,7 +4,7 @@ import { fail, succeed } from './result';
 import type { Result } from '@fiducy/core';
 import type { ProviderConfiguration, UpstreamRequestError, UpstreamRequestInput } from './types';
 
-function isPathAllowed(provider: ProviderConfiguration, path: string): boolean {
+export function isPathAllowed(provider: ProviderConfiguration, path: string): boolean {
   if (!path.startsWith(provider.allowedPathPrefix)) return false;
   if (path.includes('..') || path.includes('//') || path.includes('\\')) return false;
   return new URL(path, provider.baseURL).origin === new URL(provider.baseURL).origin;
