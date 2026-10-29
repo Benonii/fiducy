@@ -22,6 +22,8 @@ export interface UpstreamRequestInput {
 
 export type UpstreamRequestError = 'path_not_allowed';
 
+export type StreamingRequestInit = RequestInit & { duplex: 'half' };
+
 export interface TokenUsage {
   inputTokens: number;
   outputTokens: number;

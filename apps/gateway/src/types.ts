@@ -72,3 +72,25 @@ export interface WidgetPageInput {
 }
 
 export type RequestHandler = (request: Request) => Promise<Response>;
+
+export interface ControlPlaneConnection {
+  controlPlaneURL: string;
+  gatewayToken: string;
+}
+
+export interface RemoteAppDirectoryOptions extends ControlPlaneConnection {
+  refreshIntervalMilliseconds: number;
+}
+
+export interface RemoteUsageLedgerOptions extends ControlPlaneConnection {
+  flushIntervalMilliseconds: number;
+}
+
+export interface RemoteAppConfig extends RegisteredApp {
+  appSecretHash: string;
+}
+
+export interface FlushableUsageLedger extends UsageLedger {
+  flush: () => Promise<number>;
+  stop: () => Promise<void>;
+}

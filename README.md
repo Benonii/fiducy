@@ -11,6 +11,7 @@ Key custody for bring-your-own-key apps. Users paste their AI provider key into 
 | `packages/widget` | Browser client that mounts the key widget iframe |
 | `packages/testing` | Shared fixtures and a mock AI provider |
 | `apps/gateway` | The gateway server |
+| `apps/control-plane` | Farm.js developer dashboard and control plane: accounts, apps, hashed app secrets, limits, usage |
 
 ## Development
 
@@ -20,3 +21,18 @@ bun test
 bun run typecheck
 bun run lint
 ```
+
+## Running the control plane with the gateway
+
+```sh
+cd apps/control-plane
+FIDUCY_GATEWAY_TOKEN=change-me FIDUCY_GATEWAY_URL=http://localhost:8787 bun run dev
+
+cd apps/gateway
+FIDUCY_MASTER_KEY=<32 random bytes, base64url> \
+FIDUCY_CONTROL_PLANE_URL=http://localhost:3000 \
+FIDUCY_GATEWAY_TOKEN=change-me \
+bun run start
+```
+
+The control plane never handles user keys. It sends the gateway app configs (with only the SHA-256 hash of each app secret) and receives token counts. Locally it stores data in `.farm/`; set `DATABASE_URL` to use Postgres.

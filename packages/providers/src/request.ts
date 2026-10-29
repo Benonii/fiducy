@@ -2,7 +2,12 @@ import { STRIPPED_REQUEST_HEADERS } from './constants';
 import { fail, succeed } from './result';
 
 import type { Result } from '@fiducy/core';
-import type { ProviderConfiguration, UpstreamRequestError, UpstreamRequestInput } from './types';
+import type {
+  ProviderConfiguration,
+  StreamingRequestInit,
+  UpstreamRequestError,
+  UpstreamRequestInput
+} from './types';
 
 export function isPathAllowed(provider: ProviderConfiguration, path: string): boolean {
   if (!path.startsWith(provider.allowedPathPrefix)) return false;
@@ -39,12 +44,11 @@ export function buildUpstreamRequest({
 }: UpstreamRequestInput): Result<Request, UpstreamRequestError> {
   if (!isPathAllowed(provider, path)) return fail('path_not_allowed');
   const upstreamURL = new URL(path, provider.baseURL);
-  return succeed(
-    new Request(upstreamURL.toString(), {
-      method,
-      headers: buildUpstreamHeaders(provider, headers, apiKey),
-      body,
-      duplex: 'half'
-    })
-  );
+  const init: StreamingRequestInit = {
+    method,
+    headers: buildUpstreamHeaders(provider, headers, apiKey),
+    body,
+    duplex: 'half'
+  };
+  return succeed(new Request(upstreamURL.toString(), init));
 }

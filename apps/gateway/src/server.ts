@@ -1,14 +1,13 @@
 import { createLocalKeyWrapper } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 
-import {
-  createMemoryAppDirectory,
-  createMemoryKeyStore,
-  createMemoryUsageLedger
-} from './memoryStores';
+import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
+import { createMemoryUsageLedger } from './memoryStores';
+import { createRemoteAppDirectory } from './remoteAppDirectory';
+import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
 
-import type { AppRegistration } from './types';
+import type { AppRegistration, ControlPlaneConnection } from './types';
 
 function readMasterKey(): Uint8Array {
   const encodedMasterKey = process.env.FIDUCY_MASTER_KEY;
@@ -20,11 +19,25 @@ function readAppRegistrations(): AppRegistration[] {
   return JSON.parse(process.env.FIDUCY_APPS_JSON ?? '[]');
 }
 
+function readControlPlaneConnection(): ControlPlaneConnection | null {
+  const controlPlaneURL = process.env.FIDUCY_CONTROL_PLANE_URL;
+  if (!controlPlaneURL) return null;
+  const gatewayToken = process.env.FIDUCY_GATEWAY_TOKEN;
+  if (!gatewayToken) throw new Error('Set FIDUCY_GATEWAY_TOKEN to match the control plane');
+  return { controlPlaneURL, gatewayToken };
+}
+
+const connection = readControlPlaneConnection();
+
 const gateway = createGateway({
   keyWrapper: createLocalKeyWrapper(readMasterKey()),
   keyStore: createMemoryKeyStore(),
-  appDirectory: await createMemoryAppDirectory(readAppRegistrations()),
-  usageLedger: createMemoryUsageLedger(),
+  appDirectory: connection
+    ? createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 })
+    : await createMemoryAppDirectory(readAppRegistrations()),
+  usageLedger: connection
+    ? createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 })
+    : createMemoryUsageLedger(),
   providerRegistry: createProviderRegistry()
 });
 
