@@ -1,0 +1,46 @@
+import { fail, openSecret, parseHandle, succeed } from '@fiducy/core';
+
+import { KEY_HANDLE_HEADER } from './constants';
+import { describeFailure } from './responses';
+
+import type { OpenSecretError } from '@fiducy/core';
+import type { GatewayDependencies, GatewayFailure, GatewayResult } from './types';
+import type { RegisteredApp, ResolvedKey } from './types';
+
+function describeOpenFailure(error: OpenSecretError): GatewayFailure {
+  if (error === 'invalid_handle') return describeFailure(400, 'The key handle is malformed');
+  if (error === 'app_mismatch') return describeFailure(403, 'This key belongs to another app');
+  return describeFailure(403, 'This handle cannot open its key');
+}
+
+export async function resolveApiKey(
+  app: RegisteredApp,
+  headers: Headers,
+  { keyStore, keyWrapper }: GatewayDependencies
+): Promise<GatewayResult<ResolvedKey>> {
+  const handle = headers.get(KEY_HANDLE_HEADER)?.trim();
+  if (!handle)
+    return fail(describeFailure(400, `Send the user's key handle in ${KEY_HANDLE_HEADER}`));
+  const parsedHandle = parseHandle(handle);
+  if (!parsedHandle.ok) return fail(describeOpenFailure(parsedHandle.error));
+
+  const record = await keyStore.findRecord(parsedHandle.value.keyID);
+  if (!record)
+    return fail(describeFailure(404, 'No key found for this handle. It may have been revoked'));
+
+  const opened = await openSecret({ appID: app.appID, handle, record, keyWrapper });
+  if (!opened.ok) return fail(describeOpenFailure(opened.error));
+  return succeed({ apiKey: opened.value, record });
+}
+
+export async function enforceRequestLimit(
+  app: RegisteredApp,
+  keyID: string,
+  { usageLedger }: GatewayDependencies
+): Promise<GatewayResult<number>> {
+  const requestCount = await usageLedger.countRequestsThisMonth(keyID);
+  if (requestCount >= app.monthlyRequestLimitPerKey) {
+    return fail(describeFailure(429, 'This key reached its monthly request limit'));
+  }
+  return succeed(requestCount);
+}

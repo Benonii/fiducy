@@ -1,7 +1,7 @@
 import { EVENT_STREAM_TYPE, STRIPPED_RESPONSE_HEADERS } from './constants';
 import { redactSecrets } from './redaction';
 import { copyHeadersWithout } from './request';
-import { createUsageObservingStream } from './stream';
+import { observeUsageInBody } from './stream';
 import { parseJSON, readUsage } from './usage';
 
 import type { RelayResponseInput } from './types';
@@ -21,7 +21,7 @@ export async function relayResponse({
 
   const isEventStream = headers.get('content-type')?.includes(EVENT_STREAM_TYPE) ?? false;
   if (isEventStream && upstreamResponse.body) {
-    const observedBody = upstreamResponse.body.pipeThrough(createUsageObservingStream(onUsage));
+    const observedBody = observeUsageInBody(upstreamResponse.body, onUsage);
     return new Response(observedBody, responseInit);
   }
 
