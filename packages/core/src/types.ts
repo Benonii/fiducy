@@ -1,34 +1,36 @@
+export type Bytes = Uint8Array<ArrayBuffer>;
+
 export type Result<Value, Failure> = { ok: true; value: Value } | { ok: false; error: Failure };
 
 export interface EncryptedSecret {
-  ciphertext: Uint8Array;
-  iv: Uint8Array;
+  ciphertext: Bytes;
+  iv: Bytes;
 }
 
 export interface EncryptSecretInput {
-  plaintext: Uint8Array;
-  dataKey: Uint8Array;
-  associatedData: Uint8Array;
+  plaintext: Bytes;
+  dataKey: Bytes;
+  associatedData: Bytes;
 }
 
 export interface DecryptSecretInput extends EncryptedSecret {
-  dataKey: Uint8Array;
-  associatedData: Uint8Array;
+  dataKey: Bytes;
+  associatedData: Bytes;
 }
 
 export interface KeyShares {
-  shareA: Uint8Array;
-  shareB: Uint8Array;
+  shareA: Bytes;
+  shareB: Bytes;
 }
 
 export interface ParsedHandle {
   keyID: string;
-  shareA: Uint8Array;
+  shareA: Bytes;
 }
 
 export interface KeyWrapper {
-  wrap: (appID: string, bytes: Uint8Array) => Promise<Uint8Array>;
-  unwrap: (appID: string, wrapped: Uint8Array) => Promise<Result<Uint8Array, 'unwrap_failed'>>;
+  wrap: (appID: string, bytes: Bytes) => Promise<Bytes>;
+  unwrap: (appID: string, wrapped: Bytes) => Promise<Result<Bytes, 'unwrap_failed'>>;
 }
 
 export interface SealedRecord {

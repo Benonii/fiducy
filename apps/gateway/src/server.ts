@@ -8,9 +8,10 @@ import {
 } from './memoryStores';
 import { createGateway } from './router';
 
+import type { Bytes } from '@fiducy/core';
 import type { AppRegistration } from './types';
 
-function readMasterKey(): Uint8Array {
+function readMasterKey(): Bytes {
   const encodedMasterKey = process.env.FIDUCY_MASTER_KEY;
   if (!encodedMasterKey) throw new Error('Set FIDUCY_MASTER_KEY to 32 random bytes in base64url');
   return new Uint8Array(Buffer.from(encodedMasterKey, 'base64url'));

@@ -5,10 +5,10 @@ import { encodeText, wipeBytes } from './encoding';
 import { createHandle, generateKeyID, parseHandle } from './handle';
 import { fail, succeed } from './result';
 
-import type { OpenSecretError, OpenSecretInput, Result } from './types';
+import type { Bytes, OpenSecretError, OpenSecretInput, Result } from './types';
 import type { SealSecretInput, SealSecretResult } from './types';
 
-function buildAssociatedData(appID: string, keyID: string): Uint8Array {
+function buildAssociatedData(appID: string, keyID: string): Bytes {
   return encodeText(`${appID}:${keyID}`);
 }
 
