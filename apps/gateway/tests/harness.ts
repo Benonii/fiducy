@@ -17,7 +17,8 @@ export const CHAT_APP: AppRegistration = {
   name: 'Chatforge',
   appSecret: 'app_sk_chatforge_9Vx2Lr7Tn4Wd6Hc3',
   accessMode: 'gateway',
-  monthlyRequestLimitPerKey: 3
+  monthlyRequestLimitPerKey: 3,
+  allowedOrigins: ['https://chatforge.example']
 };
 
 export const DESK_APP: AppRegistration = {
@@ -25,17 +26,18 @@ export const DESK_APP: AppRegistration = {
   name: 'Promptdesk',
   appSecret: 'app_sk_promptdesk_2Qw8Ym1Kp4Lz5Ub',
   accessMode: 'gateway_and_release',
-  monthlyRequestLimitPerKey: 100
+  monthlyRequestLimitPerKey: 100,
+  allowedOrigins: ['https://promptdesk.example']
 };
 
-export async function startGatewayHarness() {
+export async function startGatewayHarness(extraApps: AppRegistration[] = []) {
   const mockProvider = startMockProvider();
   const usageLedger = createMemoryUsageLedger();
   const keyStore = createMemoryKeyStore();
   const gateway = createGateway({
     keyWrapper: createLocalKeyWrapper(crypto.getRandomValues(new Uint8Array(32))),
     keyStore,
-    appDirectory: await createMemoryAppDirectory([CHAT_APP, DESK_APP]),
+    appDirectory: await createMemoryAppDirectory([CHAT_APP, DESK_APP, ...extraApps]),
     usageLedger,
     providerRegistry: createProviderRegistry({
       openai: mockProvider.baseURL,

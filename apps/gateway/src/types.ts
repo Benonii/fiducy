@@ -8,6 +8,7 @@ export interface RegisteredApp {
   name: string;
   accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
+  allowedOrigins: string[];
 }
 
 export interface AppRegistration extends RegisteredApp {
@@ -62,5 +63,12 @@ export interface ResolvedKey {
 }
 
 export type GatewayResult<Value> = Result<Value, GatewayFailure>;
+
+export interface WidgetPageInput {
+  appID: string;
+  appName: string;
+  parentOrigin: string;
+  nonce: string;
+}
 
 export type RequestHandler = (request: Request) => Promise<Response>;
