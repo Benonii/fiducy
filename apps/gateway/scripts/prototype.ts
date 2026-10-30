@@ -110,6 +110,22 @@ await waitFor(`${controlURL}/api/config`, 'The control plane', controlPlane);
 await seedDemoApp(secrets);
 
 const mockProvider = useMockProvider ? startMockProvider() : null;
+
+// Shows that the gateway really decrypted the key: the fake OpenAI prints the last four
+// characters of the Authorization header it received. Real providers never get this log.
+function logMockRequests(provider: ReturnType<typeof startMockProvider>) {
+  let seen = 0;
+  setInterval(() => {
+    for (const request of provider.recordedRequests.slice(seen)) {
+      const apiKey = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+      console.log(
+        `[fake OpenAI] ${request.path} received the decrypted key ...${apiKey.slice(-4)}`
+      );
+    }
+    seen = provider.recordedRequests.length;
+  }, 500);
+}
+if (mockProvider) logMockRequests(mockProvider);
 const usageLedger = createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 });
 const gateway = Bun.serve({
   port: GATEWAY_PORT,
