@@ -84,3 +84,41 @@ export interface ControlFailure {
 export type Result<Value, Failure> = { ok: true; value: Value } | { ok: false; error: Failure };
 
 export type ControlResult<Value> = Result<Value, ControlFailure>;
+
+export type KeyStatus = 'active' | 'revoked';
+
+export interface AppKeyView {
+  keyID: string;
+  provider: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  requestCount: number;
+  status: KeyStatus;
+}
+
+export interface UsageDay {
+  date: string;
+  requestCount: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface ProviderUsage {
+  provider: string;
+  requestCount: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface UsageSeries {
+  days: UsageDay[];
+  byProvider: ProviderUsage[];
+}
+
+export interface GatewayStatus {
+  reachable: boolean;
+  lastSeenAt: string | null;
+  pcr0: string | null;
+  attestedAt: string | null;
+  region: string | null;
+}
