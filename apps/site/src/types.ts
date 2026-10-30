@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import type { Group, LineSegments, MeshBasicMaterial } from 'three';
+import type { Object3D, Scene } from 'three';
 
 export type Point = readonly [number, number, number];
 
@@ -39,4 +41,41 @@ export interface LeakScene {
   quiet: string;
   description: string;
   scene: ReactNode;
+}
+
+export interface KeyHalves {
+  storedHalf: Group;
+  handleHalf: Group;
+  keyFaces: MeshBasicMaterial;
+}
+
+export interface EnclaveParts {
+  scene: Scene;
+  turntable: Group;
+  attestationFrame: LineSegments;
+  request: Group;
+  halves: KeyHalves;
+}
+
+export interface PointerState {
+  targetX: number;
+  targetY: number;
+  dragVelocity: number;
+  isDragging: boolean;
+  lastClientX: number;
+}
+
+export interface EnclaveCanvasProps {
+  className?: string;
+}
+
+export interface SceneLabel {
+  element: HTMLElement;
+  anchor: Object3D;
+}
+
+export interface SceneLabelElements {
+  handleHalf: HTMLElement;
+  storedHalf: HTMLElement;
+  request: HTMLElement;
 }
