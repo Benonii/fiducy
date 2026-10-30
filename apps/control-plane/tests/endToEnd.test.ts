@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import OpenAI from 'openai';
 import { chromium } from 'playwright';
 
+import { parseHandle } from '@fiducy/core';
 import { SAMPLE_API_KEY } from '@fiducy/testing';
 import { startStack } from './stack';
 
@@ -80,6 +81,27 @@ describe('a developer onboarding through the dashboard', () => {
       messages: [{ role: 'user', content: 'Hello' }]
     });
     expect(completion.choices[0]?.message.content).toBeTruthy();
+  });
+
+  it('lets a user revoke their key through the gateway', async () => {
+    const handle = await storeUserKey(created.appID);
+    const parsed = parseHandle(handle);
+    if (!parsed.ok) throw new Error('Expected a valid handle');
+    const revoked = await fetch(`${stack.gatewayURL}/keys/${parsed.value.keyID}`, {
+      method: 'DELETE',
+      headers: { authorization: `Bearer ${created.appSecret}` }
+    });
+    expect(revoked.status).toBe(200);
+    const response = await fetch(`${stack.gatewayURL}/openai/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${created.appSecret}`,
+        'x-key-handle': handle,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages: [] })
+    });
+    expect(response.status).toBe(404);
   });
 
   it('shows the request in the app usage after the gateway reports it', async () => {

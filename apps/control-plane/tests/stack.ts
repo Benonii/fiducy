@@ -6,8 +6,8 @@ import { createLocalKeyWrapper } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 import { startMockProvider } from '@fiducy/testing';
 
-import { createMemoryKeyStore } from '../../gateway/src/memoryStores';
 import { createRemoteAppDirectory } from '../../gateway/src/remoteAppDirectory';
+import { createRemoteKeyStore } from '../../gateway/src/remoteKeyStore';
 import { createRemoteUsageLedger } from '../../gateway/src/remoteUsageLedger';
 import { createGateway } from '../../gateway/src/router';
 
@@ -30,7 +30,7 @@ function startGateway(controlPlaneURL: string, providerURL: string) {
   const usageLedger = createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 60000 });
   const gateway = createGateway({
     keyWrapper: createLocalKeyWrapper(crypto.getRandomValues(new Uint8Array(32))),
-    keyStore: createMemoryKeyStore(),
+    keyStore: createRemoteKeyStore(connection),
     appDirectory: createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 60000 }),
     usageLedger,
     providerRegistry: createProviderRegistry({ openai: providerURL })
