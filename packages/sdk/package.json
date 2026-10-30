@@ -22,7 +22,7 @@
   },
   "files": ["dist", "src"],
   "scripts": {
-    "build": "bun build src/index.ts src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime --external @tanstack/react-query && bun build src/server.ts --outdir dist --target node"
+    "build": "bun build src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime --external @tanstack/react-query && bun build src/index.ts src/server.ts --outdir dist --target node"
   },
   "dependencies": {
     "@fiducy/core": "workspace:*",
