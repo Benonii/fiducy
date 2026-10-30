@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { MAXIMUM_ALLOWED_ORIGINS, MAXIMUM_MONTHLY_REQUEST_LIMIT } from './constants';
 import { MAXIMUM_USAGE_BATCH_SIZE } from './constants';
+import { DEFAULT_USAGE_SERIES_DAYS, MAXIMUM_USAGE_SERIES_DAYS } from './constants';
 
 function isBareOrigin(value: string): boolean {
   try {
@@ -53,4 +54,13 @@ export const keyRecordSchema = z.object({
 export const seededAppSchema = appSettingsSchema.extend({
   appID: z.string().regex(/^app_[A-Za-z0-9_-]{1,64}$/, 'App IDs start with app_'),
   appSecretHash: z.string().regex(/^[a-f0-9]{64}$/, 'Send a SHA-256 hex digest')
+});
+
+export const usageSeriesQuerySchema = z.object({
+  days: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAXIMUM_USAGE_SERIES_DAYS)
+    .default(DEFAULT_USAGE_SERIES_DAYS)
 });

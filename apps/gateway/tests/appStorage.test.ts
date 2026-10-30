@@ -6,6 +6,9 @@ import { startGatewayHarness } from './harness';
 import type { SealedRecord } from '@fiducy/core';
 import type { AppRegistration } from '../src/types';
 
+// Shared with the harness's app directory, so a test can revoke a key the way a config refresh does.
+const revokedKeyIDs: string[] = [];
+
 const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore',
   name: 'Ownstore',
@@ -13,7 +16,8 @@ const OWNED_APP: AppRegistration = {
   accessMode: 'gateway',
   monthlyRequestLimitPerKey: 50,
   allowedOrigins: ['https://ownstore.example'],
-  recordStorage: 'app'
+  recordStorage: 'app',
+  revokedKeyIDs
 };
 
 let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
@@ -92,5 +96,13 @@ describe('apps that store their own sealed records', () => {
       headers: { authorization: `Bearer ${OWNED_APP.appSecret}` }
     });
     expect(response.status).toBe(409);
+  });
+
+  it('refuses a key the app revoked from the dashboard', async () => {
+    const { handle, record } = await sealForApp();
+    revokedKeyIDs.push(record.keyID);
+    const response = await callProvider(handle, encodeRecord(record));
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain('revoked');
   });
 });

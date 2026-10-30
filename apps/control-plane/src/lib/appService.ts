@@ -2,6 +2,7 @@ import { fail, succeed } from './result';
 
 import { SYSTEM_OWNER_ID } from './constants';
 import { APP_NOT_FOUND } from './failures';
+import { listRevokedKeyIDs } from './keyService';
 import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from './secrets';
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
@@ -11,13 +12,11 @@ export function toAppView({ appSecretHash, ownerID, ...app }: StoredApp): AppVie
   return app;
 }
 
-export function toGatewayApp({
-  ownerID,
-  appSecretPreview,
-  createdAt,
-  ...app
-}: StoredApp): GatewayApp {
-  return app;
+export function toGatewayApp(
+  { ownerID, appSecretPreview, createdAt, ...app }: StoredApp,
+  revokedKeyIDs: string[] = []
+): GatewayApp {
+  return { ...app, revokedKeyIDs };
 }
 
 async function issueAppSecret() {
@@ -102,7 +101,9 @@ export async function deleteApp(
 
 export async function listGatewayApps(store: ControlStore): Promise<GatewayApp[]> {
   const apps = await store.listAllApps();
-  return apps.map(toGatewayApp);
+  return Promise.all(
+    apps.map(async (app) => toGatewayApp(app, await listRevokedKeyIDs(store, app.appID)))
+  );
 }
 
 // Lets a deployment register its own demo app without a dashboard account. Only the gateway
