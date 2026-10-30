@@ -66,7 +66,3 @@ export interface ControlFailure {
 export type Result<Value, Failure> = { ok: true; value: Value } | { ok: false; error: Failure };
 
 export type ControlResult<Value> = Result<Value, ControlFailure>;
-
-export type ClientResponse<Data> =
-  | { ok: true; data: Data; message: string }
-  | { ok: false; status: number; message: string };

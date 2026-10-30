@@ -10,10 +10,20 @@
     "auth:migrate": "farm auth migrate"
   },
   "dependencies": {
+    "@base-ui/react": "1.9.0",
     "@farm.js/auth": "0.1.40",
     "@farm.js/core": "0.1.40",
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@tanstack/react-query": "5.104.2",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "1.57.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "tailwind-merge": "3.7.0",
+    "tailwindcss": "4.3.3",
     "zod": "3.25.76"
   },
   "devDependencies": {

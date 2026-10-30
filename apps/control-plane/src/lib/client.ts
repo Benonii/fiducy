@@ -1,4 +1,13 @@
-import type { ClientResponse } from './types';
+import type { AppSettings } from './types';
+
+export class ControlPlaneError extends Error {
+  constructor(
+    readonly status: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
 
 function readErrorMessage(body: Record<string, unknown>): string {
   if (typeof body.message === 'string') return body.message;
@@ -9,15 +18,19 @@ function readErrorMessage(body: Record<string, unknown>): string {
 export async function requestControlPlane<Data>(
   path: string,
   init: RequestInit = {}
-): Promise<ClientResponse<Data>> {
+): Promise<Data> {
   const response = await fetch(path, {
     ...init,
     credentials: 'same-origin',
     headers: { 'content-type': 'application/json', ...init.headers }
   });
   const body = (await response.json()) as Record<string, unknown>;
-  if (!response.ok) return { ok: false, status: response.status, message: readErrorMessage(body) };
-  return { ok: true, data: body.data as Data, message: String(body.message ?? '') };
+  if (!response.ok) throw new ControlPlaneError(response.status, readErrorMessage(body));
+  return body.data as Data;
+}
+
+export function isSignedOut(error: unknown): boolean {
+  return error instanceof ControlPlaneError && error.status === 401;
 }
 
 export function parseOriginList(text: string): string[] {
@@ -27,12 +40,13 @@ export function parseOriginList(text: string): string[] {
     .filter(Boolean);
 }
 
-export function readAppSettingsForm(form: HTMLFormElement) {
+export function readAppSettingsForm(form: HTMLFormElement): AppSettings {
   const formData = new FormData(form);
   return {
     name: String(formData.get('name') ?? ''),
     allowedOrigins: parseOriginList(String(formData.get('allowedOrigins') ?? '')),
     monthlyRequestLimitPerKey: Number(formData.get('monthlyRequestLimitPerKey')),
-    accessMode: String(formData.get('accessMode') ?? 'gateway')
+    accessMode:
+      formData.get('accessMode') === 'gateway_and_release' ? 'gateway_and_release' : 'gateway'
   };
 }
