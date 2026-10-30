@@ -3,10 +3,10 @@ import { WIDGET_FONT_PATH } from './font';
 // Same system as the Fiducy site: white ground, black for what you act on, grays for the rest,
 // square corners, hairline gray borders, dashed dividers.
 export const WIDGET_STYLES = `
-@font-face { font-family: 'Archivo'; src: url('${WIDGET_FONT_PATH}') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Geist'; src: url('${WIDGET_FONT_PATH}') format('woff2'); font-weight: 100 900; font-display: swap; }
 :root { color-scheme: light; --ink: #000000; --body: #333333; --muted: #5e5e5e; --line: #d9d9d9; --control: #c4c4c4; --surface: #ffffff; --wash: #f4f4f4; --danger: #a1121b; }
 * { box-sizing: border-box; }
-body { margin: 0; padding: 16px; font: 14px/1.55 'Archivo', system-ui, sans-serif; color: var(--ink); background: var(--surface); }
+body { margin: 0; padding: 16px; font: 14px/1.55 'Geist', system-ui, sans-serif; color: var(--ink); background: var(--surface); }
 ::selection { background: var(--ink); color: var(--surface); }
 form, .saved { display: grid; gap: 10px; }
 .heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }

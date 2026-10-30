@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 // without needing node_modules at runtime.
 export function readWidgetFontBase64(): string {
   const path = Bun.resolveSync(
-    '@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2',
+    '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2',
     import.meta.dir
   );
   return readFileSync(path).toString('base64');

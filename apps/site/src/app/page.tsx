@@ -1,27 +1,10 @@
 import { CodeTabs } from '../components/CodeTabs';
 import { InstallCommand } from '../components/InstallCommand';
 import { KeyFlow } from '../components/KeyFlow';
+import { LeakScenes } from '../components/LeakScenes';
 import { Showcase } from '../components/Showcase';
 import { DEMO_URL, GITHUB_URL, PROVIDERS } from '../lib/constants';
-
-const LEAKS = [
-  {
-    what: 'Your database',
-    result: 'Handles. They open nothing without the enclave and your app secret.'
-  },
-  {
-    what: 'Your server logs',
-    result: 'No plaintext key ever passes through your server, so none can be logged.'
-  },
-  {
-    what: "Fiducy's storage",
-    result: 'Sealed records. Half of every key lives only in your handle.'
-  },
-  {
-    what: 'An AWS admin on our account',
-    result: 'Nothing stored. KMS refuses to unwrap outside the attested enclave image.'
-  }
-];
+import { LiquidFormBackground } from '../shaders/liquid-form/LiquidFormBackground';
 
 export default function HomePage() {
   return (
@@ -40,10 +23,11 @@ export default function HomePage() {
 
         <main className="site-main">
           <section className="hero">
-            <h1>
-              <span className="headline-quiet">Users bring keys.</span> You never hold them.
-            </h1>
-            <div className="hero-side">
+            <div className="hero-copy">
+              <p className="eyebrow">Key custody for bring-your-own-key apps</p>
+              <h1>
+                <span className="headline-quiet">Users bring keys.</span> You never hold them.
+              </h1>
               <p className="description">
                 Fiducy seals the API keys your users paste in, inside an attested AWS Nitro enclave.
                 Your app keeps a handle and calls models as usual.
@@ -54,6 +38,18 @@ export default function HomePage() {
                 </a>
                 <InstallCommand />
               </div>
+            </div>
+            <div className="shader-frame">
+              <LiquidFormBackground
+                speed={1.0}
+                morph={1.0}
+                noiseScale={1.0}
+                mouseAmount={0.15}
+                metal={1.0}
+                camera={5.5}
+                tintHue={220}
+                tintAmount={0.0}
+              />
             </div>
           </section>
 
@@ -81,10 +77,10 @@ export default function HomePage() {
 
           <section className="section">
             <div className="section-head">
-              <h2>Add it like an auth library</h2>
+              <h2>Four pieces, all in your codebase</h2>
               <p className="description">
-                A server instance, one integration line, a component, and settings for the AI SDK.
-                Sealed records can live in your own database.
+                A server instance, one integration line, the key widget, and provider settings for
+                the AI SDK. Sealed records can live in your own database.
               </p>
             </div>
             <CodeTabs />
@@ -99,14 +95,7 @@ export default function HomePage() {
                 <a href="/docs/security">How to verify it</a>
               </p>
             </div>
-            <dl className="leaks">
-              {LEAKS.map((leak) => (
-                <div key={leak.what}>
-                  <dt>{leak.what}</dt>
-                  <dd>{leak.result}</dd>
-                </div>
-              ))}
-            </dl>
+            <LeakScenes />
           </section>
 
           <section className="section plans">

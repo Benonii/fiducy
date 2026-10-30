@@ -1,4 +1,6 @@
-import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/geist/wght.css';
+import '@fontsource-variable/geist-mono/wght.css';
+import '../shaders/threeui.css';
 import './globals.css';
 
 import type { LayoutProps } from '@farm.js/core';

@@ -2,18 +2,18 @@
 
 /* Docs: same face as the landing page. */
 html:root {
-  --fd-font-sans: "Archivo Variable", system-ui, sans-serif !important;
-  --font-sans: "Archivo Variable", system-ui, sans-serif !important;
+  --fd-font-sans: "Geist Variable", system-ui, sans-serif !important;
+  --font-sans: "Geist Variable", system-ui, sans-serif !important;
 }
 
 #nd-docs-layout {
-  font-family: "Archivo Variable", system-ui, sans-serif;
+  font-family: "Geist Variable", system-ui, sans-serif;
 }
 
 /*
   Landing page system, scoped under .site so the docs theme stays untouched.
-  Type: one family, Archivo. Width carries rank: display and titles are set expanded and heavy,
-  reading text at normal width. Color: black for what you read first or act on; dark gray for
+  Type: Geist for everything you read, Geist Mono for code and machine values. Weight and tight
+  tracking carry rank: display and titles are heavy and tight, reading text is regular. Color: black for what you read first or act on; dark gray for
   body; mid gray for descriptions and details; light gray for structure. Lines: the page frame
   is a solid hairline, everything inside it is dashed.
 */
@@ -41,7 +41,7 @@ html:root {
   padding-inline: 16px;
   background: var(--surface);
   color: var(--ink);
-  font-family: "Archivo Variable", system-ui, sans-serif;
+  font-family: "Geist Variable", system-ui, sans-serif;
   font-size: var(--text-body);
   font-weight: 400;
   line-height: 1.6;
@@ -77,10 +77,9 @@ html:root {
 
 .site h1 {
   font-size: var(--text-display);
-  font-stretch: 125%;
-  font-weight: 800;
-  line-height: 0.96;
-  letter-spacing: -0.025em;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
   text-wrap: balance;
 }
 
@@ -90,10 +89,9 @@ html:root {
 
 .site h2 {
   font-size: var(--text-title);
-  font-stretch: 118%;
-  font-weight: 750;
+  font-weight: 650;
   line-height: 1.08;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   text-wrap: balance;
 }
 
@@ -108,7 +106,7 @@ html:root {
 
 .site code,
 .site pre {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
   font-variant-ligatures: none;
 }
 
@@ -143,9 +141,8 @@ html:root {
 
 .site .wordmark {
   font-size: 1.125rem;
-  font-stretch: 125%;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   text-decoration: none;
 }
 
@@ -167,20 +164,51 @@ html:root {
 /* Hero */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  align-items: end;
-  gap: 48px;
-  padding: 88px var(--gutter) 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  min-height: 560px;
+  padding: 0 0 0 var(--gutter);
 }
 
-.hero-side {
+.hero-copy {
   display: grid;
   gap: 24px;
-  padding-bottom: 6px;
+  padding-block: 72px;
 }
 
-.hero-side .description {
+.hero-copy h1 {
+  font-size: clamp(2.75rem, 5.4vw, 4.75rem);
+}
+
+.hero-copy .description {
   font-size: 0.9375rem;
+}
+
+.site .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  padding: 6px 12px 6px 10px;
+  border: 1px dashed var(--control);
+  color: var(--ink-muted);
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
+  font-size: var(--text-detail);
+  letter-spacing: 0.02em;
+}
+
+.site .eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+}
+
+/* The ThreeUI liquid form fills its own cell, flush with the frame. */
+.shader-frame {
+  align-self: stretch;
+  min-height: 420px;
+  border-left: 1px dashed var(--frame);
 }
 
 .hero-actions {
@@ -198,7 +226,6 @@ html:root {
   background: var(--ink);
   color: var(--surface);
   font-size: var(--text-description);
-  font-stretch: 112%;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
@@ -230,7 +257,7 @@ html:root {
   border-left: 1px dashed var(--control);
   background: var(--surface);
   color: var(--ink);
-  font-family: "Archivo Variable", system-ui, sans-serif;
+  font-family: "Geist Variable", system-ui, sans-serif;
   font-size: var(--text-detail);
   font-weight: 600;
   cursor: pointer;
@@ -291,7 +318,7 @@ html:root {
   display: flex;
   align-items: stretch;
   border: 1px solid var(--control);
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
   font-size: var(--text-detail);
   color: var(--ink-body);
 }
@@ -309,7 +336,7 @@ html:root {
   padding: 0 12px;
   background: var(--ink);
   color: var(--surface);
-  font-family: "Archivo Variable", system-ui, sans-serif;
+  font-family: "Geist Variable", system-ui, sans-serif;
   font-weight: 600;
 }
 
@@ -379,7 +406,7 @@ html:root {
 
 .mock-trace li span:last-child {
   color: var(--ink-muted);
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
   font-size: 11px;
 }
 
@@ -404,7 +431,6 @@ html:root {
 
 .strip dd {
   justify-content: center;
-  font-stretch: 112%;
   font-weight: 650;
 }
 
@@ -471,7 +497,6 @@ html:root {
 .flow-node-title {
   fill: var(--ink);
   font-size: 15px;
-  font-stretch: 112%;
   font-weight: 650;
 }
 
@@ -549,30 +574,206 @@ html:root {
 }
 
 /* Leaks */
+/* Leak scenes: isometric line drawings that move when pointed at or focused. */
 .leaks {
   display: grid;
-  border-top: 1px solid var(--control);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 calc(-1 * var(--gutter)) -88px;
+  border-top: 1px dashed var(--line);
 }
 
-.leaks div {
+.leak {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-  gap: 24px;
-  padding: 22px 0;
+  align-content: start;
+  gap: 14px;
+  padding: 32px var(--gutter) 44px;
   border-bottom: 1px dashed var(--line);
+  outline: none;
 }
 
-.leaks dt {
-  font-size: var(--text-heading);
-  font-stretch: 112%;
-  font-weight: 650;
+.leak:nth-child(odd) {
+  border-right: 1px dashed var(--line);
 }
 
-.leaks dd {
+.leak:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.leak-label,
+.leak-meta {
   color: var(--ink-muted);
-  font-size: var(--text-description);
-  font-weight: 300;
-  line-height: 1.7;
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.leak-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.leak-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+}
+
+.leak-scene {
+  width: 100%;
+  height: 260px;
+  overflow: visible;
+}
+
+.leak-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.leak-meta span:last-child {
+  color: var(--ink);
+  text-transform: none;
+}
+
+.site .leak h3 {
+  margin: 0;
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.leak:focus-visible .leak-label {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.leak-scene polygon,
+.leak-scene line {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.leak-scene .iso-top {
+  fill: var(--surface);
+}
+
+.leak-scene .iso-side-left {
+  fill: #fafafa;
+}
+
+.leak-scene .iso-side-right {
+  fill: #ededed;
+}
+
+.leak-scene .iso-solid .iso-top {
+  fill: #9a9a9a;
+}
+
+.leak-scene .iso-solid .iso-side-left {
+  fill: #5e5e5e;
+}
+
+.leak-scene .iso-solid .iso-side-right {
+  fill: #000000;
+}
+
+.leak-scene .iso-ghost {
+  fill: none;
+  stroke: var(--control);
+  stroke-dasharray: 3 4;
+}
+
+.leak-scene .iso-screen {
+  fill: var(--wash);
+}
+
+.leak-scene .iso-slot {
+  fill: #d9d9d9;
+}
+
+.leak-scene .iso-detail,
+.leak-scene .iso-line {
+  stroke: #8a8a8a;
+}
+
+.leak-scene .iso-line-strong {
+  stroke-width: 2;
+}
+
+.leak-scene .iso-tag {
+  fill: var(--ink);
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
+  font-size: 10px;
+}
+
+.leak-move,
+.leak-try {
+  transition: transform 700ms var(--ease-out);
+}
+
+.leak-lift {
+  animation: leak-float 3.2s ease-in-out infinite;
+}
+
+.leak-reveal {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.leak:hover .leak-move,
+.leak:focus-visible .leak-move {
+  transform: var(--to);
+  animation: none;
+}
+
+.leak:hover .leak-reveal,
+.leak:focus-visible .leak-reveal {
+  opacity: 1;
+  transition-delay: 250ms;
+}
+
+.leak:hover .leak-scroll,
+.leak:focus-visible .leak-scroll {
+  animation: leak-scroll 6s linear infinite;
+}
+
+.leak:hover .leak-try,
+.leak:focus-visible .leak-try {
+  animation: leak-try 1.6s var(--ease-out) infinite;
+}
+
+@keyframes leak-float {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes leak-scroll {
+  to {
+    transform: var(--step);
+  }
+}
+
+@keyframes leak-try {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: var(--to);
+  }
+  55% {
+    transform: var(--to) translateX(-6px);
+  }
 }
 
 /* Plans */
@@ -649,8 +850,17 @@ html:root {
 @media (max-width: 720px) {
   .hero {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 48px var(--gutter) 40px;
+    padding: 0;
+  }
+
+  .hero-copy {
+    padding: 48px var(--gutter) 36px;
+  }
+
+  .shader-frame {
+    min-height: 320px;
+    border-left: 0;
+    border-top: 1px dashed var(--frame);
   }
 
   .showcase {
@@ -696,9 +906,20 @@ html:root {
     display: block;
   }
 
-  .leaks div {
+  .leaks {
     grid-template-columns: 1fr;
-    gap: 6px;
+  }
+
+  .leak:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .leak:nth-last-child(2) {
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .leak-scene {
+    height: 220px;
   }
 
   .plans {
@@ -727,6 +948,17 @@ html:root {
   .code-panel pre {
     animation: none;
   }
+
+  .leak-move,
+  .leak-try,
+  .leak-lift,
+  .leak:hover .leak-scroll,
+  .leak:hover .leak-try,
+  .leak:focus-visible .leak-scroll,
+  .leak:focus-visible .leak-try {
+    animation: none;
+    transition: none;
+  }
 }
 
 .site-main {
@@ -737,10 +969,9 @@ html:root {
   border-bottom: 1px dashed var(--frame);
 }
 
-/* Docs: headings in the same expanded face as the landing page. */
+/* Docs: headings tracked tight like the landing page. */
 #nd-docs-layout h1,
 #nd-docs-layout h2,
 #nd-docs-layout h3 {
-  font-stretch: 112%;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.03em;
 }
