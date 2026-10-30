@@ -2,12 +2,12 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createProviderSettings } from '@fiducy/sdk';
 import { convertToModelMessages, streamText } from 'ai';
 
-import { describeChatError } from '../../../lib/chatErrors';
-import { readServerDemoConfig } from '../../../lib/config';
-import { respondWith } from '../../../lib/responses';
-import { chatRequestSchema } from '../../../lib/validators';
+import { describeChatError } from '@/lib/chatErrors';
+import { readServerDemoConfig } from '@/lib/config';
+import { respondWith } from '@/lib/responses';
+import { chatRequestSchema } from '@/lib/validators';
 
-import type { ChatRequestBody } from '../../../lib/types';
+import type { ChatRequestBody } from '@/lib/types';
 
 export async function POST(request: Request) {
   const config = readServerDemoConfig();

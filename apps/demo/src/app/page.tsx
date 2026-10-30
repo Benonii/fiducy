@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
-import { Chat } from '../components/Chat';
-import { ConnectKey } from '../components/ConnectKey';
-import { readStoredHandle, storeHandle } from '../lib/handleStorage';
+import { Chat } from '@/components/Chat';
+import { ConnectKey } from '@/components/ConnectKey';
+import { readStoredHandle, storeHandle } from '@/lib/handleStorage';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 type ConfigState =
   | { status: 'loading' }

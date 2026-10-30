@@ -1,5 +1,5 @@
-import { readServerDemoConfig } from '../../../lib/config';
-import { respondWith } from '../../../lib/responses';
+import { readServerDemoConfig } from '@/lib/config';
+import { respondWith } from '@/lib/responses';
 
 export async function GET() {
   const config = readServerDemoConfig();
