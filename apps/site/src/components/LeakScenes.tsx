@@ -1,8 +1,8 @@
 import { IsoScene } from './IsoScene';
 import { Box, Line, Plate, Tag, offset } from './isometric';
 
+import type { LeakScene } from '@/types';
 import type { CSSProperties } from 'react';
-import type { LeakScene } from '../types';
 
 function moves(variables: Record<string, string>): CSSProperties {
   return variables as CSSProperties;

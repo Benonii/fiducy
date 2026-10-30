@@ -1,4 +1,4 @@
-import { PROVIDERS } from '../lib/constants';
+import { PROVIDERS } from '@/lib/constants';
 
 const CYCLE_SECONDS = 8;
 const PROVIDER_ROWS = [44, 124, 204, 284];

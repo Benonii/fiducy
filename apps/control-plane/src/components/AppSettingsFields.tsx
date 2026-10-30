@@ -1,4 +1,4 @@
-import type { AppSettings } from '../lib/types';
+import type { AppSettings } from '@/lib/types';
 
 interface AppSettingsFieldsProps {
   defaults?: AppSettings;

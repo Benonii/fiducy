@@ -3,7 +3,7 @@
 import { Dithering } from '@paper-design/shaders-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { REQUEST_TRACE } from '../lib/constants';
+import { REQUEST_TRACE } from '@/lib/constants';
 
 const SHADER_SPEED = 0.35;
 

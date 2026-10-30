@@ -15,11 +15,11 @@ import { useFiducyKeys } from '@fiducy/sdk/react';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useMemo, useRef, useState } from 'react';
 
-import { CHAT_API_PATH, DEFAULT_MODEL_ID, DEMO_MODELS, FIDUCY_BASE_PATH } from '../lib/constants';
-import { SUGGESTIONS } from '../lib/constants';
+import { CHAT_API_PATH, DEFAULT_MODEL_ID, DEMO_MODELS, FIDUCY_BASE_PATH } from '@/lib/constants';
+import { SUGGESTIONS } from '@/lib/constants';
 import { KeysPanel } from './KeysPanel';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 function ThreadListItem() {
   return (

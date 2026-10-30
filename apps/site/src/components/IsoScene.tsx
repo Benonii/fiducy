@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import type { IsoSceneProps } from '../types';
+import type { IsoSceneProps } from '@/types';
 
 const SCENE_WIDTH = 300;
 const SCENE_HEIGHT = 220;

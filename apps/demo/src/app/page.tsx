@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-import { Chat } from '../components/Chat';
-import { ensureDemoUser } from '../lib/demoUser';
+import { Chat } from '@/components/Chat';
+import { ensureDemoUser } from '@/lib/demoUser';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 type ConfigState =
   | { status: 'loading' }
