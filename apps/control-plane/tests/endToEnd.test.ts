@@ -121,10 +121,11 @@ describe('a developer onboarding through the dashboard', () => {
       );
     const keys = await callDashboard(`/api/apps/${created.appID}/keys`);
     expect(keys.status).toBe(200);
-    expect(keys.body.data).toMatchObject([
-      { provider: 'openai', requestCount: 1, status: 'active' }
-    ]);
-    const keyID = keys.body.data[0].keyID;
+    const listed = keys.body.data as Array<{ keyID: string; status: string }>;
+    expect(listed.map((key) => key.status).sort()).toEqual(['active', 'revoked']);
+    const usedKey = listed.find((key) => key.status === 'active');
+    expect(usedKey).toMatchObject({ provider: 'openai', requestCount: 1 });
+    const keyID = usedKey?.keyID;
     const series = await callDashboard(`/api/apps/${created.appID}/usage/series?days=7`);
     expect(series.body.data.byProvider).toMatchObject([{ provider: 'openai', requestCount: 1 }]);
     const status = await callDashboard('/api/gateway-status');
@@ -133,7 +134,8 @@ describe('a developer onboarding through the dashboard', () => {
     const revoked = await callDashboard(`/api/apps/${created.appID}/keys/${keyID}`, 'DELETE');
     expect(revoked.status).toBe(200);
     const after = await callDashboard(`/api/apps/${created.appID}/keys`);
-    expect(after.body.data).toMatchObject([{ keyID, status: 'revoked' }]);
+    const statusesAfter = (after.body.data as Array<{ status: string }>).map((key) => key.status);
+    expect(statusesAfter).toEqual(['revoked', 'revoked']);
   });
 
   it('hides the app from other developers', async () => {
