@@ -1,4 +1,23 @@
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+
 import type { AppSettings } from '@/lib/types';
+
+const ACCESS_MODES = [
+  { label: 'Gateway only (keys never leave Fiducy)', value: 'gateway' },
+  {
+    label: 'Gateway and key release (your server may fetch a key for 5 minutes)',
+    value: 'gateway_and_release'
+  }
+];
 
 interface AppSettingsFieldsProps {
   defaults?: AppSettings;
@@ -7,36 +26,50 @@ interface AppSettingsFieldsProps {
 export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
   return (
     <>
-      <label>
-        App name
-        <input name="name" required maxLength={80} defaultValue={defaults?.name} />
-      </label>
-      <label>
-        Allowed origins
-        <span className="hint">
+      <Field>
+        <FieldLabel>App name</FieldLabel>
+        <Input name="name" required maxLength={80} defaultValue={defaults?.name} />
+      </Field>
+      <Field>
+        <FieldLabel>Allowed origins</FieldLabel>
+        <Textarea
+          name="allowedOrigins"
+          className="font-mono"
+          defaultValue={defaults?.allowedOrigins.join('\n')}
+        />
+        <FieldDescription>
           Sites that may embed the key widget, one per line, such as https://chat.example.com
-        </span>
-        <textarea name="allowedOrigins" defaultValue={defaults?.allowedOrigins.join('\n')} />
-      </label>
-      <label>
-        Monthly request limit per user key
-        <input
+        </FieldDescription>
+      </Field>
+      <Field>
+        <FieldLabel>Monthly request limit per user key</FieldLabel>
+        <Input
           name="monthlyRequestLimitPerKey"
           required
           type="number"
           min={1}
           defaultValue={defaults?.monthlyRequestLimitPerKey ?? 10000}
         />
-      </label>
-      <label>
-        Key access
-        <select name="accessMode" defaultValue={defaults?.accessMode ?? 'gateway'}>
-          <option value="gateway">Gateway only (keys never leave Fiducy)</option>
-          <option value="gateway_and_release">
-            Gateway and key release (your server may fetch a key for 5 minutes)
-          </option>
-        </select>
-      </label>
+      </Field>
+      <Field>
+        <FieldLabel>Key access</FieldLabel>
+        <Select
+          name="accessMode"
+          items={ACCESS_MODES}
+          defaultValue={defaults?.accessMode ?? 'gateway'}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectPopup>
+            {ACCESS_MODES.map((mode) => (
+              <SelectItem key={mode.value} value={mode.value}>
+                {mode.label}
+              </SelectItem>
+            ))}
+          </SelectPopup>
+        </Select>
+      </Field>
     </>
   );
 }
