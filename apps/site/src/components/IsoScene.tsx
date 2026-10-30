@@ -24,7 +24,11 @@ export function IsoScene({ children }: IsoSceneProps) {
   }, []);
 
   return (
-    <svg className="leak-scene" viewBox={viewBox} aria-hidden="true">
+    <svg
+      className="h-[260px] w-full overflow-visible stroke-ink [stroke-linejoin:round] max-md:h-[220px]"
+      viewBox={viewBox}
+      aria-hidden="true"
+    >
       <g ref={sceneRef}>{children}</g>
     </svg>
   );

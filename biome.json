@@ -8,7 +8,8 @@
       ".output",
       "**/farm.d.ts",
       "**/*.generated.ts",
-      "apps/site/src/shaders"
+      "apps/site/src/components/ui",
+      "apps/site/src/lib/utils.ts"
     ]
   },
   "formatter": {

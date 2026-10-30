@@ -1,41 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-
+import { Tabs, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs';
 import { CODE_SAMPLES } from '@/lib/codeSamples';
 
 export function CodeTabs() {
-  const [activeID, setActiveID] = useState(CODE_SAMPLES[0]?.id);
-  const active = CODE_SAMPLES.find((sample) => sample.id === activeID) ?? CODE_SAMPLES[0];
-
   return (
-    <div className="code-tabs">
-      <div className="code-tabs-list" role="tablist" aria-label="Integration code">
-        {CODE_SAMPLES.map((sample) => (
-          <button
-            key={sample.id}
-            type="button"
-            role="tab"
-            id={`tab-${sample.id}`}
-            aria-selected={sample.id === active?.id}
-            aria-controls="code-panel"
-            onClick={() => setActiveID(sample.id)}
-          >
-            {sample.label}
-          </button>
-        ))}
+    <Tabs
+      defaultValue={CODE_SAMPLES[0]?.id}
+      className="gap-0 overflow-hidden rounded-xl border bg-white shadow-xs/5"
+    >
+      <div className="border-b border-dashed px-3 pt-2">
+        <TabsList variant="underline" aria-label="Integration code">
+          {CODE_SAMPLES.map((sample) => (
+            <TabsTab key={sample.id} value={sample.id}>
+              {sample.label}
+            </TabsTab>
+          ))}
+        </TabsList>
       </div>
-      <div
-        className="code-panel"
-        id="code-panel"
-        role="tabpanel"
-        aria-labelledby={`tab-${active?.id}`}
-      >
-        <p className="code-file">{active?.file}</p>
-        <pre key={active?.id}>
-          <code>{active?.code}</code>
-        </pre>
-      </div>
-    </div>
+      {CODE_SAMPLES.map((sample) => (
+        <TabsPanel key={sample.id} value={sample.id}>
+          <p className="px-5 pt-4 font-mono text-xs text-ink-muted">{sample.file}</p>
+          <pre className="animate-code-in overflow-x-auto px-5 pt-3 pb-6 font-mono text-[0.8125rem] leading-[1.75] text-ink-body motion-reduce:animate-none">
+            <code>{sample.code}</code>
+          </pre>
+        </TabsPanel>
+      ))}
+    </Tabs>
   );
 }

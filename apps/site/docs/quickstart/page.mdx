@@ -69,6 +69,20 @@ This mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fid
 
 ## 4. Drop in the widget and use the key
 
+The React parts run on TanStack Query, so install it and wrap your app in a `QueryClientProvider` (see [React](/docs/react#setup)):
+
+```bash
+bun add @tanstack/react-query
+```
+
+```tsx title="src/app/layout.tsx"
+import { Providers } from './providers';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return <Providers>{children}</Providers>;
+}
+```
+
 ```tsx title="src/app/settings/page.tsx"
 'use client';
 
