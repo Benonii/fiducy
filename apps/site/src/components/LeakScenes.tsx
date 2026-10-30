@@ -1,9 +1,9 @@
+import { IsoScene } from './IsoScene';
 import { Box, Line, Plate, Tag, offset } from './isometric';
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
+import type { LeakScene } from '../types';
 
-// Each scene moves on hover through CSS variables holding isometric offsets, so the
-// motion follows the drawing's axes. See .leak rules in globals.css.
 function moves(variables: Record<string, string>): CSSProperties {
   return variables as CSSProperties;
 }
@@ -93,7 +93,7 @@ function StorageScene() {
         <Box at={[2.2, 0, 0]} size={[2.2, 4.4, 3]}>
           <Plate at={[2.9, 1.6, 3]} size={[0.8, 1.2]} className="iso-slot" />
         </Box>
-        <Tag at={[4.8, 2.2, 3.4]} className="iso-tag leak-reveal">
+        <Tag at={[7.4, 2.2, 0]} className="iso-tag leak-reveal">
           in Fiducy storage
         </Tag>
       </g>
@@ -119,16 +119,6 @@ function EnclaveScene() {
       </Tag>
     </>
   );
-}
-
-interface LeakScene {
-  label: string;
-  hint: string;
-  stat: string;
-  title: string;
-  quiet: string;
-  description: string;
-  scene: ReactNode;
 }
 
 const SCENES: LeakScene[] = [
@@ -177,9 +167,7 @@ export function LeakScenes() {
         // biome-ignore lint/a11y/noNoninteractiveTabindex: focus plays the same motion as hover
         <article key={leak.label} className="leak" tabIndex={0}>
           <p className="leak-label">{leak.label}</p>
-          <svg className="leak-scene" viewBox="-150 -110 300 220" aria-hidden="true">
-            {leak.scene}
-          </svg>
+          <IsoScene>{leak.scene}</IsoScene>
           <div className="leak-meta">
             <span>{leak.hint}</span>
             <span>{leak.stat}</span>
