@@ -1,8 +1,8 @@
 import { createEndpoint } from '@farm.js/core/api';
 
-import { requireGateway } from '../../../../../lib/middleware';
-import { respondWith } from '../../../../../lib/responses';
-import { getControlStore } from '../../../../../lib/storage';
+import { requireGateway } from '@/lib/middleware';
+import { respondWith } from '@/lib/responses';
+import { getControlStore } from '@/lib/storage';
 
 export const GET = createEndpoint({ middleware: [requireGateway] }, async ({ params }) => {
   const record = await getControlStore().findKeyRecord(String(params.keyID));
