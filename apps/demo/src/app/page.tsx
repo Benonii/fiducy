@@ -1,37 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { Chat } from '@/components/Chat';
-import { ensureDemoUser } from '@/lib/demoUser';
-
-import type { PublicDemoConfig } from '@/lib/types';
-
-type ConfigState =
-  | { status: 'loading' }
-  | { status: 'failed'; message: string }
-  | { status: 'ready'; config: PublicDemoConfig };
+import { Spinner } from '@/components/ui/spinner';
+import { useDemoConfig } from '@/lib/queries';
 
 export default function DemoPage() {
-  const [configState, setConfigState] = useState<ConfigState>({ status: 'loading' });
+  const config = useDemoConfig();
 
-  useEffect(() => {
-    ensureDemoUser();
-    fetch('/api/config')
-      .then((response) => response.json())
-      .then((body: { data: PublicDemoConfig | null; message: string }) =>
-        setConfigState(
-          body.data
-            ? { status: 'ready', config: body.data }
-            : { status: 'failed', message: body.message }
-        )
-      )
-      .catch(() => setConfigState({ status: 'failed', message: 'Could not load the demo config' }));
-  }, []);
-
-  if (configState.status === 'loading') return <p className="page-note muted">Loading</p>;
-  if (configState.status === 'failed') {
-    return <p className="page-note error-text">{configState.message}</p>;
+  if (config.isPending) {
+    return (
+      <p className="flex items-center gap-2 p-6 text-muted-foreground text-sm">
+        <Spinner />
+        Loading
+      </p>
+    );
   }
-  return <Chat config={configState.config} />;
+  if (config.isError) return <p className="p-6 text-destructive text-sm">{config.error.message}</p>;
+  return <Chat config={config.data} />;
 }

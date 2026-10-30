@@ -2,6 +2,8 @@ import '@fontsource-variable/geist/wght.css';
 import '@fontsource-variable/geist-mono/wght.css';
 import './globals.css';
 
+import { QueryProvider } from '@/components/QueryProvider';
+
 import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
@@ -10,5 +12,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps) {
-  return <>{children}</>;
+  return <QueryProvider>{children}</QueryProvider>;
 }

@@ -1,5 +1,5 @@
 import { KeyWidget } from './KeyWidget';
-import { saveConnectedKey } from './useFiducyKeys';
+import { useSaveConnectedKey } from './useFiducyKeys';
 
 import type { ConnectKeyWidgetProps } from './types';
 
@@ -16,6 +16,7 @@ export function ConnectKeyWidget({
   onError,
   className
 }: ConnectKeyWidgetProps) {
+  const saveConnectedKey = useSaveConnectedKey(basePath);
   return (
     <KeyWidget
       gatewayURL={gatewayURL}
@@ -23,11 +24,10 @@ export function ConnectKeyWidget({
       className={className}
       onError={onError}
       onHandle={(handle, record) => {
-        saveConnectedKey(basePath, { provider, handle, record })
-          .then((key) => onConnected?.(key))
-          .catch((error: unknown) =>
-            onError?.(error instanceof Error ? error.message : String(error))
-          );
+        saveConnectedKey.mutate(
+          { provider, handle, record },
+          { onSuccess: (key) => onConnected?.(key), onError: (error) => onError?.(error.message) }
+        );
       }}
     />
   );

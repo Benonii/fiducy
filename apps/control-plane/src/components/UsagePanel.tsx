@@ -1,34 +1,44 @@
-import type { UsageSummary } from '@/lib/types';
+'use client';
+
+import { PageStatus } from '@/components/PageStatus';
+import { Card, CardDescription, CardHeader, CardPanel, CardTitle } from '@/components/ui/card';
+import { useUsage } from '@/lib/queries';
 
 interface UsagePanelProps {
-  usage: UsageSummary | null;
+  appID: string;
 }
 
-export function UsagePanel({ usage }: UsagePanelProps) {
-  if (!usage) return <p className="hint">Loading usage</p>;
-  const keyCount = Object.keys(usage.requestsByKey).length;
+export function UsagePanel({ appID }: UsagePanelProps) {
+  const usage = useUsage(appID);
+  if (!usage.data) {
+    return (
+      <PageStatus isLoading={usage.isPending}>{usage.error?.message ?? 'Loading usage'}</PageStatus>
+    );
+  }
+  const stats = [
+    { label: 'requests', value: usage.data.requestCount, testID: 'request-count' },
+    { label: 'input tokens', value: usage.data.inputTokens },
+    { label: 'output tokens', value: usage.data.outputTokens },
+    { label: 'active user keys', value: Object.keys(usage.data.requestsByKey).length }
+  ];
   return (
-    <section className="card stack" aria-label="Usage this month">
-      <h2>Usage in {usage.month}</h2>
-      <div className="stats">
-        <div className="stat">
-          <strong data-testid="request-count">{usage.requestCount}</strong>
-          <span className="hint">requests</span>
-        </div>
-        <div className="stat">
-          <strong>{usage.inputTokens}</strong>
-          <span className="hint">input tokens</span>
-        </div>
-        <div className="stat">
-          <strong>{usage.outputTokens}</strong>
-          <span className="hint">output tokens</span>
-        </div>
-        <div className="stat">
-          <strong>{keyCount}</strong>
-          <span className="hint">active user keys</span>
-        </div>
-      </div>
-      <p className="hint">Token counts only. Fiducy never stores prompts or replies.</p>
-    </section>
+    <Card render={<section aria-label="Usage this month" />}>
+      <CardHeader>
+        <CardTitle render={(props) => <h2 {...props} />}>Usage in {usage.data.month}</CardTitle>
+        <CardDescription>
+          Token counts only. Fiducy never stores prompts or replies.
+        </CardDescription>
+      </CardHeader>
+      <CardPanel className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {stats.map((stat) => (
+          <div key={stat.label} className="grid gap-0.5">
+            <strong className="font-mono text-2xl text-foreground" data-testid={stat.testID}>
+              {stat.value}
+            </strong>
+            <span className="text-muted-foreground text-xs">{stat.label}</span>
+          </div>
+        ))}
+      </CardPanel>
+    </Card>
   );
 }

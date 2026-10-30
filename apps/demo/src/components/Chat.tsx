@@ -15,16 +15,32 @@ import { useFiducyKeys } from '@fiducy/sdk/react';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useMemo, useRef, useState } from 'react';
 
-import { CHAT_API_PATH, DEFAULT_MODEL_ID, DEMO_MODELS, FIDUCY_BASE_PATH } from '@/lib/constants';
-import { SUGGESTIONS } from '@/lib/constants';
-import { KeysPanel } from './KeysPanel';
+import { KeysPanel } from '@/components/KeysPanel';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  CHAT_API_PATH,
+  DEFAULT_MODEL_ID,
+  DEMO_MODELS,
+  FIDUCY_BASE_PATH,
+  SUGGESTIONS
+} from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 import type { PublicDemoConfig } from '@/lib/types';
 
+const MODEL_ITEMS = DEMO_MODELS.map((model) => ({ label: model.label, value: model.id }));
+
 function ThreadListItem() {
   return (
-    <ThreadListItemPrimitive.Root className="thread-item">
-      <ThreadListItemPrimitive.Trigger className="thread-item-trigger">
+    <ThreadListItemPrimitive.Root className="group">
+      <ThreadListItemPrimitive.Trigger className="w-full cursor-pointer px-2.5 py-1.5 text-left text-muted-foreground text-sm hover:bg-accent hover:text-foreground group-data-active:bg-accent group-data-active:text-foreground">
         <ThreadListItemPrimitive.Title fallback="New chat" />
       </ThreadListItemPrimitive.Trigger>
     </ThreadListItemPrimitive.Root>
@@ -36,7 +52,6 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
   const modelRef = useRef(modelID);
   modelRef.current = modelID;
   const keysState = useFiducyKeys(FIDUCY_BASE_PATH);
-  const { keys, refresh } = keysState;
 
   // The selected model rides along with every request; the server picks the user's key for it.
   const transport = useMemo(
@@ -49,6 +64,7 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
     // After the user saves a key in the thread, send the conversation again so the model answers.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls
   });
+  // Saving a key refreshes useFiducyKeys through TanStack Query, so no callback is needed here.
   const auiConfig = useMemo(
     () =>
       AuiConfig({
@@ -56,54 +72,62 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
           toolkit: fiducyToolkit({
             gatewayURL: config.gatewayURL,
             appID: config.appID,
-            basePath: FIDUCY_BASE_PATH,
-            onConnected: () => void refresh()
+            basePath: FIDUCY_BASE_PATH
           })
         })
       }),
-    [config, refresh]
+    [config]
   );
 
   const selected = DEMO_MODELS.find((model) => model.id === modelID) ?? DEMO_MODELS[0];
-  const hasKey = keys.some((key) => key.provider === selected?.provider);
+  const hasKey = keysState.keys.some((key) => key.provider === selected?.provider);
   const providerLabel = selected ? PROVIDER_LABELS[selected.provider] : '';
 
   return (
     <AssistantRuntimeProvider runtime={runtime} config={auiConfig}>
-      <div className="app">
-        <aside className="sidebar">
-          <div className="brand">
-            <span className="brand-name">Acme Chat</span>
-            <span className="muted">Example app</span>
+      <div className="mx-auto grid h-screen max-w-7xl grid-rows-[auto_minmax(0,1fr)] md:grid-cols-[264px_minmax(0,1fr)] md:grid-rows-1 md:border-x">
+        <aside className="flex min-h-0 flex-col border-b md:border-r md:border-b-0 [&>*]:border-b [&>*]:border-dashed [&>*]:p-4">
+          <div className="flex items-baseline gap-2.5 md:grid md:gap-0.5">
+            <span className="font-bold text-foreground text-lg tracking-tight">Acme Chat</span>
+            <span className="text-muted-foreground text-xs">Example app</span>
           </div>
-          <ThreadListPrimitive.Root className="thread-list">
-            <ThreadListPrimitive.New className="new-chat">New chat</ThreadListPrimitive.New>
+          <ThreadListPrimitive.Root className="hidden flex-1 content-start gap-0.5 overflow-y-auto md:grid">
+            <ThreadListPrimitive.New asChild>
+              <Button variant="outline" size="sm" className="mb-2">
+                New chat
+              </Button>
+            </ThreadListPrimitive.New>
             <ThreadListPrimitive.Items components={{ ThreadListItem }} />
           </ThreadListPrimitive.Root>
           <KeysPanel {...keysState} />
-          <p className="powered">
-            Keys sealed by <a href="https://github.com/Benonii/fiducy">Fiducy</a>
+          <p className="hidden border-b-0! text-muted-foreground text-xs md:block">
+            Keys sealed by{' '}
+            <a className="text-foreground underline" href="https://github.com/Benonii/fiducy">
+              Fiducy
+            </a>
           </p>
         </aside>
 
-        <ThreadPrimitive.Root className="thread">
-          <ThreadPrimitive.Viewport className="viewport">
+        <ThreadPrimitive.Root className="flex min-h-0 flex-col">
+          <ThreadPrimitive.Viewport className="grid flex-1 content-start gap-5 overflow-y-auto px-4 py-8 md:px-16">
             <ThreadPrimitive.Empty>
-              <div className="welcome">
-                <h1>What can I help with?</h1>
-                <p className="muted">
+              <div className="mx-auto mt-[12vh] grid max-w-xl gap-3 text-center">
+                <h1 className="text-balance font-bold text-3xl text-foreground tracking-tight">
+                  What can I help with?
+                </h1>
+                <p className="text-muted-foreground text-sm">
                   Pick any model. If you have no key for it yet, the chat asks for one right here.
                   Acme never sees it.
                 </p>
-                <div className="suggestions">
+                <div className="mt-3 grid gap-2">
                   {SUGGESTIONS.map((prompt) => (
-                    <ThreadPrimitive.Suggestion
-                      key={prompt}
-                      prompt={prompt}
-                      send
-                      className="suggestion"
-                    >
-                      {prompt}
+                    <ThreadPrimitive.Suggestion key={prompt} prompt={prompt} send asChild>
+                      <Button
+                        variant="outline"
+                        className="h-auto justify-start whitespace-normal py-3 text-left"
+                      >
+                        {prompt}
+                      </Button>
                     </ThreadPrimitive.Suggestion>
                   ))}
                 </div>
@@ -112,14 +136,20 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
             <ThreadPrimitive.Messages>
               {({ message }) => (
                 <MessagePrimitive.Root
-                  className={`message ${message.role}`}
+                  className="mx-auto grid w-full max-w-3xl gap-1.5"
                   data-role={message.role}
                 >
-                  <div className="message-body">
+                  <div
+                    className={cn(
+                      'grid gap-2.5 whitespace-pre-wrap',
+                      message.role === 'user' &&
+                        'max-w-4/5 justify-self-end bg-muted px-3.5 py-2.5 text-foreground'
+                    )}
+                  >
                     <MessagePrimitive.Parts />
                   </div>
                   <MessagePrimitive.Error>
-                    <ErrorPrimitive.Root className="error-text">
+                    <ErrorPrimitive.Root className="text-destructive text-sm">
                       <ErrorPrimitive.Message />
                     </ErrorPrimitive.Root>
                   </MessagePrimitive.Error>
@@ -128,28 +158,43 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
             </ThreadPrimitive.Messages>
           </ThreadPrimitive.Viewport>
 
-          <ComposerPrimitive.Root className="composer">
+          <ComposerPrimitive.Root className="mx-auto mb-5 grid w-[min(720px,calc(100%-32px))] gap-2 border border-input p-3 focus-within:border-foreground">
             <ComposerPrimitive.Input
-              className="composer-input"
+              className="min-h-6 resize-none bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
               placeholder="Message Acme Chat"
               aria-label="Message"
               rows={1}
             />
-            <div className="composer-bar">
-              <label className="model-picker">
-                <span className="visually-hidden">Model</span>
-                <select value={modelID} onChange={(event) => setModelID(event.target.value)}>
-                  {DEMO_MODELS.map((model) => (
-                    <option key={model.id} value={model.id}>
+            <div className="flex items-center gap-2.5 border-t border-dashed pt-2">
+              <Select
+                items={MODEL_ITEMS}
+                value={modelID}
+                onValueChange={(value) => value && setModelID(value)}
+              >
+                <SelectTrigger aria-label="Model" size="sm" className="w-auto min-w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectPopup>
+                  {MODEL_ITEMS.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
                       {model.label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </label>
-              <span className={`key-status${hasKey ? ' is-connected' : ''}`}>
+                </SelectPopup>
+              </Select>
+              <span
+                className={cn(
+                  'hidden font-mono text-muted-foreground text-xs sm:inline',
+                  hasKey && 'text-foreground'
+                )}
+              >
                 {hasKey ? `Your ${providerLabel} key` : `No ${providerLabel} key yet`}
               </span>
-              <ComposerPrimitive.Send className="send">Send</ComposerPrimitive.Send>
+              <ComposerPrimitive.Send asChild>
+                <Button size="sm" className="ml-auto">
+                  Send
+                </Button>
+              </ComposerPrimitive.Send>
             </div>
           </ComposerPrimitive.Root>
         </ThreadPrimitive.Root>
