@@ -105,17 +105,23 @@ void main() {
   vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
   vec3 up = cross(fwd, right);
   vec3 rd = normalize(fwd + uv.x * right + uv.y * up);
-  vec3 bgCol = mix(vec3(0.02), vec3(0.05), length(uv) * 0.5);
-  vec3 col = bgCol;
+  vec3 col = vec3(0.0);
   float d = 0.0;
+  float closestDistance = 1e5;
+  float closestDepth = 0.0;
   for(int i=0; i<MAX_STEPS; i++) {
     vec3 p = ro + rd * d;
     float ds = map(p, t);
+    if(ds < closestDistance) { closestDistance = ds; closestDepth = d; }
     d += ds;
     if(d > MAX_DIST || abs(ds) < SURF_DIST) break;
   }
-  if(d < MAX_DIST) {
-    vec3 p = ro + rd * d;
+  bool hit = d < MAX_DIST;
+  float edge = 0.003 * closestDepth;
+  float alpha = hit ? 1.0 : 1.0 - smoothstep(0.0, edge, closestDistance);
+  if(alpha > 0.0) {
+    float depth = hit ? d : closestDepth;
+    vec3 p = ro + rd * depth;
     vec3 n = calcNormal(p, t);
     vec3 ref = reflect(rd, n);
     float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 4.0);
@@ -128,10 +134,8 @@ void main() {
     float disp = map(p, t) - (length(p) - 1.8);
     col *= mix(0.7, 1.0, smoothstep(-0.1, 0.1, disp));
   }
-  float bloom = exp(-length(uv) * 2.5);
-  col += vec3(0.02, 0.02, 0.02) * bloom;
   col = col / (col + 0.5);
   col = pow(col, vec3(1.0/2.2));
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor = vec4(col * alpha, alpha);
 }
 `;

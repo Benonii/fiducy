@@ -33,7 +33,7 @@ export function LiquidFormBackground({ className = "", ...props }: LiquidFormBac
     const host = hostRef.current;
     const canvas = canvasRef.current;
     if (!host || !canvas) return undefined;
-    const gl = canvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "high-performance" });
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: "high-performance" });
     if (!gl) return undefined;
     const vertex = compile(gl, gl.VERTEX_SHADER, VELOX_VERTEX_SHADER);
     const fragment = compile(gl, gl.FRAGMENT_SHADER, VELOX_FRAGMENT_SHADER);
@@ -75,8 +75,8 @@ export function LiquidFormBackground({ className = "", ...props }: LiquidFormBac
     };
     const resizeObserver = new ResizeObserver(resize);
     const intersection = new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? true; if (visible && !frame) frame = requestAnimationFrame(render); if (!visible && frame) cancelAnimationFrame(frame), frame = 0; });
-    resizeObserver.observe(host); intersection.observe(host); canvas.addEventListener("pointermove", pointer, { passive: true }); resize(); frame = requestAnimationFrame(render);
-    return () => { if (frame) cancelAnimationFrame(frame); resizeObserver.disconnect(); intersection.disconnect(); canvas.removeEventListener("pointermove", pointer); gl.deleteBuffer(buffer); gl.deleteShader(vertex); gl.deleteShader(fragment); gl.deleteProgram(program); };
+    resizeObserver.observe(host); intersection.observe(host); window.addEventListener("pointermove", pointer, { passive: true }); resize(); frame = requestAnimationFrame(render);
+    return () => { if (frame) cancelAnimationFrame(frame); resizeObserver.disconnect(); intersection.disconnect(); window.removeEventListener("pointermove", pointer); gl.deleteBuffer(buffer); gl.deleteShader(vertex); gl.deleteShader(fragment); gl.deleteProgram(program); };
   }, []);
   const options = optionsRef.current;
   const tintFilter = options.tintAmount > 0 ? ` sepia(${options.tintAmount}) saturate(${1 + options.tintAmount * 5}) hue-rotate(${options.tintHue - 35}deg)` : "";
