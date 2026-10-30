@@ -1,109 +1,111 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-
 import { AppSettingsFields } from '@/components/AppSettingsFields';
+import { ErrorAlert } from '@/components/ErrorAlert';
+import { PageStatus } from '@/components/PageStatus';
 import { SecretReveal } from '@/components/SecretReveal';
-import { readAppSettingsForm, requestControlPlane } from '@/lib/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardPanel, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { isSignedOut, readAppSettingsForm } from '@/lib/client';
+import { useApps, useCreateApp } from '@/lib/queries';
 
-import type { AppView, CreatedApp } from '@/lib/types';
 import type { FormEvent } from 'react';
 
-type DashboardState = { status: 'loading' } | { status: 'signed_out' } | { status: 'ready' };
-
 export default function DashboardPage() {
-  const [state, setState] = useState<DashboardState>({ status: 'loading' });
-  const [apps, setApps] = useState<AppView[]>([]);
-  const [created, setCreated] = useState<CreatedApp | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const apps = useApps();
+  const createApp = useCreateApp();
 
-  const loadApps = useCallback(async () => {
-    const response = await requestControlPlane<AppView[]>('/api/apps');
-    if (!response.ok) {
-      setState({ status: response.status === 401 ? 'signed_out' : 'ready' });
-      if (response.status !== 401) setErrorMessage(response.message);
-      return;
-    }
-    setApps(response.data);
-    setState({ status: 'ready' });
-  }, []);
-
-  useEffect(() => {
-    loadApps();
-  }, [loadApps]);
-
-  async function createApp(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    setIsCreating(true);
-    setErrorMessage(null);
-    const response = await requestControlPlane<CreatedApp>('/api/apps', {
-      method: 'POST',
-      body: JSON.stringify(readAppSettingsForm(form))
-    });
-    setIsCreating(false);
-    if (!response.ok) {
-      setErrorMessage(response.message);
-      return;
-    }
-    form.reset();
-    setCreated(response.data);
-    await loadApps();
+    createApp.mutate(readAppSettingsForm(form), { onSuccess: () => form.reset() });
   }
 
-  if (state.status === 'loading') return <p>Loading your apps</p>;
-  if (state.status === 'signed_out') {
+  if (apps.isPending) return <PageStatus isLoading>Loading your apps</PageStatus>;
+  if (isSignedOut(apps.error)) {
     return (
-      <p className="card">
-        <a href="/sign-in">Sign in</a> to manage your apps.
-      </p>
+      <PageStatus>
+        <a className="text-foreground underline" href="/sign-in">
+          Sign in
+        </a>
+        to manage your apps.
+      </PageStatus>
     );
   }
 
+  const created = createApp.data;
   return (
-    <main className="stack">
-      <h1>Your apps</h1>
+    <main className="grid gap-6">
+      <h1 className="font-bold text-3xl text-foreground tracking-tight">Your apps</h1>
+      <ErrorAlert error={apps.error} />
       {created ? (
-        <div className="card stack">
-          <h2>{created.app.name} is ready</h2>
-          <p>
-            App ID <code>{created.app.appID}</code>
-          </p>
-          <SecretReveal appSecret={created.appSecret} />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle render={(props) => <h2 {...props} />}>{created.app.name} is ready</CardTitle>
+          </CardHeader>
+          <CardPanel className="grid gap-4">
+            <p className="text-sm">
+              App ID <code>{created.app.appID}</code>
+            </p>
+            <SecretReveal appSecret={created.appSecret} />
+          </CardPanel>
+        </Card>
       ) : null}
-      {apps.length === 0 ? <p className="hint">No apps yet. Create one below.</p> : null}
-      {apps.length > 0 ? (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>App ID</th>
-              <th>Secret</th>
-            </tr>
-          </thead>
-          <tbody>
-            {apps.map((app) => (
-              <tr key={app.appID}>
-                <td>
-                  <a href={`/dashboard/${app.appID}`}>{app.name}</a>
-                </td>
-                <td className="mono">{app.appID}</td>
-                <td className="mono">...{app.appSecretPreview}</td>
-              </tr>
+      {apps.data?.length ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>App ID</TableHead>
+              <TableHead>Secret</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {apps.data.map((app) => (
+              <TableRow key={app.appID}>
+                <TableCell>
+                  <a
+                    className="font-medium text-foreground underline"
+                    href={`/dashboard/${app.appID}`}
+                  >
+                    {app.name}
+                  </a>
+                </TableCell>
+                <TableCell className="font-mono">{app.appID}</TableCell>
+                <TableCell className="font-mono">...{app.appSecretPreview}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      ) : null}
-      <form className="card stack" onSubmit={createApp}>
-        <h2>Create an app</h2>
-        <AppSettingsFields />
-        <button disabled={isCreating} type="submit">
-          {isCreating ? 'Creating' : 'Create app'}
-        </button>
-        {errorMessage ? <p className="notice error">{errorMessage}</p> : null}
-      </form>
+          </TableBody>
+        </Table>
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No apps yet</EmptyTitle>
+            <EmptyDescription>Create one below.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+      <Card render={<form onSubmit={submit} />}>
+        <CardHeader>
+          <CardTitle render={(props) => <h2 {...props} />}>Create an app</CardTitle>
+        </CardHeader>
+        <CardPanel className="grid gap-4">
+          <AppSettingsFields />
+          <Button className="justify-self-start" loading={createApp.isPending} type="submit">
+            Create app
+          </Button>
+          <ErrorAlert error={createApp.error} />
+        </CardPanel>
+      </Card>
     </main>
   );
 }
