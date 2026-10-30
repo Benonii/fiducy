@@ -53,9 +53,10 @@ function loadSecrets(): PrototypeSecrets {
   return secrets;
 }
 
-async function waitFor(url: string, name: string) {
+async function waitFor(url: string, name: string, process: Bun.Subprocess) {
   const deadline = Date.now() + STARTUP_TIMEOUT_MILLISECONDS;
   while (Date.now() < deadline) {
+    if (process.exitCode !== null) throw new Error(`${name} exited with code ${process.exitCode}`);
     const response = await fetch(url).catch(() => null);
     if (response?.ok) return;
     await Bun.sleep(500);
@@ -91,6 +92,11 @@ async function seedDemoApp(secrets: PrototypeSecrets) {
   if (!response.ok) throw new Error(`Seeding the demo app failed with ${response.status}`);
 }
 
+if (!Bun.which('node')) {
+  console.error('Farm.js runs on Node. Install Node 22 or newer (for example: nvm install 22).');
+  process.exit(1);
+}
+
 const secrets = loadSecrets();
 const connection = { controlPlaneURL: controlURL, gatewayToken: secrets.gatewayToken };
 
@@ -100,7 +106,7 @@ const controlPlane = startFarmApp('control-plane', CONTROL_PORT, {
   FIDUCY_GATEWAY_TOKEN: secrets.gatewayToken,
   FIDUCY_GATEWAY_URL: gatewayURL
 });
-await waitFor(`${controlURL}/api/config`, 'The control plane');
+await waitFor(`${controlURL}/api/config`, 'The control plane', controlPlane);
 await seedDemoApp(secrets);
 
 const mockProvider = useMockProvider ? startMockProvider() : null;
@@ -126,7 +132,7 @@ const demo = startFarmApp('demo', DEMO_PORT, {
   FIDUCY_APP_SECRET: secrets.demoAppSecret,
   FIDUCY_GATEWAY_URL: gatewayURL
 });
-await waitFor(`${demoURL}/api/config`, 'The demo');
+await waitFor(`${demoURL}/api/config`, 'The demo', demo);
 
 console.log(`
 Fiducy prototype is running${useMockProvider ? ' with a fake OpenAI' : ''}
