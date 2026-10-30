@@ -1,0 +1,147 @@
+// Runs the whole product on one machine: control plane, gateway and the demo chat.
+//   bun run prototype          real providers (paste a real OpenAI key in the widget)
+//   bun run prototype --mock   a local fake OpenAI, no key or spend needed
+// The gateway uses the same remote stores as the enclave build; only the key wrapper differs
+// (a local master key here, attested KMS on AWS).
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { createLocalKeyWrapper } from '@fiducy/core';
+import { createProviderRegistry } from '@fiducy/providers';
+import { startMockProvider } from '@fiducy/testing';
+
+import { hashSecret } from '../src/hashing';
+import { createRemoteAppDirectory } from '../src/remoteAppDirectory';
+import { createRemoteKeyStore } from '../src/remoteKeyStore';
+import { createRemoteUsageLedger } from '../src/remoteUsageLedger';
+import { createGateway } from '../src/router';
+
+interface PrototypeSecrets {
+  gatewayToken: string;
+  masterKey: string;
+  demoAppSecret: string;
+}
+
+const ROOT = join(import.meta.dir, '../../..');
+const STATE_DIR = join(ROOT, '.prototype');
+const SECRETS_PATH = join(STATE_DIR, 'secrets.json');
+const CONTROL_PORT = 3000;
+const DEMO_PORT = 3001;
+const GATEWAY_PORT = 8787;
+const DEMO_APP_ID = 'app_demo';
+const STARTUP_TIMEOUT_MILLISECONDS = 120000;
+
+const useMockProvider = process.argv.includes('--mock');
+const controlURL = `http://localhost:${CONTROL_PORT}`;
+const demoURL = `http://localhost:${DEMO_PORT}`;
+const gatewayURL = `http://localhost:${GATEWAY_PORT}`;
+
+function randomToken(byteLength: number): string {
+  return Buffer.from(crypto.getRandomValues(new Uint8Array(byteLength))).toString('base64url');
+}
+
+// Kept on disk so sealed records stay openable across restarts.
+function loadSecrets(): PrototypeSecrets {
+  mkdirSync(STATE_DIR, { recursive: true });
+  if (existsSync(SECRETS_PATH)) return JSON.parse(readFileSync(SECRETS_PATH, 'utf8'));
+  const secrets = {
+    gatewayToken: randomToken(32),
+    masterKey: randomToken(32),
+    demoAppSecret: `fsk_${randomToken(32)}`
+  };
+  writeFileSync(SECRETS_PATH, JSON.stringify(secrets, null, 2), { mode: 0o600 });
+  return secrets;
+}
+
+async function waitFor(url: string, name: string) {
+  const deadline = Date.now() + STARTUP_TIMEOUT_MILLISECONDS;
+  while (Date.now() < deadline) {
+    const response = await fetch(url).catch(() => null);
+    if (response?.ok) return;
+    await Bun.sleep(500);
+  }
+  throw new Error(`${name} did not start at ${url}`);
+}
+
+function startFarmApp(directory: string, port: number, env: Record<string, string>) {
+  return Bun.spawn(['bunx', 'farm', 'dev', '--port', String(port)], {
+    cwd: join(ROOT, 'apps', directory),
+    env: { ...process.env, ...env },
+    stdout: 'ignore',
+    stderr: 'inherit'
+  });
+}
+
+async function seedDemoApp(secrets: PrototypeSecrets) {
+  const response = await fetch(`${controlURL}/api/gateway/seed`, {
+    method: 'PUT',
+    headers: {
+      authorization: `Bearer ${secrets.gatewayToken}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      appID: DEMO_APP_ID,
+      name: 'Fiducy demo',
+      accessMode: 'gateway',
+      monthlyRequestLimitPerKey: 1000,
+      allowedOrigins: [demoURL],
+      appSecretHash: await hashSecret(secrets.demoAppSecret)
+    })
+  });
+  if (!response.ok) throw new Error(`Seeding the demo app failed with ${response.status}`);
+}
+
+const secrets = loadSecrets();
+const connection = { controlPlaneURL: controlURL, gatewayToken: secrets.gatewayToken };
+
+const controlPlane = startFarmApp('control-plane', CONTROL_PORT, {
+  FARM_AUTH_URL: controlURL,
+  FIDUCY_CONTROL_DATA_DIR: join(STATE_DIR, 'control'),
+  FIDUCY_GATEWAY_TOKEN: secrets.gatewayToken,
+  FIDUCY_GATEWAY_URL: gatewayURL
+});
+await waitFor(`${controlURL}/api/config`, 'The control plane');
+await seedDemoApp(secrets);
+
+const mockProvider = useMockProvider ? startMockProvider() : null;
+const usageLedger = createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 });
+const gateway = Bun.serve({
+  port: GATEWAY_PORT,
+  idleTimeout: 255,
+  fetch: createGateway({
+    keyWrapper: createLocalKeyWrapper(new Uint8Array(Buffer.from(secrets.masterKey, 'base64url'))),
+    keyStore: createRemoteKeyStore(connection),
+    appDirectory: createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 }),
+    usageLedger,
+    providerRegistry: createProviderRegistry(
+      mockProvider ? { openai: mockProvider.baseURL } : undefined
+    )
+  })
+});
+
+const buildSDK = Bun.spawnSync(['bun', 'run', 'build'], { cwd: join(ROOT, 'packages/sdk') });
+if (buildSDK.exitCode !== 0) throw new Error(`SDK build failed: ${buildSDK.stderr.toString()}`);
+const demo = startFarmApp('demo', DEMO_PORT, {
+  FIDUCY_APP_ID: DEMO_APP_ID,
+  FIDUCY_APP_SECRET: secrets.demoAppSecret,
+  FIDUCY_GATEWAY_URL: gatewayURL
+});
+await waitFor(`${demoURL}/api/config`, 'The demo');
+
+console.log(`
+Fiducy prototype is running${useMockProvider ? ' with a fake OpenAI' : ''}
+  Demo chat:      ${demoURL}
+  Dashboard:      ${controlURL}
+  Gateway:        ${gatewayURL}/health
+State lives in .prototype/ (delete it to start fresh). Ctrl+C to stop.`);
+
+const stop = async () => {
+  await usageLedger.stop();
+  gateway.stop(true);
+  mockProvider?.server.stop(true);
+  controlPlane.kill();
+  demo.kill();
+  process.exit(0);
+};
+process.on('SIGINT', stop);
+process.on('SIGTERM', stop);
