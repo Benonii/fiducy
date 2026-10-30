@@ -10,7 +10,7 @@ export async function callControlPlane(
     ...init,
     headers: {
       authorization: `Bearer ${gatewayToken}`,
-      'content-type': 'application/json',
+      ...(init.body ? { 'content-type': 'application/json' } : {}),
       ...init.headers
     }
   });
