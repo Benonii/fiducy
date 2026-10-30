@@ -24,8 +24,6 @@ afterAll(async () => {
   await stack?.stop();
 });
 
-// Asks a question with no key: the reply opens the key box inside the thread, and once the
-// key is saved the conversation is sent again and answered.
 async function askAndConnect(page: Page, question: string) {
   await page.goto(stack.demoURL);
   await sendMessage(page, question);
@@ -37,7 +35,6 @@ async function askAndConnect(page: Page, question: string) {
   await page.getByText('Here is a summary.').waitFor();
 }
 
-// The demo keeps sealed records on its own disk through the Farm storage mount.
 function readStoredRecords(): string {
   const directory = join(stack.dataDirectory, 'fiducy');
   return readdirSync(directory, { recursive: true, withFileTypes: true })
@@ -89,6 +86,15 @@ describe('assistant-ui demo with bring-your-own keys', () => {
     },
     TEST_TIMEOUT_MILLISECONDS
   );
+
+  it('gives a new browser an http-only demo user cookie once', async () => {
+    const first = await fetch(`${stack.demoURL}/api/config`);
+    expect(first.headers.get('set-cookie')).toMatch(/^fiducy_demo_user=[0-9a-f-]{36};.*HttpOnly/);
+    const returning = await fetch(`${stack.demoURL}/api/config`, {
+      headers: { cookie: 'fiducy_demo_user=returning-user-01' }
+    });
+    expect(returning.headers.get('set-cookie')).toBeNull();
+  });
 
   it('answers a user with no key by calling the connect tool', async () => {
     const response = await fetch(`${stack.demoURL}/api/chat`, {

@@ -5,8 +5,8 @@ export const CHAT_API_PATH = '/api/chat';
 export const FIDUCY_BASE_PATH = '/api/fiducy';
 export const FIDUCY_STORAGE_MOUNT = 'fiducy';
 export const DEMO_USER_COOKIE = 'fiducy_demo_user';
+export const DEMO_USER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// One model per provider. Each runs on the user's own key for that provider.
 export const DEMO_MODELS: DemoModel[] = [
   { id: 'gpt-5-mini', label: 'GPT-5 mini', provider: 'openai' },
   { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5', provider: 'anthropic' },
