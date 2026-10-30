@@ -1,5 +1,6 @@
 import { createEndpoint } from '@farm.js/core/api';
 
+import { noteRevokedKey } from '@/lib/keyService';
 import { requireGateway } from '@/lib/middleware';
 import { respondWith } from '@/lib/responses';
 import { getControlStore } from '@/lib/storage';
@@ -12,7 +13,10 @@ export const GET = createEndpoint({ middleware: [requireGateway] }, async ({ par
 
 export const DELETE = createEndpoint({ middleware: [requireGateway] }, async ({ params }) => {
   const keyID = String(params.keyID);
-  const deleted = await getControlStore().deleteKeyRecord(keyID);
-  if (!deleted) return respondWith(404, null, 'No sealed record with this key ID');
+  const store = getControlStore();
+  const record = await store.findKeyRecord(keyID);
+  if (!record) return respondWith(404, null, 'No sealed record with this key ID');
+  await store.deleteKeyRecord(keyID);
+  await noteRevokedKey(store, record.appID, keyID);
   return respondWith(200, { keyID }, 'Sealed record deleted');
 });
