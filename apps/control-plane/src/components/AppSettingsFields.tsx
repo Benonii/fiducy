@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
-import type { AppSettings } from '@/lib/types';
+import type { AppSettingsFieldsProps } from './types';
 
 const ACCESS_MODES = [
   { label: 'Gateway only (keys never leave Fiducy)', value: 'gateway' },
@@ -23,10 +23,6 @@ const RECORD_STORAGE_OPTIONS = [
   { label: 'With Fiducy (your app stores only a handle)', value: 'fiducy' },
   { label: 'In your database (your app sends the record with each call)', value: 'app' }
 ];
-
-interface AppSettingsFieldsProps {
-  defaults?: AppSettings;
-}
 
 export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
   return (

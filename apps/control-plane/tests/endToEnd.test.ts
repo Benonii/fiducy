@@ -64,7 +64,7 @@ describe('a developer onboarding through the dashboard', () => {
     expect(created.appID).toMatch(/^app_/);
     expect(created.appSecret).toMatch(/^fsk_/);
     await page.reload();
-    await page.getByRole('link', { name: 'Chatforge' }).waitFor();
+    await page.getByRole('main').getByRole('link', { name: 'Chatforge' }).waitFor();
     expect(await page.content()).not.toContain(created.appSecret);
   });
 
@@ -84,7 +84,7 @@ describe('a developer onboarding through the dashboard', () => {
 
   it('shows the request in the app usage after the gateway reports it', async () => {
     expect(await stack.usageLedger.flush()).toBe(1);
-    await page.getByRole('link', { name: 'Chatforge' }).click();
+    await page.getByRole('main').getByRole('link', { name: 'Chatforge' }).click();
     await page.getByTestId('request-count').filter({ hasText: '1' }).waitFor({ timeout: 30000 });
   });
 

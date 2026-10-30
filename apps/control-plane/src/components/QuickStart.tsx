@@ -1,46 +1,57 @@
-import { Card, CardHeader, CardPanel, CardTitle } from '@/components/ui/card';
+import { Panel } from './Panel';
 
-interface QuickStartProps {
-  appID: string;
-  gatewayURL: string;
-}
+import type { QuickStartProps } from './types';
 
-export function QuickStart({ appID, gatewayURL }: QuickStartProps) {
-  const widgetSnippet = `import { mountKeyWidget } from '@fiducy/widget';
+function buildSteps({ appID, gatewayURL }: QuickStartProps) {
+  return [
+    {
+      title: 'Let users paste their key into the widget',
+      detail: 'You get back a handle. Store it next to the user.',
+      code: `import { mountKeyWidget } from '@fiducy/widget';
 
 mountKeyWidget({
   gatewayURL: '${gatewayURL}',
   appID: '${appID}',
   container: document.querySelector('#key-widget'),
   onHandle: (handle) => saveHandleForUser(handle)
-});`;
-  const serverSnippet = `import OpenAI from 'openai';
+});`
+    },
+    {
+      title: 'Call the provider through the gateway',
+      detail: 'Use your app secret and the user handle. The key itself never reaches your server.',
+      code: `import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.FIDUCY_APP_SECRET,
   baseURL: '${gatewayURL}/openai/v1',
   defaultHeaders: { 'x-key-handle': userHandle }
-});`;
-  const steps = [
-    {
-      text: '1. Let users paste their key into the widget. You get back a handle.',
-      code: widgetSnippet
-    },
-    { text: '2. Call the provider through the gateway with your app secret.', code: serverSnippet }
+});`
+    }
   ];
+}
+
+export function QuickStart(props: QuickStartProps) {
   return (
-    <Card render={<section />}>
-      <CardHeader>
-        <CardTitle render={(props) => <h2 {...props} />}>Connect your app</CardTitle>
-      </CardHeader>
-      <CardPanel className="grid gap-3">
-        {steps.map((step) => (
-          <div key={step.text} className="grid gap-2">
-            <p className="text-muted-foreground text-sm">{step.text}</p>
-            <pre className="overflow-x-auto border bg-muted p-3 text-xs">{step.code}</pre>
-          </div>
+    <Panel
+      title="Connect your app"
+      description="Two steps. Both values below are already filled in for this app."
+    >
+      <ol className="grid gap-6">
+        {buildSteps(props).map((step, index) => (
+          <li key={step.title} className="grid gap-2">
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-ink-quiet text-xs">0{index + 1}</span>
+              <div className="grid gap-0.5">
+                <p className="font-medium text-foreground text-sm">{step.title}</p>
+                <p className="text-ink-quiet text-xs">{step.detail}</p>
+              </div>
+            </div>
+            <pre className="overflow-x-auto border bg-surface p-4 text-xs leading-relaxed">
+              {step.code}
+            </pre>
+          </li>
         ))}
-      </CardPanel>
-    </Card>
+      </ol>
+    </Panel>
   );
 }

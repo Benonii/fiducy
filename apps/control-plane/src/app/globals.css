@@ -2,7 +2,7 @@
 
 /*
   coss ui tokens in the Fiducy look: white ground, black for what you read first or act on,
-  grays for the rest, square corners, Geist for reading and Geist Mono for machine values.
+  grays for the rest, square corners, Lexend for reading and Geist Mono for machine values.
 */
 :root {
   --background: #ffffff;
@@ -34,7 +34,7 @@
 }
 
 @theme inline {
-  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-sans: "Lexend Variable", system-ui, sans-serif;
   --font-heading: var(--font-sans);
   --font-mono: "Geist Mono Variable", ui-monospace, Menlo, monospace;
   --radius-xs: 0;
@@ -43,6 +43,10 @@
   --radius-lg: 0;
   --radius-xl: 0;
   --radius-2xl: 0;
+  --color-surface: #fafafa;
+  --color-ink-quiet: #8a8a8a;
+  --color-bar: #1a1a1a;
+  --color-bar-muted: #c4c4c4;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -79,9 +83,40 @@
     @apply bg-background font-sans text-foreground antialiased;
   }
 
+  ::selection {
+    @apply bg-foreground text-background;
+  }
+
   code,
   pre {
     @apply font-mono;
     font-variant-ligatures: none;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@theme inline {
+  --animate-rise-in: rise-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-bar-grow: bar-grow 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
   }
 }
