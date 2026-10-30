@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { FiducyKeysState, UserKeySummaryView } from './types';
 
@@ -15,46 +15,51 @@ async function callApp<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data;
 }
 
-/** Lists and revokes the signed-in user's keys through the app's Fiducy handler. */
-export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
-  const [keys, setKeys] = useState<UserKeySummaryView[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const refresh = useCallback(async () => {
-    try {
-      const data = await callApp<{ keys: UserKeySummaryView[] }>(`${basePath}/keys`);
-      setKeys(data.keys);
-      setError(null);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [basePath]);
-
-  const revoke = useCallback(
-    async (keyID: string) => {
-      await callApp(`${basePath}/keys/${keyID}`, { method: 'DELETE' });
-      await refresh();
-    },
-    [basePath, refresh]
-  );
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  return { keys, isLoading, error, refresh, revoke };
+/** The TanStack Query key for the signed-in user's keys, to invalidate after your own changes. */
+export function fiducyKeysQueryKey(basePath = '/api/fiducy') {
+  return ['fiducy', basePath, 'keys'] as const;
 }
 
-export async function saveConnectedKey(
-  basePath: string,
-  body: unknown
-): Promise<UserKeySummaryView> {
-  return callApp<UserKeySummaryView>(`${basePath}/keys`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body)
+/**
+ * Lists and revokes the signed-in user's keys through the app's Fiducy handler.
+ * Built on TanStack Query, so it needs a QueryClientProvider above it.
+ */
+export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
+  const queryClient = useQueryClient();
+  const queryKey = fiducyKeysQueryKey(basePath);
+  const keysQuery = useQuery({
+    queryKey,
+    queryFn: () => callApp<{ keys: UserKeySummaryView[] }>(`${basePath}/keys`),
+    select: (data) => data.keys
+  });
+  const revokeMutation = useMutation({
+    mutationFn: (keyID: string) => callApp(`${basePath}/keys/${keyID}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey })
+  });
+
+  return {
+    keys: keysQuery.data ?? [],
+    isLoading: keysQuery.isPending,
+    error: keysQuery.error?.message ?? revokeMutation.error?.message ?? null,
+    refresh: async () => {
+      await queryClient.invalidateQueries({ queryKey });
+    },
+    revoke: async (keyID) => {
+      await revokeMutation.mutateAsync(keyID);
+    }
+  };
+}
+
+/** Posts a newly connected key to the app's Fiducy handler and refreshes useFiducyKeys. */
+export function useSaveConnectedKey(basePath = '/api/fiducy') {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: unknown) =>
+      callApp<UserKeySummaryView>(`${basePath}/keys`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: fiducyKeysQueryKey(basePath) })
   });
 }

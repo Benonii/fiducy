@@ -1,32 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface SecretRevealProps {
   appSecret: string;
 }
 
 export function SecretReveal({ appSecret }: SecretRevealProps) {
-  const [isCopied, setIsCopied] = useState(false);
-
-  async function copySecret() {
-    await navigator.clipboard.writeText(appSecret);
-    setIsCopied(true);
-  }
-
+  const copySecret = useMutation({ mutationFn: () => navigator.clipboard.writeText(appSecret) });
   return (
-    <div className="notice stack">
-      <strong>
+    <Alert>
+      <AlertTitle>
         Copy your app secret now. Fiducy only stores its hash and cannot show it again.
-      </strong>
-      <div className="secret" data-testid="app-secret">
-        {appSecret}
-      </div>
-      <div className="row">
-        <button className="secondary" onClick={copySecret} type="button">
-          {isCopied ? 'Copied' : 'Copy secret'}
-        </button>
-      </div>
-    </div>
+      </AlertTitle>
+      <AlertDescription className="grid gap-3">
+        <code
+          className="block break-all border border-foreground border-dashed p-2.5 text-foreground"
+          data-testid="app-secret"
+        >
+          {appSecret}
+        </code>
+        <Button
+          className="justify-self-start"
+          variant="outline"
+          size="sm"
+          onClick={() => copySecret.mutate()}
+        >
+          {copySecret.isSuccess ? 'Copied' : 'Copy secret'}
+        </Button>
+      </AlertDescription>
+    </Alert>
   );
 }
