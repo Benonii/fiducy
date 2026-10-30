@@ -15,6 +15,14 @@ import type {
 } from './types';
 
 const INVALID_HANDLE_ERROR = { status: 400, message: 'The key handle is malformed' };
+const BROWSER_ERROR =
+  '@fiducy/sdk takes your app secret and must run on your server. In the browser, use @fiducy/sdk/react.';
+
+function assertServer() {
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    throw new Error(BROWSER_ERROR);
+  }
+}
 
 function joinURL(gatewayURL: string, path: string): string {
   return `${gatewayURL.replace(/\/+$/, '')}${path}`;
@@ -46,6 +54,7 @@ export function createProviderSettings(
   provider: GatewayProvider,
   handle: string
 ): ProviderSettings {
+  assertServer();
   return {
     baseURL: joinURL(gatewayURL, PROVIDER_BASE_PATHS[provider]),
     apiKey: appSecret,
@@ -58,6 +67,7 @@ export function createGatewayClient({
   appSecret,
   fetch: fetchGateway = fetch
 }: GatewayClientOptions): GatewayClient {
+  assertServer();
   const authorization = { authorization: `Bearer ${appSecret}` };
 
   const revokeKey = async (handle: string): Promise<GatewayResult<RevokedKey>> => {
