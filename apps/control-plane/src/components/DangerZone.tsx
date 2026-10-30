@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { requestControlPlane } from '../lib/client';
+import { requestControlPlane } from '@/lib/client';
 import { SecretReveal } from './SecretReveal';
 
-import type { CreatedApp } from '../lib/types';
+import type { CreatedApp } from '@/lib/types';
 
 interface DangerZoneProps {
   appID: string;
