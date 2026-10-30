@@ -1,73 +1,68 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { AppSettingsFields } from '@/components/AppSettingsFields';
 import { DangerZone } from '@/components/DangerZone';
+import { ErrorAlert } from '@/components/ErrorAlert';
+import { PageStatus } from '@/components/PageStatus';
 import { QuickStart } from '@/components/QuickStart';
 import { UsagePanel } from '@/components/UsagePanel';
-import { readAppSettingsForm, requestControlPlane } from '@/lib/client';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardPanel, CardTitle } from '@/components/ui/card';
+import { readAppSettingsForm } from '@/lib/client';
+import { useApp, useGatewayURL, useUpdateApp } from '@/lib/queries';
 
-import type { AppView, UsageSummary } from '@/lib/types';
 import type { PageProps } from '@farm.js/core';
 import type { FormEvent } from 'react';
 
 export default function AppPage({ params = {} }: PageProps) {
   const appID = String(params.appID ?? '');
-  const [app, setApp] = useState<AppView | null>(null);
-  const [usage, setUsage] = useState<UsageSummary | null>(null);
-  const [gatewayURL, setGatewayURL] = useState('');
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const app = useApp(appID);
+  const gatewayURL = useGatewayURL();
+  const updateApp = useUpdateApp(appID);
 
-  useEffect(() => {
-    requestControlPlane<AppView>(`/api/apps/${appID}`).then((response) =>
-      response.ok ? setApp(response.data) : setErrorMessage(response.message)
-    );
-    requestControlPlane<UsageSummary>(`/api/apps/${appID}/usage`).then((response) => {
-      if (response.ok) setUsage(response.data);
-    });
-    requestControlPlane<{ gatewayURL: string }>('/api/config').then((response) => {
-      if (response.ok) setGatewayURL(response.data.gatewayURL);
-    });
-  }, [appID]);
-
-  async function saveSettings(event: FormEvent<HTMLFormElement>) {
+  function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatusMessage(null);
-    setErrorMessage(null);
-    const response = await requestControlPlane<AppView>(`/api/apps/${appID}`, {
-      method: 'PATCH',
-      body: JSON.stringify(readAppSettingsForm(event.currentTarget))
-    });
-    if (!response.ok) return setErrorMessage(response.message);
-    setApp(response.data);
-    setStatusMessage('Saved. The gateway picks up changes within 30 seconds.');
+    updateApp.mutate(readAppSettingsForm(event.currentTarget));
   }
 
-  if (!app) {
-    return <p className="card">{errorMessage ?? 'Loading app'}</p>;
-  }
+  if (app.isPending) return <PageStatus isLoading>Loading app</PageStatus>;
+  if (app.isError) return <ErrorAlert error={app.error} />;
 
   return (
-    <main className="stack">
-      <p>
-        <a href="/dashboard">All apps</a>
-      </p>
-      <h1>{app.name}</h1>
-      <p>
-        App ID <code>{app.appID}</code>, secret ending in <code>{app.appSecretPreview}</code>
-      </p>
-      <UsagePanel usage={usage} />
-      <form className="card stack" onSubmit={saveSettings}>
-        <h2>Settings</h2>
-        <AppSettingsFields defaults={app} />
-        <button type="submit">Save settings</button>
-        {statusMessage ? <p className="notice">{statusMessage}</p> : null}
-        {errorMessage ? <p className="notice error">{errorMessage}</p> : null}
-      </form>
-      {gatewayURL ? <QuickStart appID={app.appID} gatewayURL={gatewayURL} /> : null}
-      <DangerZone appID={app.appID} />
+    <main className="grid gap-6">
+      <a className="text-muted-foreground text-sm underline" href="/dashboard">
+        All apps
+      </a>
+      <div className="grid gap-1">
+        <h1 className="font-bold text-3xl text-foreground tracking-tight">{app.data.name}</h1>
+        <p className="text-muted-foreground text-sm">
+          App ID <code>{app.data.appID}</code>, secret ending in{' '}
+          <code>{app.data.appSecretPreview}</code>
+        </p>
+      </div>
+      <UsagePanel appID={appID} />
+      <Card render={<form onSubmit={saveSettings} />}>
+        <CardHeader>
+          <CardTitle render={(props) => <h2 {...props} />}>Settings</CardTitle>
+        </CardHeader>
+        <CardPanel className="grid gap-4">
+          <AppSettingsFields defaults={app.data} />
+          <Button className="justify-self-start" loading={updateApp.isPending} type="submit">
+            Save settings
+          </Button>
+          {updateApp.isSuccess ? (
+            <Alert>
+              <AlertDescription>
+                Saved. The gateway picks up changes within 30 seconds.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          <ErrorAlert error={updateApp.error} />
+        </CardPanel>
+      </Card>
+      {gatewayURL.data ? <QuickStart appID={appID} gatewayURL={gatewayURL.data} /> : null}
+      <DangerZone appID={appID} />
     </main>
   );
 }
