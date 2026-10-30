@@ -1,4 +1,4 @@
-import type { UsageSummary } from '../lib/types';
+import type { UsageSummary } from '@/lib/types';
 
 interface UsagePanelProps {
   usage: UsageSummary | null;
