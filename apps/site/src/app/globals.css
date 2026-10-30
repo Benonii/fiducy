@@ -13,16 +13,17 @@ html:root {
 /*
   Landing page system, scoped under .site so the docs theme stays untouched.
   Type: one family, Archivo. Width carries rank: display and titles are set expanded and heavy,
-  reading text at normal width. Color: black for what you read first, act on, or what holds the
-  structure (the frame); dark gray for body; mid gray for descriptions and details; light gray
-  for inner dividers and surfaces. Nothing else.
+  reading text at normal width. Color: black for what you read first or act on; dark gray for
+  body; mid gray for descriptions and details; light gray for structure. Lines: the page frame
+  is a solid hairline, everything inside it is dashed.
 */
 .site {
   --ink: #000000;
   --ink-body: #333333;
   --ink-muted: #5e5e5e;
-  --frame: #000000;
-  --line: #e2e2e2;
+  --frame: #d9d9d9;
+  --line: #d9d9d9;
+  --control: #c4c4c4;
   --surface: #ffffff;
   --wash: #f4f4f4;
 
@@ -124,7 +125,7 @@ html:root {
 }
 
 .site-frame > * {
-  border-bottom: 1px solid var(--frame);
+  border-bottom: 1px dashed var(--frame);
 }
 
 .site-frame > *:last-child {
@@ -212,7 +213,7 @@ html:root {
   display: inline-flex;
   align-items: stretch;
   height: 44px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--control);
   font-size: 0.8125rem;
   color: var(--ink-body);
 }
@@ -226,7 +227,7 @@ html:root {
 .install button {
   padding: 0 14px;
   border: 0;
-  border-left: 1px solid var(--ink);
+  border-left: 1px dashed var(--control);
   background: var(--surface);
   color: var(--ink);
   font-family: "Archivo Variable", system-ui, sans-serif;
@@ -262,9 +263,9 @@ html:root {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.85fr);
   width: 100%;
   max-width: 1000px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--control);
   background: var(--surface);
-  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.22);
   font-size: var(--text-description);
 }
 
@@ -273,7 +274,7 @@ html:root {
 }
 
 .mock > * + * {
-  border-left: 1px solid var(--line);
+  border-left: 1px dashed var(--line);
 }
 
 .mock-widget {
@@ -289,7 +290,7 @@ html:root {
 .mock-field {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--control);
   font-family: ui-monospace, Menlo, monospace;
   font-size: var(--text-detail);
   color: var(--ink-body);
@@ -346,7 +347,7 @@ html:root {
   gap: 8px;
   margin-top: 8px;
   padding: 10px 12px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--control);
   color: var(--ink-muted);
   font-size: var(--text-detail);
 }
@@ -369,7 +370,7 @@ html:root {
   display: grid;
   gap: 2px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px dashed var(--line);
 }
 
 .mock-trace li span:first-child {
@@ -408,7 +409,7 @@ html:root {
 }
 
 .strip > * + * {
-  border-left: 1px solid var(--line);
+  border-left: 1px dashed var(--line);
 }
 
 /* Sections */
@@ -455,14 +456,16 @@ html:root {
 
 .flow-node rect {
   fill: var(--surface);
-  stroke: var(--line);
+  stroke: var(--control);
+  stroke-dasharray: 3 3;
   stroke-width: 1;
 }
 
 .flow-hub rect {
-  fill: var(--surface);
+  fill: var(--wash);
+  stroke-dasharray: none;
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: 1;
 }
 
 .flow-node-title {
@@ -489,12 +492,12 @@ html:root {
 
 /* Code tabs */
 .code-tabs {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--control);
 }
 
 .code-tabs-list {
   display: flex;
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px dashed var(--control);
   overflow-x: auto;
 }
 
@@ -503,7 +506,7 @@ html:root {
   height: 44px;
   padding: 0 18px;
   border: 0;
-  border-right: 1px solid var(--line);
+  border-right: 1px dashed var(--line);
   background: transparent;
   color: var(--ink-muted);
   font: inherit;
@@ -548,7 +551,7 @@ html:root {
 /* Leaks */
 .leaks {
   display: grid;
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--control);
 }
 
 .leaks div {
@@ -556,7 +559,7 @@ html:root {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
   gap: 24px;
   padding: 22px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px dashed var(--line);
 }
 
 .leaks dt {
@@ -587,7 +590,7 @@ html:root {
 }
 
 .plans > div + div {
-  border-left: 1px solid var(--frame);
+  border-left: 1px dashed var(--frame);
 }
 
 .plan-price {
@@ -639,7 +642,7 @@ html:root {
   }
 
   .strip > *:nth-child(n + 5) {
-    border-top: 1px solid var(--line);
+    border-top: 1px dashed var(--line);
   }
 }
 
@@ -661,7 +664,7 @@ html:root {
 
   .mock > * + * {
     border-left: 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px dashed var(--line);
   }
 
   .mock-chat {
@@ -677,7 +680,7 @@ html:root {
   }
 
   .strip > *:nth-child(n + 3) {
-    border-top: 1px solid var(--line);
+    border-top: 1px dashed var(--line);
   }
 
   .strip dt,
@@ -704,7 +707,7 @@ html:root {
 
   .plans > div + div {
     border-left: 0;
-    border-top: 1px solid var(--frame);
+    border-top: 1px dashed var(--frame);
   }
 
   .section {
@@ -731,7 +734,7 @@ html:root {
 }
 
 .site-main > * {
-  border-bottom: 1px solid var(--frame);
+  border-bottom: 1px dashed var(--frame);
 }
 
 /* Docs: headings in the same expanded face as the landing page. */
