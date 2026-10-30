@@ -1,0 +1,23 @@
+version: v1
+name: fiducy-gateway
+target: fiducy-enclave:latest
+sources:
+  app: fiducy-gateway-app:latest
+defaults:
+  cpu_count: ${ENCLAVE_CPU_COUNT}
+  memory_mb: ${ENCLAVE_MEMORY_MB}
+ingress:
+  - listen_port: 8787
+egress:
+  allow:
+    - 169.254.169.254
+    - kms.${AWS_REGION}.amazonaws.com
+    - ${CONTROL_PLANE_HOST}
+    - api.openai.com
+    - api.anthropic.com
+    - generativelanguage.googleapis.com
+    - openrouter.ai
+kms_proxy:
+  listen_port: 9999
+api:
+  listen_port: 9000

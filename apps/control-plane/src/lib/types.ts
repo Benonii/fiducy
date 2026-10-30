@@ -41,9 +41,22 @@ export interface UsageSummary {
   requestsByKey: Record<string, number>;
 }
 
+export interface StoredKeyRecord {
+  keyID: string;
+  appID: string;
+  ciphertext: string;
+  iv: string;
+  wrappedShareB: string;
+}
+
+export interface SeededApp extends AppSettings {
+  appID: string;
+  appSecretHash: string;
+}
+
 export interface KeyValueStore {
   getItem: (key: string) => Promise<unknown>;
-  setItem: (key: string, value: StoredApp | UsageSummary | true) => Promise<void>;
+  setItem: (key: string, value: StoredApp | UsageSummary | StoredKeyRecord | true) => Promise<void>;
   removeItem: (key: string) => Promise<void>;
   getKeys: (base?: string) => Promise<string[]>;
 }
@@ -56,6 +69,9 @@ export interface ControlStore {
   listAllApps: () => Promise<StoredApp[]>;
   readUsage: (appID: string, month: string) => Promise<UsageSummary>;
   saveUsage: (appID: string, summary: UsageSummary) => Promise<void>;
+  saveKeyRecord: (record: StoredKeyRecord) => Promise<void>;
+  findKeyRecord: (keyID: string) => Promise<StoredKeyRecord | null>;
+  deleteKeyRecord: (keyID: string) => Promise<boolean>;
 }
 
 export interface ControlFailure {

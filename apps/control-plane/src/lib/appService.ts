@@ -1,10 +1,11 @@
 import { fail, succeed } from './result';
 
+import { SYSTEM_OWNER_ID } from './constants';
 import { APP_NOT_FOUND } from './failures';
 import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from './secrets';
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
-import type { CreatedApp, GatewayApp, StoredApp } from './types';
+import type { CreatedApp, GatewayApp, SeededApp, StoredApp } from './types';
 
 export function toAppView({ appSecretHash, ownerID, ...app }: StoredApp): AppView {
   return app;
@@ -102,4 +103,18 @@ export async function deleteApp(
 export async function listGatewayApps(store: ControlStore): Promise<GatewayApp[]> {
   const apps = await store.listAllApps();
   return apps.map(toGatewayApp);
+}
+
+// Lets a deployment register its own demo app without a dashboard account. Only the gateway
+// token can call this, and the caller sends a hash, never the app secret itself.
+export async function seedApp(store: ControlStore, seeded: SeededApp): Promise<GatewayApp> {
+  const existing = await store.findApp(seeded.appID);
+  const app: StoredApp = {
+    ...seeded,
+    ownerID: existing?.ownerID ?? SYSTEM_OWNER_ID,
+    appSecretPreview: '****',
+    createdAt: existing?.createdAt ?? new Date().toISOString()
+  };
+  await store.saveApp(app);
+  return toGatewayApp(app);
 }

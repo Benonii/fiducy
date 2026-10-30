@@ -5,3 +5,5 @@ dist
 .output
 *.generated.ts
 farm.d.ts
+enclave/gateway.js
+enclave/enclaver.yaml

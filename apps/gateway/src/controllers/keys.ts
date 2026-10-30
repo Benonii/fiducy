@@ -8,9 +8,13 @@ import { readJSONBody, validateStoreKeyBody } from '../validators';
 
 import type { GatewayDependencies } from '../types';
 
+// Compares hosts, not full origins: behind a TLS proxy the gateway sees http:// while the
+// widget page, and so the browser's Origin header, is https://.
 function isFromForeignOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
-  return origin !== null && origin !== new URL(request.url).origin;
+  if (origin === null) return false;
+  const gatewayHost = request.headers.get('host') ?? new URL(request.url).host;
+  return URL.parse(origin)?.host !== gatewayHost;
 }
 
 export async function storeKey(request: Request, dependencies: GatewayDependencies) {

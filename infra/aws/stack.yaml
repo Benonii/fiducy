@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Fiducy prototype - one Graviton host running the gateway inside a Nitro enclave
+
+Parameters:
+  AmiId:
+    Type: AWS::EC2::Image::Id
+    Description: Amazon Linux 2023 arm64 AMI, pinned so stack updates never replace the host
+  InstanceType:
+    Type: String
+    Default: c6g.large
+  EnclaveImageSha384:
+    Type: String
+    Default: none
+    Description: PCR0 of the enclave image. Only an enclave with this hash can decrypt with the key
+
+Resources:
+  DeployBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-releases
+            Status: Enabled
+            ExpirationInDays: 14
+
+  HostRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: fiducy-host
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub '${DeployBucket.Arn}/*'
+              # Decrypt is listed here but the key policy denies it unless the request carries
+              # an attestation document from the enclave image named in EnclaveImageSha384.
+              - Effect: Allow
+                Action: [kms:Encrypt, kms:Decrypt, kms:DescribeKey]
+                Resource: !GetAtt WrappingKey.Arn
+
+  HostProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref HostRole]
+
+  WrappingKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Wraps share B of every stored API key. Decrypt only works inside the enclave
+      PendingWindowInDays: 7
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AccountAdministration
+            Effect: Allow
+            Principal: { AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root' }
+            Action: kms:*
+            Resource: '*'
+          # Applies to everyone, account admins included. A Decrypt without an attestation
+          # document for this exact enclave image is refused. Missing attestation counts as a
+          # mismatch, so the parent host and the AWS console cannot decrypt either.
+          - Sid: DecryptOnlyInsideTheEnclave
+            Effect: Deny
+            Principal: '*'
+            Action: kms:Decrypt
+            Resource: '*'
+            Condition:
+              StringNotEqualsIgnoreCase:
+                kms:RecipientAttestation:ImageSha384: !Ref EnclaveImageSha384
+
+  HostSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Public HTTPS for the gateway, dashboard and demo
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+        - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0 }
+
+  Host:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref HostProfile
+      SecurityGroupIds: [!GetAtt HostSecurityGroup.GroupId]
+      EnclaveOptions:
+        Enabled: true
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required
+        # The enclave reaches IMDS through the Enclaver container, which adds one network hop.
+        HttpPutResponseHopLimit: 2
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp3
+            VolumeSize: 30
+            Encrypted: true
+      Tags:
+        - { Key: Name, Value: fiducy-prototype }
+
+  HostAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref Host
+
+Outputs:
+  InstanceId:
+    Value: !Ref Host
+  PublicIp:
+    Value: !Ref HostAddress
+  KeyArn:
+    Value: !GetAtt WrappingKey.Arn
+  BucketName:
+    Value: !Ref DeployBucket
