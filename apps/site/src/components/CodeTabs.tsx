@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { CODE_SAMPLES } from '../lib/codeSamples';
+import { CODE_SAMPLES } from '@/lib/codeSamples';
 
 export function CodeTabs() {
   const [activeID, setActiveID] = useState(CODE_SAMPLES[0]?.id);

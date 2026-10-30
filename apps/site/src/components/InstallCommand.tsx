@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { INSTALL_COMMAND } from '../lib/constants';
+import { INSTALL_COMMAND } from '@/lib/constants';
 
 const COPIED_RESET_MILLISECONDS = 1600;
 

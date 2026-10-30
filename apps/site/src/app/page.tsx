@@ -1,10 +1,10 @@
-import { CodeTabs } from '../components/CodeTabs';
-import { HeroStage } from '../components/HeroStage';
-import { InstallCommand } from '../components/InstallCommand';
-import { KeyFlow } from '../components/KeyFlow';
-import { LeakScenes } from '../components/LeakScenes';
-import { Showcase } from '../components/Showcase';
-import { DEMO_URL, GITHUB_URL, PROVIDERS } from '../lib/constants';
+import { CodeTabs } from '@/components/CodeTabs';
+import { HeroStage } from '@/components/HeroStage';
+import { InstallCommand } from '@/components/InstallCommand';
+import { KeyFlow } from '@/components/KeyFlow';
+import { LeakScenes } from '@/components/LeakScenes';
+import { Showcase } from '@/components/Showcase';
+import { DEMO_URL, GITHUB_URL, PROVIDERS } from '@/lib/constants';
 
 export default function HomePage() {
   return (

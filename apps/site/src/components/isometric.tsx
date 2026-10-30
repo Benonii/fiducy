@@ -1,5 +1,5 @@
-import type { BoxProps, LineProps, PlateProps } from '../types';
-import type { Point, TagProps } from '../types';
+import type { BoxProps, LineProps, PlateProps } from '@/types';
+import type { Point, TagProps } from '@/types';
 
 const UNIT = 16;
 const COS_30 = Math.cos(Math.PI / 6);

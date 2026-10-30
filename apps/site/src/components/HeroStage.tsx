@@ -1,4 +1,4 @@
-import { LiquidFormBackground } from '../shaders/liquid-form/LiquidFormBackground';
+import { LiquidFormBackground } from '@/shaders/liquid-form/LiquidFormBackground';
 
 export function HeroStage() {
   return (
