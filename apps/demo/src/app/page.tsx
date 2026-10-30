@@ -3,12 +3,12 @@
 import { useFiducyKeys } from '@fiducy/sdk/react';
 import { useEffect, useState } from 'react';
 
-import { Chat } from '../components/Chat';
-import { ConnectKey } from '../components/ConnectKey';
-import { FIDUCY_BASE_PATH } from '../lib/constants';
-import { ensureDemoUser } from '../lib/demoUser';
+import { Chat } from '@/components/Chat';
+import { ConnectKey } from '@/components/ConnectKey';
+import { FIDUCY_BASE_PATH } from '@/lib/constants';
+import { ensureDemoUser } from '@/lib/demoUser';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 type ConfigState =
   | { status: 'loading' }

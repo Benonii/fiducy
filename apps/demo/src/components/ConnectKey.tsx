@@ -1,9 +1,9 @@
 import { ConnectKeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
-import { FIDUCY_BASE_PATH } from '../lib/constants';
+import { FIDUCY_BASE_PATH } from '@/lib/constants';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 interface ConnectKeyProps {
   config: PublicDemoConfig;

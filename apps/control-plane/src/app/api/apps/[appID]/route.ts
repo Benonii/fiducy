@@ -1,10 +1,10 @@
 import { createEndpoint } from '@farm.js/core/api';
 
-import { deleteApp, findOwnedApp, toAppView, updateApp } from '../../../../lib/appService';
-import { requireOwner } from '../../../../lib/middleware';
-import { respondWith, respondWithFailure } from '../../../../lib/responses';
-import { getControlStore } from '../../../../lib/storage';
-import { appSettingsUpdateSchema } from '../../../../lib/validators';
+import { deleteApp, findOwnedApp, toAppView, updateApp } from '@/lib/appService';
+import { requireOwner } from '@/lib/middleware';
+import { respondWith, respondWithFailure } from '@/lib/responses';
+import { getControlStore } from '@/lib/storage';
+import { appSettingsUpdateSchema } from '@/lib/validators';
 
 export const GET = createEndpoint({ middleware: [requireOwner] }, async ({ context, params }) => {
   const owned = await findOwnedApp(getControlStore(), context.ownerID, String(params.appID));
