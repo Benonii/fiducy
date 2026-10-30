@@ -1,10 +1,10 @@
 import { createEndpoint } from '@farm.js/core/api';
 
-import { createApp, listApps } from '../../../lib/appService';
-import { requireOwner } from '../../../lib/middleware';
-import { respondWith } from '../../../lib/responses';
-import { getControlStore } from '../../../lib/storage';
-import { appSettingsSchema } from '../../../lib/validators';
+import { createApp, listApps } from '@/lib/appService';
+import { requireOwner } from '@/lib/middleware';
+import { respondWith } from '@/lib/responses';
+import { getControlStore } from '@/lib/storage';
+import { appSettingsSchema } from '@/lib/validators';
 
 export const GET = createEndpoint({ middleware: [requireOwner] }, async ({ context }) => {
   const apps = await listApps(getControlStore(), context.ownerID);

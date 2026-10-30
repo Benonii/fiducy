@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { AppSettingsFields } from '../../components/AppSettingsFields';
-import { SecretReveal } from '../../components/SecretReveal';
-import { readAppSettingsForm, requestControlPlane } from '../../lib/client';
+import { AppSettingsFields } from '@/components/AppSettingsFields';
+import { SecretReveal } from '@/components/SecretReveal';
+import { readAppSettingsForm, requestControlPlane } from '@/lib/client';
 
+import type { AppView, CreatedApp } from '@/lib/types';
 import type { FormEvent } from 'react';
-import type { AppView, CreatedApp } from '../../lib/types';
 
 type DashboardState = { status: 'loading' } | { status: 'signed_out' } | { status: 'ready' };
 
