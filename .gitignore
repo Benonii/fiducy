@@ -1,2 +1,7 @@
 node_modules
 .DS_Store
+.farm
+dist
+.output
+*.generated.ts
+farm.d.ts

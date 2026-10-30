@@ -1,0 +1,52 @@
+import type { AppSettings } from './types';
+
+export class ControlPlaneError extends Error {
+  constructor(
+    readonly status: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+function readErrorMessage(body: Record<string, unknown>): string {
+  if (typeof body.message === 'string') return body.message;
+  const details = body.details as Array<{ message?: string }> | undefined;
+  return details?.[0]?.message ?? 'Something went wrong';
+}
+
+export async function requestControlPlane<Data>(
+  path: string,
+  init: RequestInit = {}
+): Promise<Data> {
+  const response = await fetch(path, {
+    ...init,
+    credentials: 'same-origin',
+    headers: init.body ? { 'content-type': 'application/json', ...init.headers } : init.headers
+  });
+  const body = (await response.json()) as Record<string, unknown>;
+  if (!response.ok) throw new ControlPlaneError(response.status, readErrorMessage(body));
+  return body.data as Data;
+}
+
+export function isSignedOut(error: unknown): boolean {
+  return error instanceof ControlPlaneError && error.status === 401;
+}
+
+export function parseOriginList(text: string): string[] {
+  return text
+    .split(/[\s,]+/)
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+export function readAppSettingsForm(form: HTMLFormElement): AppSettings {
+  const formData = new FormData(form);
+  return {
+    name: String(formData.get('name') ?? ''),
+    allowedOrigins: parseOriginList(String(formData.get('allowedOrigins') ?? '')),
+    monthlyRequestLimitPerKey: Number(formData.get('monthlyRequestLimitPerKey')),
+    accessMode:
+      formData.get('accessMode') === 'gateway_and_release' ? 'gateway_and_release' : 'gateway'
+  };
+}

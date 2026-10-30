@@ -1,0 +1,40 @@
+import { z } from 'zod';
+
+import { MAXIMUM_ALLOWED_ORIGINS, MAXIMUM_MONTHLY_REQUEST_LIMIT } from './constants';
+import { MAXIMUM_USAGE_BATCH_SIZE } from './constants';
+
+function isBareOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (url.protocol === 'https:' || url.protocol === 'http:') && url.origin === value;
+  } catch {
+    return false;
+  }
+}
+
+const originSchema = z
+  .string()
+  .trim()
+  .refine(isBareOrigin, 'Use a bare origin such as https://example.com with no path');
+
+export const appSettingsSchema = z.object({
+  name: z.string().trim().min(1, 'Give the app a name').max(80),
+  accessMode: z.enum(['gateway', 'gateway_and_release']).default('gateway'),
+  monthlyRequestLimitPerKey: z.coerce.number().int().min(1).max(MAXIMUM_MONTHLY_REQUEST_LIMIT),
+  allowedOrigins: z.array(originSchema).max(MAXIMUM_ALLOWED_ORIGINS)
+});
+
+export const appSettingsUpdateSchema = appSettingsSchema.partial();
+
+export const usageEventSchema = z.object({
+  appID: z.string().min(1),
+  keyID: z.string().min(1),
+  provider: z.string().min(1),
+  inputTokens: z.number().int().min(0),
+  outputTokens: z.number().int().min(0),
+  recordedAt: z.string().datetime()
+});
+
+export const usageBatchSchema = z.object({
+  events: z.array(usageEventSchema).max(MAXIMUM_USAGE_BATCH_SIZE)
+});
