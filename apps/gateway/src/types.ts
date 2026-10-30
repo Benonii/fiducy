@@ -15,6 +15,7 @@ export interface RegisteredApp {
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
+  revokedKeyIDs?: string[];
 }
 
 export interface AppRegistration extends RegisteredApp {

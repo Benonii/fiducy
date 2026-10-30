@@ -19,7 +19,9 @@ export interface StoredApp extends AppSettings {
 
 export type AppView = Omit<StoredApp, 'appSecretHash' | 'ownerID'>;
 
-export type GatewayApp = Omit<StoredApp, 'ownerID' | 'appSecretPreview' | 'createdAt'>;
+export interface GatewayApp extends Omit<StoredApp, 'ownerID' | 'appSecretPreview' | 'createdAt'> {
+  revokedKeyIDs: string[];
+}
 
 export interface CreatedApp {
   app: AppView;
@@ -56,9 +58,18 @@ export interface SeededApp extends AppSettings {
   appSecretHash: string;
 }
 
+export type StoredValue =
+  | StoredApp
+  | UsageSummary
+  | StoredKeyRecord
+  | StoredKeyEntry
+  | DailyUsage
+  | GatewayHeartbeat
+  | true;
+
 export interface KeyValueStore {
   getItem: (key: string) => Promise<unknown>;
-  setItem: (key: string, value: StoredApp | UsageSummary | StoredKeyRecord | true) => Promise<void>;
+  setItem: (key: string, value: StoredValue) => Promise<void>;
   removeItem: (key: string) => Promise<void>;
   getKeys: (base?: string) => Promise<string[]>;
 }
@@ -74,6 +85,13 @@ export interface ControlStore {
   saveKeyRecord: (record: StoredKeyRecord) => Promise<void>;
   findKeyRecord: (keyID: string) => Promise<StoredKeyRecord | null>;
   deleteKeyRecord: (keyID: string) => Promise<boolean>;
+  saveKeyEntry: (entry: StoredKeyEntry) => Promise<void>;
+  findKeyEntry: (appID: string, keyID: string) => Promise<StoredKeyEntry | null>;
+  listKeyEntries: (appID: string) => Promise<StoredKeyEntry[]>;
+  readDailyUsage: (appID: string, date: string) => Promise<DailyUsage>;
+  saveDailyUsage: (appID: string, usage: DailyUsage) => Promise<void>;
+  readGatewayHeartbeat: () => Promise<GatewayHeartbeat | null>;
+  saveGatewayHeartbeat: (heartbeat: GatewayHeartbeat) => Promise<void>;
 }
 
 export interface ControlFailure {
@@ -121,4 +139,28 @@ export interface GatewayStatus {
   pcr0: string | null;
   attestedAt: string | null;
   region: string | null;
+}
+
+export interface StoredKeyEntry {
+  keyID: string;
+  appID: string;
+  provider: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  status: KeyStatus;
+}
+
+export interface TokenTotals {
+  requestCount: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface DailyUsage extends TokenTotals {
+  date: string;
+  byProvider: Record<string, TokenTotals>;
+}
+
+export interface GatewayHeartbeat {
+  lastSeenAt: string;
 }

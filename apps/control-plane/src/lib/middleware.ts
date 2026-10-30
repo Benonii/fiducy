@@ -1,7 +1,9 @@
 import { auth } from '@farm.js/auth/server';
 
+import { noteGatewayContact } from './gatewayStatusService';
 import { respondWith } from './responses';
 import { matchesToken } from './secrets';
+import { getControlStore } from './storage';
 
 import type { EndpointMiddlewareContext } from '@farm.js/core/api';
 
@@ -20,5 +22,6 @@ export async function requireGateway({ request }: EndpointMiddlewareContext) {
   if (!matchesToken(receivedToken, gatewayToken)) {
     return respondWith(401, null, 'This gateway token is not valid');
   }
+  await noteGatewayContact(getControlStore());
   return true;
 }
