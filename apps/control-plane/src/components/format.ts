@@ -46,3 +46,14 @@ export function shortenIdentifier(identifier: string, visible = 10): string {
   if (identifier.length <= visible + 2) return identifier;
   return `${identifier.slice(0, visible)}...${identifier.slice(-4)}`;
 }
+
+const PROVIDER_LABELS: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  unknown: 'Not used yet'
+};
+
+export function formatProvider(provider: string): string {
+  return PROVIDER_LABELS[provider] ?? provider;
+}

@@ -10,7 +10,7 @@ import {
 
 import { KeyLimitMeter } from './KeyLimitMeter';
 import { RevokeKey } from './RevokeKey';
-import { formatDay, formatRelativeTime, shortenIdentifier } from './format';
+import { formatDay, formatProvider, formatRelativeTime, shortenIdentifier } from './format';
 
 import type { KeysTableProps } from './types';
 
@@ -35,7 +35,7 @@ export function KeysTable({ appID, keys, usage, monthlyLimit }: KeysTableProps) 
             className={key.status === 'revoked' ? 'text-ink-quiet' : undefined}
           >
             <TableCell className="font-mono text-xs">{shortenIdentifier(key.keyID, 14)}</TableCell>
-            <TableCell className="capitalize">{key.provider}</TableCell>
+            <TableCell>{formatProvider(key.provider)}</TableCell>
             <TableCell>
               <KeyLimitMeter
                 requestCount={usage?.requestsByKey[key.keyID] ?? 0}

@@ -34,7 +34,7 @@ export function UsageBars({ days, metric }: UsageBarsProps) {
       </p>
       <div className="relative">
         <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-dashed" />
-        <span className="pointer-events-none absolute top-1 right-0 text-[10px] text-ink-quiet tabular-nums">
+        <span className="pointer-events-none absolute -top-4 right-0 text-[10px] text-ink-quiet tabular-nums">
           {formatCompact(peak)}
         </span>
         <div

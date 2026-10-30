@@ -1,5 +1,5 @@
 import { QuietState } from './QuietState';
-import { formatNumber } from './format';
+import { formatNumber, formatProvider } from './format';
 
 import type { ProviderBreakdownProps } from './types';
 
@@ -20,7 +20,7 @@ export function ProviderBreakdown({ providers }: ProviderBreakdownProps) {
         .map((provider) => (
           <li key={provider.provider} className="grid gap-1.5">
             <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="text-foreground capitalize">{provider.provider}</span>
+              <span className="text-foreground">{formatProvider(provider.provider)}</span>
               <span className="text-ink-quiet text-xs tabular-nums">
                 {formatNumber(provider.requestCount)}
               </span>

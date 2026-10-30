@@ -117,7 +117,7 @@ describe('a developer onboarding through the dashboard', () => {
   it('hides the app from other developers', async () => {
     const otherPage = await browser.newPage();
     await signUp(otherPage, 'mallory@elsewhere.example');
-    expect(await otherPage.getByText('No apps yet').isVisible()).toBe(true);
+    await otherPage.getByText('No apps yet').waitFor({ timeout: 30000 });
     const response = await otherPage.request.get(
       `${stack.controlPlaneURL}/api/apps/${created.appID}`
     );
