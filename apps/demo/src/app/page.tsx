@@ -1,10 +1,12 @@
 'use client';
 
+import { useFiducyKeys } from '@fiducy/sdk/react';
 import { useEffect, useState } from 'react';
 
 import { Chat } from '../components/Chat';
 import { ConnectKey } from '../components/ConnectKey';
-import { readStoredHandle, storeHandle } from '../lib/handleStorage';
+import { FIDUCY_BASE_PATH } from '../lib/constants';
+import { ensureDemoUser } from '../lib/demoUser';
 
 import type { PublicDemoConfig } from '../lib/types';
 
@@ -13,12 +15,21 @@ type ConfigState =
   | { status: 'failed'; message: string }
   | { status: 'ready'; config: PublicDemoConfig };
 
+function ConnectedDemo({ config }: { config: PublicDemoConfig }) {
+  const { keys, isLoading, error, refresh, revoke } = useFiducyKeys(FIDUCY_BASE_PATH);
+  const openAIKey = keys.find((key) => key.provider === 'openai');
+
+  if (isLoading) return <p className="hint">Loading</p>;
+  if (error) return <p className="notice error">{error}</p>;
+  if (!openAIKey) return <ConnectKey config={config} onConnected={refresh} />;
+  return <Chat onForgetKey={() => revoke(openAIKey.keyID)} />;
+}
+
 export default function DemoPage() {
   const [configState, setConfigState] = useState<ConfigState>({ status: 'loading' });
-  const [handle, setHandle] = useState<string | null>(null);
 
   useEffect(() => {
-    setHandle(readStoredHandle());
+    ensureDemoUser();
     fetch('/api/config')
       .then((response) => response.json())
       .then((body: { data: PublicDemoConfig | null; message: string }) =>
@@ -31,13 +42,7 @@ export default function DemoPage() {
       .catch(() => setConfigState({ status: 'failed', message: 'Could not load the demo config' }));
   }, []);
 
-  const updateHandle = (nextHandle: string | null) => {
-    storeHandle(nextHandle);
-    setHandle(nextHandle);
-  };
-
   if (configState.status === 'loading') return <p className="hint">Loading</p>;
   if (configState.status === 'failed') return <p className="notice error">{configState.message}</p>;
-  if (!handle) return <ConnectKey config={configState.config} onHandle={updateHandle} />;
-  return <Chat handle={handle} onForgetKey={() => updateHandle(null)} />;
+  return <ConnectedDemo config={configState.config} />;
 }

@@ -4,12 +4,17 @@ import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/provide
 
 export type KeyAccessMode = 'gateway' | 'gateway_and_release';
 
+// 'fiducy': we keep sealed records and the app keeps handles. 'app': the app keeps both and
+// sends the record with each call, so we store nothing per key.
+export type RecordStorage = 'fiducy' | 'app';
+
 export interface RegisteredApp {
   appID: string;
   name: string;
   accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
+  recordStorage?: RecordStorage;
 }
 
 export interface AppRegistration extends RegisteredApp {

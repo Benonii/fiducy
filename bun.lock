@@ -41,6 +41,7 @@
         "@assistant-ui/react": "0.15.28",
         "@assistant-ui/react-ai-sdk": "1.4.17",
         "@farm.js/core": "0.1.40",
+        "@fiducy/farm": "workspace:*",
         "@fiducy/sdk": "workspace:*",
         "ai": "7.0.139",
         "react": "19.2.0",
@@ -77,6 +78,17 @@
     "packages/core": {
       "name": "@fiducy/core",
       "version": "0.1.0",
+    },
+    "packages/farm": {
+      "name": "@fiducy/farm",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@farm.js/core": "0.1.40",
+        "@fiducy/sdk": "workspace:*",
+      },
+      "peerDependencies": {
+        "@farm.js/core": "0.1.40",
+      },
     },
     "packages/providers": {
       "name": "@fiducy/providers",
@@ -291,6 +303,8 @@
     "@fiducy/core": ["@fiducy/core@workspace:packages/core"],
 
     "@fiducy/demo": ["@fiducy/demo@workspace:apps/demo"],
+
+    "@fiducy/farm": ["@fiducy/farm@workspace:packages/farm"],
 
     "@fiducy/gateway": ["@fiducy/gateway@workspace:apps/gateway"],
 

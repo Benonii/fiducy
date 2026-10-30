@@ -13,11 +13,16 @@
       "types": "./src/react.ts",
       "bun": "./src/react.ts",
       "default": "./dist/react.js"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "bun": "./src/server.ts",
+      "default": "./dist/server.js"
     }
   },
   "files": ["dist", "src"],
   "scripts": {
-    "build": "bun build src/index.ts src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime"
+    "build": "bun build src/index.ts src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime && bun build src/server.ts --outdir dist --target node"
   },
   "dependencies": {
     "@fiducy/core": "workspace:*",

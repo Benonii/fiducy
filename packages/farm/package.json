@@ -1,0 +1,24 @@
+{
+  "name": "@fiducy/farm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node --external @farm.js/core"
+  },
+  "peerDependencies": {
+    "@farm.js/core": "0.1.40"
+  },
+  "devDependencies": {
+    "@farm.js/core": "0.1.40",
+    "@fiducy/sdk": "workspace:*"
+  }
+}

@@ -33,6 +33,7 @@ export function readAppSettingsForm(form: HTMLFormElement) {
     name: String(formData.get('name') ?? ''),
     allowedOrigins: parseOriginList(String(formData.get('allowedOrigins') ?? '')),
     monthlyRequestLimitPerKey: Number(formData.get('monthlyRequestLimitPerKey')),
-    accessMode: String(formData.get('accessMode') ?? 'gateway')
+    accessMode: String(formData.get('accessMode') ?? 'gateway'),
+    recordStorage: String(formData.get('recordStorage') ?? 'fiducy')
   };
 }

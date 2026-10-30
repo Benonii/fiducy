@@ -36,6 +36,16 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
             Gateway and key release (your server may fetch a key for 5 minutes)
           </option>
         </select>
+        <span className="hint">
+          Key release sends the plain key to your server. Leave it off unless a feature needs it.
+        </span>
+      </label>
+      <label>
+        Where sealed keys live
+        <select name="recordStorage" defaultValue={defaults?.recordStorage ?? 'fiducy'}>
+          <option value="fiducy">With Fiducy (your app stores only a handle)</option>
+          <option value="app">In your database (your app sends the record with each call)</option>
+        </select>
       </label>
     </>
   );

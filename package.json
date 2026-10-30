@@ -5,7 +5,7 @@
   "scripts": {
     "test": "bun test",
     "lint": "biome check .",
-    "typecheck": "for project in packages/core packages/providers packages/testing packages/widget packages/sdk apps/gateway apps/control-plane apps/demo; do bunx tsc --noEmit -p $project || exit 1; done",
+    "typecheck": "for project in packages/core packages/providers packages/testing packages/widget packages/sdk packages/farm apps/gateway apps/control-plane apps/demo; do bunx tsc --noEmit -p $project || exit 1; done",
     "prototype": "bun apps/gateway/scripts/prototype.ts"
   },
   "devDependencies": {

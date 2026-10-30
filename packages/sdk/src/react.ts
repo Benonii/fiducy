@@ -1,3 +1,10 @@
+export { ConnectKeyWidget } from './ConnectKeyWidget';
 export { KeyWidget } from './KeyWidget';
+export { useFiducyKeys } from './useFiducyKeys';
 
-export type { KeyWidgetProps } from './types';
+export type {
+  ConnectKeyWidgetProps,
+  FiducyKeysState,
+  KeyWidgetProps,
+  UserKeySummaryView
+} from './types';

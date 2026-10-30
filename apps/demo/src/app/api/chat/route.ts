@@ -1,9 +1,9 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { createProviderSettings } from '@fiducy/sdk';
 import { convertToModelMessages, streamText } from 'ai';
 
 import { describeChatError } from '../../../lib/chatErrors';
 import { readServerDemoConfig } from '../../../lib/config';
+import { fiducyServer, readDemoUser } from '../../../lib/fiducy';
 import { respondWith } from '../../../lib/responses';
 import { chatRequestSchema } from '../../../lib/validators';
 
@@ -16,13 +16,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return respondWith(400, null, parsed.error.issues[0]?.message ?? 'Invalid chat request');
   }
-  const { handle, messages } = parsed.data as ChatRequestBody;
+  const { messages } = parsed.data as ChatRequestBody;
 
-  const openai = createOpenAI(
-    createProviderSettings(config.gatewayURL, config.appSecret, 'openai', handle)
-  );
+  const userID = readDemoUser(request);
+  const settings = userID ? await fiducyServer.providerSettings('openai', { userID }) : null;
+  if (!settings) return respondWith(400, null, 'Connect your API key first');
+
   const result = streamText({
-    model: openai.chat(config.model),
+    model: createOpenAI(settings).chat(config.model),
     messages: await convertToModelMessages(messages),
     maxRetries: 0
   });
