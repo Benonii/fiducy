@@ -5,7 +5,7 @@ import { generateText, streamText } from 'ai';
 
 import { SAMPLE_API_KEY, SAMPLE_HANDLE } from '@fiducy/testing';
 import { CHAT_APP, DESK_APP, startGatewayHarness } from '../../../apps/gateway/tests/harness';
-import { createGatewayClient } from '../src/gatewayClient';
+import { createGatewayClient, createProviderSettings } from '../src/gatewayClient';
 
 let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
 
@@ -96,5 +96,22 @@ describe('managing keys from the app server', () => {
     const client = createGatewayClient({ gatewayURL: 'http://localhost:1', appSecret: 'secret' });
     const result = await client.revokeKey(SAMPLE_HANDLE);
     expect(result.ok ? null : result.error.status).toBe(0);
+  });
+});
+
+describe('running in a browser', () => {
+  it('refuses to take the app secret', () => {
+    const browserGlobals = globalThis as { window?: unknown; document?: unknown };
+    browserGlobals.window = {};
+    browserGlobals.document = {};
+    try {
+      expect(() => createClient()).toThrow('must run on your server');
+      expect(() =>
+        createProviderSettings(harness.gatewayURL, CHAT_APP.appSecret, 'openai', SAMPLE_HANDLE)
+      ).toThrow('must run on your server');
+    } finally {
+      browserGlobals.window = undefined;
+      browserGlobals.document = undefined;
+    }
   });
 });
