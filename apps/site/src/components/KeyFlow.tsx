@@ -8,8 +8,6 @@ function providerPath(rowTop: number) {
   return `M580 190 C 660 190, 660 ${y}, 740 ${y}`;
 }
 
-// One request's path: the app sends a handle, the enclave opens the key, the provider gets it.
-// Each provider lights up in turn so the fan-out reads as "any of these", not "all at once".
 function HorizontalFlow() {
   return (
     <svg className="flow flow-wide" viewBox="0 0 960 360" role="img" aria-labelledby="flow-title">

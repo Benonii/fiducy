@@ -1,10 +1,10 @@
 import { CodeTabs } from '../components/CodeTabs';
+import { HeroStage } from '../components/HeroStage';
 import { InstallCommand } from '../components/InstallCommand';
 import { KeyFlow } from '../components/KeyFlow';
 import { LeakScenes } from '../components/LeakScenes';
 import { Showcase } from '../components/Showcase';
 import { DEMO_URL, GITHUB_URL, PROVIDERS } from '../lib/constants';
-import { LiquidFormBackground } from '../shaders/liquid-form/LiquidFormBackground';
 
 export default function HomePage() {
   return (
@@ -23,33 +23,24 @@ export default function HomePage() {
 
         <main className="site-main">
           <section className="hero">
+            <HeroStage />
             <div className="hero-copy">
-              <p className="eyebrow">Key custody for bring-your-own-key apps</p>
               <h1>
-                <span className="headline-quiet">Users bring keys.</span> You never hold them.
+                <span className="headline-quiet">Users bring keys.</span>
+                <span className="headline-line">You never hold them.</span>
               </h1>
-              <p className="description">
-                Fiducy seals the API keys your users paste in, inside an attested AWS Nitro enclave.
-                Your app keeps a handle and calls models as usual.
-              </p>
-              <div className="hero-actions">
-                <a className="button" href="/docs/quickstart">
-                  Read the docs
-                </a>
-                <InstallCommand />
+              <div className="hero-side">
+                <p className="description">
+                  Fiducy seals the API keys your users paste in, inside an attested AWS Nitro
+                  enclave. Your app keeps a handle and calls models as usual.
+                </p>
+                <div className="hero-actions">
+                  <a className="button" href="/docs/quickstart">
+                    Read the docs
+                  </a>
+                  <InstallCommand />
+                </div>
               </div>
-            </div>
-            <div className="shader-frame">
-              <LiquidFormBackground
-                speed={1.0}
-                morph={1.0}
-                noiseScale={1.0}
-                mouseAmount={0.15}
-                metal={1.0}
-                camera={5.5}
-                tintHue={220}
-                tintAmount={0.0}
-              />
             </div>
           </section>
 

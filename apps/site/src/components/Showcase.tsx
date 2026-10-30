@@ -3,18 +3,10 @@
 import { Dithering } from '@paper-design/shaders-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { REQUEST_TRACE } from '../lib/constants';
+
 const SHADER_SPEED = 0.35;
 
-const TRACE = [
-  { step: 'handle received', detail: 'kh_9f2c…' },
-  { step: 'enclave attested', detail: 'PCR0 a41e…' },
-  { step: 'key opened', detail: 'in memory' },
-  { step: 'openai', detail: '200 · streamed' },
-  { step: 'key dropped', detail: 'request ended' }
-];
-
-// A still of the product doing its job, sitting on a slow dithered field.
-// The shader pauses offscreen and for visitors who prefer reduced motion.
 export function Showcase() {
   const frameRef = useRef<HTMLElement>(null);
   const [speed, setSpeed] = useState(0);
@@ -63,7 +55,7 @@ export function Showcase() {
           </div>
         </div>
         <ol className="mock-trace">
-          {TRACE.map((entry) => (
+          {REQUEST_TRACE.map((entry) => (
             <li key={entry.step}>
               <span>{entry.step}</span>
               <span>{entry.detail}</span>

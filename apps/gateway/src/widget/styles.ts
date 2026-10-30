@@ -1,7 +1,5 @@
 import { WIDGET_FONT_PATH } from './font';
 
-// Same system as the Fiducy site: white ground, black for what you act on, grays for the rest,
-// square corners, hairline gray borders, dashed dividers.
 export const WIDGET_STYLES = `
 @font-face { font-family: 'Geist'; src: url('${WIDGET_FONT_PATH}') format('woff2'); font-weight: 100 900; font-display: swap; }
 :root { color-scheme: light; --ink: #000000; --body: #333333; --muted: #5e5e5e; --line: #d9d9d9; --control: #c4c4c4; --surface: #ffffff; --wash: #f4f4f4; --danger: #a1121b; }

@@ -161,54 +161,204 @@ html:root {
   color: var(--ink);
 }
 
-/* Hero */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 0;
+  padding: 24px var(--gutter) 72px;
+}
+
+.hero-stage {
+  position: relative;
+  margin: 0;
+  animation: rise-in 900ms var(--ease-out) both;
+}
+
+.shader-frame {
+  position: relative;
+  height: clamp(320px, 42vw, 500px);
+  background: #3b3b3b;
+}
+
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  height: clamp(320px, 42vw, 500px);
+  pointer-events: none;
+  color: #e6e6e6;
+  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+}
+
+.stage-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgba(255, 255, 255, 0.55);
+  border-style: solid;
+  border-width: 0;
+}
+
+.stage-corner-top-left {
+  top: 16px;
+  left: 16px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.stage-corner-top-right {
+  top: 16px;
+  right: 16px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.stage-corner-bottom-left {
+  bottom: 16px;
+  left: 16px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.stage-corner-bottom-right {
+  right: 16px;
+  bottom: 16px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.site .stage-chip {
+  position: absolute;
+  top: 28px;
+  left: 40px;
+  display: inline-flex;
   align-items: center;
-  min-height: 560px;
-  padding: 0 0 0 var(--gutter);
+  gap: 8px;
+  padding: 5px 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.stage-dot {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  animation: blink 1.8s steps(2, jump-none) infinite;
+}
+
+.site .stage-trace {
+  position: absolute;
+  top: 50%;
+  left: 40px;
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+  transform: translateY(-50%);
+}
+
+.stage-trace li {
+  display: grid;
+  grid-template-columns: 16px auto;
+  column-gap: 10px;
+  color: rgba(255, 255, 255, 0.42);
+  transition: color 400ms var(--ease-out);
+}
+
+.stage-trace li::before {
+  content: "";
+  grid-row: span 2;
+  align-self: center;
+  width: 8px;
+  height: 1px;
+  background: currentColor;
+  transition: width 400ms var(--ease-out);
+}
+
+.stage-trace li span:last-child {
+  grid-column: 2;
+  font-size: 0.625rem;
+}
+
+.stage-trace li[data-state="done"] {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.stage-trace li[data-state="current"] {
+  color: #ffffff;
+}
+
+.stage-trace li[data-state="current"]::before {
+  width: 16px;
+}
+
+.site .stage-readout {
+  position: absolute;
+  right: 40px;
+  bottom: 30px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  animation: rise-in 500ms var(--ease-out) both;
+}
+
+.stage-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  color: var(--ink-muted);
+  font-size: var(--text-detail);
+}
+
+.stage-caption span:last-child {
+  color: #8a8a8a;
 }
 
 .hero-copy {
   display: grid;
-  gap: 24px;
-  padding-block: 72px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 48px;
+  padding-top: 56px;
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.75rem, 5.4vw, 4.75rem);
+  display: grid;
+  font-size: clamp(2.5rem, 5vw, 4.25rem);
+  line-height: 1;
 }
 
-.hero-copy .description {
+.hero-copy h1 span {
+  animation: rise-in 900ms var(--ease-out) both;
+}
+
+.hero-copy h1 .headline-line {
+  animation-delay: 120ms;
+}
+
+.hero-side {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 8px;
+  animation: rise-in 900ms 240ms var(--ease-out) both;
+}
+
+.hero-side .description {
   font-size: 0.9375rem;
 }
 
-.site .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  justify-self: start;
-  padding: 6px 12px 6px 10px;
-  border: 1px dashed var(--control);
-  color: var(--ink-muted);
-  font-family: "Geist Mono Variable", ui-monospace, Menlo, monospace;
-  font-size: var(--text-detail);
-  letter-spacing: 0.02em;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
-.site .eyebrow::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--ink);
-}
-
-/* The ThreeUI liquid form fills its own cell, flush with the frame. */
-.shader-frame {
-  align-self: stretch;
-  min-height: 420px;
-  border-left: 1px dashed var(--frame);
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
 }
 
 .hero-actions {
@@ -238,6 +388,7 @@ html:root {
 
 .install {
   display: inline-flex;
+  max-width: 100%;
   align-items: stretch;
   height: 44px;
   border: 1px solid var(--control);
@@ -248,7 +399,10 @@ html:root {
 .install code {
   display: flex;
   align-items: center;
+  min-width: 0;
   padding: 0 14px;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .install button {
@@ -724,6 +878,10 @@ html:root {
   animation: leak-float 3.2s ease-in-out infinite;
 }
 
+.leak-scroll {
+  animation: leak-scroll 18s linear infinite;
+}
+
 .leak-reveal {
   opacity: 0;
   transition: opacity 300ms var(--ease-out);
@@ -743,7 +901,7 @@ html:root {
 
 .leak:hover .leak-scroll,
 .leak:focus-visible .leak-scroll {
-  animation: leak-scroll 6s linear infinite;
+  animation-duration: 5s;
 }
 
 .leak:hover .leak-try,
@@ -849,18 +1007,22 @@ html:root {
 
 @media (max-width: 720px) {
   .hero {
-    grid-template-columns: 1fr;
-    padding: 0;
+    padding: 16px var(--gutter) 48px;
   }
 
   .hero-copy {
-    padding: 48px var(--gutter) 36px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 36px;
   }
 
-  .shader-frame {
-    min-height: 320px;
-    border-left: 0;
-    border-top: 1px dashed var(--frame);
+  .site .stage-trace,
+  .stage-caption span:last-child {
+    display: none;
+  }
+
+  .site .stage-chip {
+    left: 28px;
   }
 
   .showcase {
@@ -945,13 +1107,19 @@ html:root {
     display: none;
   }
 
-  .code-panel pre {
+  .code-panel pre,
+  .hero-stage,
+  .hero-copy h1 span,
+  .hero-side,
+  .stage-dot,
+  .site .stage-readout {
     animation: none;
   }
 
   .leak-move,
   .leak-try,
   .leak-lift,
+  .leak-scroll,
   .leak:hover .leak-scroll,
   .leak:hover .leak-try,
   .leak:focus-visible .leak-scroll,
