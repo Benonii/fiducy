@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
-import { AppSettingsFields } from '../../../components/AppSettingsFields';
-import { DangerZone } from '../../../components/DangerZone';
-import { QuickStart } from '../../../components/QuickStart';
-import { UsagePanel } from '../../../components/UsagePanel';
-import { readAppSettingsForm, requestControlPlane } from '../../../lib/client';
+import { AppSettingsFields } from '@/components/AppSettingsFields';
+import { DangerZone } from '@/components/DangerZone';
+import { QuickStart } from '@/components/QuickStart';
+import { UsagePanel } from '@/components/UsagePanel';
+import { readAppSettingsForm, requestControlPlane } from '@/lib/client';
 
+import type { AppView, UsageSummary } from '@/lib/types';
 import type { PageProps } from '@farm.js/core';
 import type { FormEvent } from 'react';
-import type { AppView, UsageSummary } from '../../../lib/types';
 
 export default function AppPage({ params = {} }: PageProps) {
   const appID = String(params.appID ?? '');
