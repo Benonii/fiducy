@@ -22,7 +22,7 @@ export async function requestControlPlane<Data>(
   const response = await fetch(path, {
     ...init,
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json', ...init.headers }
+    headers: init.body ? { 'content-type': 'application/json', ...init.headers } : init.headers
   });
   const body = (await response.json()) as Record<string, unknown>;
   if (!response.ok) throw new ControlPlaneError(response.status, readErrorMessage(body));
