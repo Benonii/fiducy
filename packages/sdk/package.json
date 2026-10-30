@@ -17,7 +17,7 @@
   },
   "files": ["dist", "src"],
   "scripts": {
-    "build": "bun build src/index.ts src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime"
+    "build": "bun build src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime && bun build src/index.ts --outdir dist --target node"
   },
   "dependencies": {
     "@fiducy/core": "workspace:*",
