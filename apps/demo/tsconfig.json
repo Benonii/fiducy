@@ -8,7 +8,10 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "types": ["bun", "vite/client"],
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src", "tests", "farm.config.ts"]
 }

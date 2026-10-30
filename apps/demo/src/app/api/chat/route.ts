@@ -7,7 +7,7 @@ import { fiducyServer, readDemoUser } from '../../../lib/fiducy';
 import { respondWith } from '../../../lib/responses';
 import { chatRequestSchema } from '../../../lib/validators';
 
-import type { ChatRequestBody } from '../../../lib/types';
+import type { ChatRequestBody } from '@/lib/types';
 
 export async function POST(request: Request) {
   const config = readServerDemoConfig();

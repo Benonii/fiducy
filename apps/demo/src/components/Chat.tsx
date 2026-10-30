@@ -8,7 +8,7 @@ import {
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { useMemo } from 'react';
 
-import { CHAT_API_PATH } from '../lib/constants';
+import { CHAT_API_PATH } from '@/lib/constants';
 
 interface ChatProps {
   onForgetKey: () => void;
