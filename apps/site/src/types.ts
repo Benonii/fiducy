@@ -7,7 +7,7 @@ export type Point = readonly [number, number, number];
 export interface BoxProps {
   at: Point;
   size: Point;
-  className?: string;
+  tone?: 'line' | 'solid';
   children?: ReactNode;
 }
 
@@ -78,4 +78,12 @@ export interface SceneLabelElements {
   handleHalf: HTMLElement;
   storedHalf: HTMLElement;
   request: HTMLElement;
+}
+
+export interface PlanCardProps {
+  title: string;
+  price: string;
+  description: string;
+  linkLabel: string;
+  linkURL: string;
 }

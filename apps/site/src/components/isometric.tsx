@@ -1,3 +1,5 @@
+import { ISO_FACES, ISO_TAG } from '@/lib/isoStyles';
+
 import type { BoxProps, LineProps, PlateProps } from '@/types';
 import type { Point, TagProps } from '@/types';
 
@@ -26,14 +28,16 @@ function points(corners: Point[]): string {
 export function Box({
   at: [x, y, z],
   size: [width, depth, height],
-  className,
+  tone = 'line',
   children
 }: BoxProps) {
   const top = z + height;
+  const faces = ISO_FACES[tone];
   return (
-    <g className={className}>
+    <g>
       <polygon
-        className="iso-side-left"
+        className={faces.left}
+        vectorEffect="non-scaling-stroke"
         points={points([
           [x, y + depth, z],
           [x + width, y + depth, z],
@@ -42,7 +46,8 @@ export function Box({
         ])}
       />
       <polygon
-        className="iso-side-right"
+        className={faces.right}
+        vectorEffect="non-scaling-stroke"
         points={points([
           [x + width, y, z],
           [x + width, y + depth, z],
@@ -51,7 +56,8 @@ export function Box({
         ])}
       />
       <polygon
-        className="iso-top"
+        className={faces.top}
+        vectorEffect="non-scaling-stroke"
         points={points([
           [x, y, top],
           [x + width, y, top],
@@ -68,6 +74,7 @@ export function Plate({ at: [x, y, z], size: [width, depth], className }: PlateP
   return (
     <polygon
       className={className}
+      vectorEffect="non-scaling-stroke"
       points={points([
         [x, y, z],
         [x + width, y, z],
@@ -81,13 +88,15 @@ export function Plate({ at: [x, y, z], size: [width, depth], className }: PlateP
 export function Line({ from, to, className }: LineProps) {
   const [x1, y1] = project(from);
   const [x2, y2] = project(to);
-  return <line className={className} x1={x1} y1={y1} x2={x2} y2={y2} />;
+  return (
+    <line className={className} vectorEffect="non-scaling-stroke" x1={x1} y1={y1} x2={x2} y2={y2} />
+  );
 }
 
 export function Tag({ at, children, className }: TagProps) {
   const [x, y] = project(at);
   return (
-    <text className={className ?? 'iso-tag'} x={x} y={y}>
+    <text className={`${ISO_TAG} ${className ?? ''}`} x={x} y={y}>
       {children}
     </text>
   );

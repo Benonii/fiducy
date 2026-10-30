@@ -1,15 +1,17 @@
 import { EnclaveCanvas } from '@/components/EnclaveCanvas';
+import { Badge } from '@/components/ui/badge';
 
 export function HeroStage() {
   return (
-    <div className="hero-stage" aria-hidden="true">
-      <div className="enclave-frame">
-        <EnclaveCanvas />
-      </div>
-      <p className="stage-chip">
-        <span className="stage-dot" />
+    <div className="relative h-[clamp(340px,40vw,500px)] animate-fade-in" aria-hidden="true">
+      <EnclaveCanvas />
+      <Badge
+        variant="outline"
+        className="pointer-events-none absolute top-0 right-0 gap-2 font-mono text-[0.6875rem] uppercase"
+      >
+        <span className="size-1.5 animate-blink bg-ink" />
         Nitro enclave · attested
-      </p>
+      </Badge>
     </div>
   );
 }

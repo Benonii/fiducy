@@ -20,7 +20,7 @@ toggle.addEventListener('click', () => {
 const notifyParent = (message) => window.parent.postMessage(message, settings.parentOrigin);
 const showStatus = (text, isError) => {
   status.textContent = text;
-  status.className = isError ? 'status error' : 'status';
+  status.dataset.state = isError ? 'error' : 'idle';
 };
 const submitKey = async (apiKey) => {
   const response = await fetch('/keys', {

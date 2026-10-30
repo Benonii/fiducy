@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { INSTALL_COMMAND } from '@/lib/constants';
 
 const COPIED_RESET_MILLISECONDS = 1600;
@@ -16,11 +17,14 @@ export function InstallCommand() {
   };
 
   return (
-    <div className="install">
-      <code>{INSTALL_COMMAND}</code>
-      <button type="button" onClick={copy} aria-live="polite">
+    <div className="flex h-10 max-w-full min-w-0 items-center gap-1 rounded-lg border border-input bg-white pr-1 pl-3 shadow-xs/5 sm:h-9">
+      <span className="font-mono text-ink-quiet select-none">$</span>
+      <code className="min-w-0 overflow-x-auto font-mono text-[0.8125rem] whitespace-nowrap text-ink-body">
+        {INSTALL_COMMAND}
+      </code>
+      <Button variant="ghost" size="xs" onClick={copy} aria-live="polite">
         {isCopied ? 'Copied' : 'Copy'}
-      </button>
+      </Button>
     </div>
   );
 }

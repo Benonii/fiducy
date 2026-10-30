@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react';
 
 import { startEnclaveRenderer } from '@/lib/enclaveRenderer';
 
+const LABEL_CLASS =
+  'pointer-events-none absolute top-0 left-0 rounded-sm bg-white/85 px-1.5 py-0.5 font-mono text-[0.625rem] whitespace-nowrap transition-opacity duration-300';
+
 export function EnclaveCanvas() {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,15 +25,15 @@ export function EnclaveCanvas() {
   }, []);
 
   return (
-    <div ref={hostRef} className="enclave-canvas">
-      <canvas ref={canvasRef} />
-      <span ref={handleLabelRef} className="enclave-label">
+    <div ref={hostRef} className="absolute inset-0 cursor-grab active:cursor-grabbing">
+      <canvas ref={canvasRef} className="block size-full touch-pan-y" />
+      <span ref={handleLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 -translate-y-full`}>
         half in your handle
       </span>
-      <span ref={storedLabelRef} className="enclave-label enclave-label-quiet">
+      <span ref={storedLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 text-ink-muted`}>
         half sealed here
       </span>
-      <span ref={requestLabelRef} className="enclave-label">
+      <span ref={requestLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 -translate-y-full`}>
         provider call
       </span>
     </div>

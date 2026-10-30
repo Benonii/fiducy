@@ -97,7 +97,7 @@ export function startEnclaveRenderer(
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
   const camera = new PerspectiveCamera(28, 1, 0.1, 100);
-  camera.position.set(0, 0, 15);
+  camera.position.set(0, 0, 16);
   const parts = createEnclaveParts();
   const pointer = createPointerState();
   const labels = pinLabels(parts, labelElements);

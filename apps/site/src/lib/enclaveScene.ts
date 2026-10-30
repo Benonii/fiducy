@@ -7,7 +7,7 @@ import { createStoredHalfGeometry } from '@/lib/enclaveGeometry';
 import type { EnclaveParts, KeyHalves } from '@/types';
 
 const VAULT_SIZE = 3.0;
-const TRACK_LENGTH = 9;
+const TRACK_LENGTH = 6.6;
 const TRACK_END = TRACK_LENGTH / 2;
 const CYCLE_SECONDS = 6;
 const JOINED_X = 0.17;
