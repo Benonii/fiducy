@@ -62,6 +62,7 @@ export async function startDemoStack() {
   const demoURL = `http://localhost:${DEMO_PORT}`;
   buildPackage('sdk');
   buildPackage('farm');
+  buildPackage('assistant-ui');
   // Each run gets its own key records, so earlier runs never leak a connected key.
   const dataDirectory = mkdtempSync(join(tmpdir(), 'fiducy-demo-'));
   const mockProvider = startMockProvider();
@@ -73,7 +74,6 @@ export async function startDemoStack() {
       FIDUCY_GATEWAY_URL: gateway.gatewayURL,
       FIDUCY_APP_ID: DEMO_APP_ID,
       FIDUCY_APP_SECRET: DEMO_APP_SECRET,
-      FIDUCY_DEMO_MODEL: 'gpt-4o-mini',
       FIDUCY_DEMO_DATA_DIR: dataDirectory
     },
     stdout: 'ignore',

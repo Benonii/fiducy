@@ -63,4 +63,4 @@ cd apps/demo
 FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
 ```
 
-`FIDUCY_DEMO_MODEL` picks the OpenAI model. The demo keeps the handle in local storage to stay small; a real app stores it server side.
+The demo is an assistant-ui chat. Pick a model; if you have no key for that provider, the reply opens the key box inside the thread (see `packages/assistant-ui`). Handles are stored server side per demo user.
