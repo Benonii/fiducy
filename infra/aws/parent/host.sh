@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs on the parent EC2 host through SSM. Two steps:
 #   host.sh build  -> install tools, build the apps and the enclave image, print its PCR0
-#   host.sh start  -> (re)start Postgres, the control plane, the demo, the enclave and Caddy
+#   host.sh start  -> (re)start Postgres, the control plane, the demo, the site, the enclave and Caddy
 # Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_PUBLIC_IP
 set -euo pipefail
 
@@ -17,6 +17,7 @@ DASHED_IP="${FIDUCY_PUBLIC_IP//./-}"
 GATEWAY_HOST="gw.${DASHED_IP}.sslip.io"
 CONTROL_HOST="app.${DASHED_IP}.sslip.io"
 DEMO_HOST="demo.${DASHED_IP}.sslip.io"
+SITE_HOST="${DASHED_IP}.sslip.io"
 DEMO_APP_ID=app_demo
 
 export PATH="/usr/local/bin:$PATH"
@@ -96,9 +97,10 @@ build_release() {
   cd "$RELEASE_DIR"
   bun install --frozen-lockfile >/dev/null
 
-  log "Building the control plane and the demo"
+  log "Building the control plane, the demo and the site"
   (cd apps/control-plane && bunx farm build >/dev/null)
   (cd apps/demo && bun run build >/dev/null)
+  (cd apps/site && VITE_FIDUCY_DEMO_URL="https://${DEMO_HOST}" bunx farm build >/dev/null)
 
   log "Bundling the gateway"
   bun build apps/gateway/src/server.ts --target=bun --outfile=enclave/gateway.js >/dev/null
@@ -171,6 +173,11 @@ FIDUCY_APP_ID=${DEMO_APP_ID}
 FIDUCY_APP_SECRET=${DEMO_APP_SECRET}
 FIDUCY_GATEWAY_URL=https://${GATEWAY_HOST}
 EOF
+  cat > /etc/fiducy/site.env <<EOF
+PORT=3002
+HOST=127.0.0.1
+NODE_ENV=production
+EOF
   umask 022
 
   cat > /etc/systemd/system/fiducy-control-plane.service <<EOF
@@ -192,6 +199,18 @@ After=network-online.target
 [Service]
 EnvironmentFile=/etc/fiducy/demo.env
 WorkingDirectory=${RELEASE_DIR}/apps/demo
+ExecStart=${node_bin} .farm/.output/server/index.mjs
+Restart=always
+[Install]
+WantedBy=multi-user.target
+EOF
+  cat > /etc/systemd/system/fiducy-site.service <<EOF
+[Unit]
+Description=Fiducy landing page and docs
+After=network-online.target
+[Service]
+EnvironmentFile=/etc/fiducy/site.env
+WorkingDirectory=${RELEASE_DIR}/apps/site
 ExecStart=${node_bin} .farm/.output/server/index.mjs
 Restart=always
 [Install]
@@ -224,6 +243,9 @@ ${DEMO_HOST} {
   reverse_proxy 127.0.0.1:3001 {
     flush_interval -1
   }
+}
+${SITE_HOST} {
+  reverse_proxy 127.0.0.1:3002
 }
 EOF
   cat > /etc/systemd/system/fiducy-caddy.service <<EOF
@@ -271,8 +293,8 @@ start_services() {
   (cd "$RELEASE_DIR/apps/control-plane" && set -a && source /etc/fiducy/control-plane.env && set +a &&
     bunx farm auth migrate >/dev/null)
 
-  systemctl enable fiducy-control-plane fiducy-demo fiducy-enclave fiducy-caddy >/dev/null
-  systemctl restart fiducy-control-plane fiducy-demo
+  systemctl enable fiducy-control-plane fiducy-demo fiducy-site fiducy-enclave fiducy-caddy >/dev/null
+  systemctl restart fiducy-control-plane fiducy-demo fiducy-site
   wait_for http://127.0.0.1:3000/api/config "Control plane"
   seed_demo_app
   systemctl restart fiducy-caddy
@@ -281,6 +303,7 @@ start_services() {
   log "Gateway:  https://${GATEWAY_HOST}"
   log "Console:  https://${CONTROL_HOST}"
   log "Demo:     https://${DEMO_HOST}"
+  log "Site:     https://${SITE_HOST}"
 }
 
 install_tools

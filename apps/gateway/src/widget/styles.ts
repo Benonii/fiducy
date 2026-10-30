@@ -1,17 +1,34 @@
+import { WIDGET_FONT_PATH } from './font';
+
+// Same system as the Fiducy site: white ground, black for what you act on, grays for the rest,
+// square corners and a firm black border on the controls.
 export const WIDGET_STYLES = `
-:root { color-scheme: light dark; --ink: #111111; --muted: #4a4a4a; --line: #d4d4d2; --accent: #111111; --surface: #ffffff; --danger: #a1121b; }
-@media (prefers-color-scheme: dark) { :root { --ink: #f2f2f2; --muted: #b4b4b4; --line: #333333; --accent: #f2f2f2; --surface: #0d0d0d; --danger: #ff8a8f; } }
+@font-face { font-family: 'Archivo'; src: url('${WIDGET_FONT_PATH}') format('woff2'); font-weight: 100 900; font-display: swap; }
+:root { color-scheme: light; --ink: #000000; --body: #333333; --muted: #5e5e5e; --line: #e2e2e2; --surface: #ffffff; --wash: #f4f4f4; --danger: #a1121b; }
 * { box-sizing: border-box; }
-body { margin: 0; padding: 16px; font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink); background: var(--surface); }
+body { margin: 0; padding: 16px; font: 14px/1.55 'Archivo', system-ui, sans-serif; color: var(--ink); background: var(--surface); }
+::selection { background: var(--ink); color: var(--surface); }
 form, .saved { display: grid; gap: 10px; }
-label { font-weight: 600; }
-.row { display: flex; gap: 8px; }
-input { flex: 1; min-width: 0; font: 13px ui-monospace, Menlo, monospace; font-variant-ligatures: none; padding: 9px 10px; border: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); }
-input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-button { font: inherit; font-weight: 600; padding: 9px 14px; border: 0; border-radius: 0; background: var(--accent); color: var(--surface); cursor: pointer; }
+.heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+label, .saved .status { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.badge { font-size: 12px; color: var(--muted); }
+.row { display: flex; border: 1px solid var(--ink); }
+.row:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
+.field { flex: 1; min-width: 0; display: flex; }
+input { flex: 1; min-width: 0; padding: 10px 12px; border: 0; border-radius: 0; background: transparent; color: var(--ink); font: 13px ui-monospace, 'SFMono-Regular', Menlo, monospace; font-variant-ligatures: none; outline: none; }
+input::placeholder { color: var(--muted); }
+button { font: inherit; font-weight: 600; padding: 0 16px; border: 0; border-radius: 0; background: var(--ink); color: var(--surface); cursor: pointer; transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1), color 150ms cubic-bezier(0.16, 1, 0.3, 1); }
+button:hover { background: #262626; }
+button.ghost { background: transparent; color: var(--muted); font-weight: 500; font-size: 12px; padding: 0 12px; }
+button.ghost:hover { color: var(--ink); background: var(--wash); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
 button:disabled { opacity: 0.6; cursor: wait; }
-.note { margin: 0; font-size: 12.5px; color: var(--muted); }
-.status { margin: 0; font-size: 13px; min-height: 1.5em; }
+.note { margin: 0; font-size: 12px; font-weight: 300; color: var(--muted); }
+.status { margin: 0; min-height: 1.55em; font-size: 13px; }
 .status.error { color: var(--danger); }
+.saved { animation: settle 300ms cubic-bezier(0.16, 1, 0.3, 1); }
+.footer { margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
 [hidden] { display: none !important; }
+@keyframes settle { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .saved { animation: none; } }
 `;

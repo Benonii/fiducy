@@ -30,7 +30,7 @@
   },
   "overrides": [
     {
-      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts"],
+      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts", "apps/*/docs.config.ts"],
       "linter": {
         "rules": {
           "style": {

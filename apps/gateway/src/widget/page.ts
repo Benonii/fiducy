@@ -23,18 +23,28 @@ export function renderWidgetPage({ appID, appName, parentOrigin, nonce }: Widget
 </head>
 <body>
 <form id="key-form" autocomplete="off">
-  <label for="api-key">Your API key</label>
+  <div class="heading">
+    <label for="api-key">Your API key</label>
+    <span class="badge">Sealed in an enclave</span>
+  </div>
   <div class="row">
-    <input id="api-key" name="api-key" type="password" spellcheck="false" autocapitalize="off" placeholder="sk-..." required>
+    <div class="field">
+      <input id="api-key" name="api-key" type="password" spellcheck="false" autocapitalize="off" placeholder="sk-..." required>
+      <button id="toggle-button" class="ghost" type="button" aria-controls="api-key" aria-pressed="false">Show</button>
+    </div>
     <button id="save-button" type="submit">Save key</button>
   </div>
-  <p class="note">${escapeHTML(appName)} never sees your key. It is encrypted and only used to call your AI provider.</p>
+  <p class="note">${escapeHTML(appName)} never sees your key. It is sealed and only opened to call your AI provider.</p>
   <p id="status" class="status" role="status"></p>
 </form>
 <div id="saved" class="saved" hidden>
-  <p class="status">Key saved and encrypted.</p>
+  <div class="heading">
+    <p class="status">Key saved and encrypted.</p>
+    <span id="key-hint" class="badge"></span>
+  </div>
   <p class="note">${escapeHTML(appName)} now holds a handle, not your key. You can revoke it at any time.</p>
 </div>
+<p class="footer">Secured by Fiducy</p>
 <script nonce="${nonce}">${buildWidgetScript(appID, parentOrigin)}</script>
 </body>
 </html>`;
@@ -45,6 +55,7 @@ export function buildWidgetSecurityHeaders(nonce: string, parentOrigin: string):
     "default-src 'none'",
     `script-src 'nonce-${nonce}'`,
     `style-src 'nonce-${nonce}'`,
+    "font-src 'self'",
     "connect-src 'self'",
     `frame-ancestors ${parentOrigin}`,
     "base-uri 'none'",

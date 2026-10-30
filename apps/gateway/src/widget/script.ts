@@ -9,6 +9,14 @@ const input = document.getElementById('api-key');
 const button = document.getElementById('save-button');
 const status = document.getElementById('status');
 const saved = document.getElementById('saved');
+const toggle = document.getElementById('toggle-button');
+const keyHint = document.getElementById('key-hint');
+toggle.addEventListener('click', () => {
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  toggle.textContent = isHidden ? 'Hide' : 'Show';
+  toggle.setAttribute('aria-pressed', String(isHidden));
+});
 const notifyParent = (message) => window.parent.postMessage(message, settings.parentOrigin);
 const showStatus = (text, isError) => {
   status.textContent = text;
@@ -32,6 +40,7 @@ form.addEventListener('submit', async (event) => {
   showStatus('Encrypting and saving...', false);
   try {
     const { handle, record } = await submitKey(apiKey);
+    keyHint.textContent = 'ends in ' + apiKey.slice(-4);
     form.hidden = true;
     saved.hidden = false;
     notifyParent({ type: settings.messageTypes.handle, handle, record });
@@ -41,6 +50,9 @@ form.addEventListener('submit', async (event) => {
     notifyParent({ type: settings.messageTypes.error, message });
   } finally {
     input.value = '';
+    input.type = 'password';
+    toggle.textContent = 'Show';
+    toggle.setAttribute('aria-pressed', 'false');
     button.disabled = false;
   }
 });

@@ -8,3 +8,4 @@ farm.d.ts
 enclave/gateway.js
 enclave/enclaver.yaml
 .prototype/
+apps/site/.farm/

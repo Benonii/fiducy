@@ -1,0 +1,72 @@
+---
+title: Self-hosting
+order: 9
+description: Run the gateway enclave, KMS key and dashboard in your own AWS account.
+---
+
+# Self-hosting
+
+Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about $50 a month for `c6g.large`) and a KMS key ($1 a month).
+
+## What gets created
+
+`infra/aws/stack.yaml` is one CloudFormation stack:
+
+- an S3 bucket for releases and logs
+- a KMS key whose policy only allows `kms:Decrypt` from the enclave image you built
+- a `c6g.large` instance with Nitro enclaves on, an Elastic IP, and ports 80 and 443 open
+- an IAM role limited to the bucket and the key
+
+The host runs Postgres, the dashboard and Caddy for TLS. The gateway runs in the enclave.
+
+## Deploy with GitHub Actions
+
+1. Create an IAM user with admin rights for the first deploy.
+2. Add repository secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optionally `AWS_REGION` (default `us-east-1`).
+3. Run the **AWS deploy** workflow.
+
+The workflow builds the enclave on the host, reads its `PCR0`, locks the KMS key to it, starts everything, and checks the endpoints. The run summary lists your URLs:
+
+```
+Gateway (in the enclave): https://gw.<your-ip>.sslip.io
+Dashboard:                https://app.<your-ip>.sslip.io
+Demo chat:                https://demo.<your-ip>.sslip.io
+Site and docs:            https://<your-ip>.sslip.io
+```
+
+## Deploy from your machine
+
+```bash
+export AWS_REGION=us-east-1
+bash infra/aws/deploy.sh
+```
+
+Needs the AWS CLI, `jq` and admin credentials.
+
+## Tear down
+
+Run the **AWS teardown** workflow, or `bash infra/aws/teardown.sh`. The KMS key enters a 7 day deletion window; every key it wrapped becomes unrecoverable after that.
+
+## Run locally
+
+No AWS needed. A local master key stands in for KMS:
+
+```bash
+bun install
+bun run prototype --mock
+```
+
+This starts the dashboard on `:3000`, the demo chat on `:3001` and the gateway on `:8787`. `--mock` uses a fake OpenAI that logs the last four characters of the key it received, so you can see decryption happen.
+
+## Gateway environment
+
+| Variable | Purpose |
+| --- | --- |
+| `FIDUCY_KMS_KEY_ID` | KMS key ARN. When unset, `FIDUCY_MASTER_KEY` is used instead (local only) |
+| `FIDUCY_MASTER_KEY` | 32 random bytes, base64url. Local development only |
+| `AWS_KMS_ENDPOINT` | KMS proxy inside the enclave. Default `http://127.0.0.1:9999` |
+| `FIDUCY_CONTROL_PLANE_URL` | Dashboard URL for apps, records and usage |
+| `FIDUCY_GATEWAY_TOKEN_CIPHERTEXT` | Control plane token, KMS-encrypted |
+| `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation` |
+| `FIDUCY_APPS_JSON` | Static app list when there is no control plane |
+| `PORT` | Default `8787` |
