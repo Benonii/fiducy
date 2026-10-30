@@ -8,3 +8,11 @@ export const GATEWAY_APPS_PATH = '/api/gateway/apps';
 export const GATEWAY_USAGE_PATH = '/api/gateway/usage';
 export const MINIMUM_REFRESH_GAP_MILLISECONDS = 1000;
 export const MAXIMUM_USAGE_BATCH_SIZE = 1000;
+export const GATEWAY_KEYS_PATH = '/api/gateway/keys';
+export const ATTESTATION_PATH = '/v1/attestation';
+export const MAXIMUM_NONCE_LENGTH = 512;
+export const GATEWAY_TOKEN_PURPOSE = 'gateway-token';
+export const ENCLAVE_PLACEHOLDER_CREDENTIALS = {
+  accessKeyId: 'enclave-placeholder',
+  secretAccessKey: 'enclave-placeholder'
+};

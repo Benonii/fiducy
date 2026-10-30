@@ -1,3 +1,4 @@
+import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
 
@@ -39,12 +40,15 @@ export interface UsageLedger {
   countRequestsThisMonth: (keyID: string) => Promise<number>;
 }
 
+export type AttestationSource = (nonce: Uint8Array | null) => Promise<Uint8Array | null>;
+
 export interface GatewayDependencies {
   keyWrapper: KeyWrapper;
   keyStore: KeyStore;
   appDirectory: AppDirectory;
   usageLedger: UsageLedger;
   providerRegistry: ProviderRegistry;
+  attest?: AttestationSource;
 }
 
 export interface StoreKeyBody {
@@ -93,4 +97,18 @@ export interface RemoteAppConfig extends RegisteredApp {
 export interface FlushableUsageLedger extends UsageLedger {
   flush: () => Promise<number>;
   stop: () => Promise<void>;
+}
+
+export interface KmsOutput {
+  CiphertextBlob?: Uint8Array;
+  Plaintext?: Uint8Array;
+}
+
+export interface KmsSender {
+  send: (command: EncryptCommand | DecryptCommand) => Promise<KmsOutput>;
+}
+
+export interface KmsKeyWrapperOptions {
+  client: KmsSender;
+  keyID: string;
 }
