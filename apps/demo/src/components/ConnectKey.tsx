@@ -1,7 +1,7 @@
 import { KeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
-import type { PublicDemoConfig } from '../lib/types';
+import type { PublicDemoConfig } from '@/lib/types';
 
 interface ConnectKeyProps {
   config: PublicDemoConfig;
