@@ -3,6 +3,8 @@ name: fiducy-gateway
 target: fiducy-enclave:latest
 sources:
   app: fiducy-gateway-app:latest
+  odyn: public.ecr.aws/s2t1d4c6/enclaver-io/odyn@sha256:76ea70290e9b42e02f21c9fbad205a23d4a77e840f41e8541708e7a1c262b8ba
+  sleeve: public.ecr.aws/s2t1d4c6/enclaver-io/enclaver-wrapper-base@sha256:50d210beeca6d569247e5802a42ca641de4877648d925c8ec6fe77a8a05e08af
 defaults:
   cpu_count: ${ENCLAVE_CPU_COUNT}
   memory_mb: ${ENCLAVE_MEMORY_MB}
@@ -12,6 +14,7 @@ egress:
   allow:
     - 169.254.169.254
     - kms.${AWS_REGION}.amazonaws.com
+    - dynamodb.${AWS_REGION}.amazonaws.com
     - ${CONTROL_PLANE_HOST}
     - api.openai.com
     - api.anthropic.com

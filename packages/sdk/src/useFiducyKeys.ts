@@ -15,15 +15,10 @@ async function callApp<T>(url: string, init?: RequestInit): Promise<T> {
   return body.data;
 }
 
-/** The TanStack Query key for the signed-in user's keys, to invalidate after your own changes. */
 export function fiducyKeysQueryKey(basePath = '/api/fiducy') {
   return ['fiducy', basePath, 'keys'] as const;
 }
 
-/**
- * Lists and revokes the signed-in user's keys through the app's Fiducy handler.
- * Built on TanStack Query, so it needs a QueryClientProvider above it.
- */
 export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
   const queryClient = useQueryClient();
   const queryKey = fiducyKeysQueryKey(basePath);
@@ -50,7 +45,6 @@ export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
   };
 }
 
-/** Posts a newly connected key to the app's Fiducy handler and refreshes useFiducyKeys. */
 export function useSaveConnectedKey(basePath = '/api/fiducy') {
   const queryClient = useQueryClient();
   return useMutation({

@@ -32,7 +32,6 @@ async function connectKey(page: Page) {
   await page.getByText('Your key is connected').waitFor();
 }
 
-// The demo keeps sealed records on its own disk through the Farm storage mount.
 function readStoredRecords(): string {
   const directory = join(stack.dataDirectory, 'fiducy');
   return readdirSync(directory, { recursive: true, withFileTypes: true })
@@ -85,6 +84,15 @@ describe('demo chat with a bring-your-own key', () => {
     },
     TEST_TIMEOUT_MILLISECONDS
   );
+
+  it('gives a new browser an http-only demo user cookie once', async () => {
+    const first = await fetch(`${stack.demoURL}/api/config`);
+    expect(first.headers.get('set-cookie')).toMatch(/^fiducy_demo_user=[0-9a-f-]{36};.*HttpOnly/);
+    const returning = await fetch(`${stack.demoURL}/api/config`, {
+      headers: { cookie: 'fiducy_demo_user=returning-user-01' }
+    });
+    expect(returning.headers.get('set-cookie')).toBeNull();
+  });
 
   it('refuses chat requests from a user with no connected key', async () => {
     const response = await fetch(`${stack.demoURL}/api/chat`, {

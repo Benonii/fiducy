@@ -1,7 +1,7 @@
 import { fail, succeed } from './result';
 
 import { SYSTEM_OWNER_ID } from './constants';
-import { APP_NOT_FOUND } from './failures';
+import { APP_NOT_FOUND, APP_OWNED_BY_USER } from './failures';
 import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from './secrets';
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
@@ -67,7 +67,7 @@ export async function updateApp(
   store: ControlStore,
   ownerID: string,
   appID: string,
-  changes: Partial<AppSettings>
+  changes: Partial<Omit<AppSettings, 'recordStorage'>>
 ): Promise<ControlResult<AppView>> {
   const owned = await findOwnedApp(store, ownerID, appID);
   if (!owned.ok) return owned;
@@ -105,16 +105,18 @@ export async function listGatewayApps(store: ControlStore): Promise<GatewayApp[]
   return apps.map(toGatewayApp);
 }
 
-// Lets a deployment register its own demo app without a dashboard account. Only the gateway
-// token can call this, and the caller sends a hash, never the app secret itself.
-export async function seedApp(store: ControlStore, seeded: SeededApp): Promise<GatewayApp> {
+export async function seedApp(
+  store: ControlStore,
+  seeded: SeededApp
+): Promise<ControlResult<GatewayApp>> {
   const existing = await store.findApp(seeded.appID);
+  if (existing && existing.ownerID !== SYSTEM_OWNER_ID) return fail(APP_OWNED_BY_USER);
   const app: StoredApp = {
     ...seeded,
-    ownerID: existing?.ownerID ?? SYSTEM_OWNER_ID,
+    ownerID: SYSTEM_OWNER_ID,
     appSecretPreview: '****',
     createdAt: existing?.createdAt ?? new Date().toISOString()
   };
   await store.saveApp(app);
-  return toGatewayApp(app);
+  return succeed(toGatewayApp(app));
 }

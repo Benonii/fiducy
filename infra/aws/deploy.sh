@@ -52,9 +52,9 @@ run_on_host() {
   local step="$1"
   local commands
   commands=$(jq -cn --arg bucket "$BUCKET" --arg key "$KEY_ARN" --arg ip "$PUBLIC_IP" \
-    --arg region "$AWS_REGION" --arg step "$step" '[
+    --arg region "$AWS_REGION" --arg table "$KEYS_TABLE" --arg step "$step" '[
       "set -euo pipefail",
-      "export AWS_REGION=\($region) FIDUCY_BUCKET=\($bucket) FIDUCY_KMS_KEY_ID=\($key) FIDUCY_PUBLIC_IP=\($ip)",
+      "export AWS_REGION=\($region) FIDUCY_BUCKET=\($bucket) FIDUCY_KMS_KEY_ID=\($key) FIDUCY_PUBLIC_IP=\($ip) FIDUCY_KEYS_TABLE=\($table)",
       "rm -rf /opt/fiducy/release && mkdir -p /opt/fiducy/release",
       "aws s3 cp --quiet s3://\($bucket)/release.tar.gz /tmp/fiducy-release.tar.gz",
       "tar -xzf /tmp/fiducy-release.tar.gz -C /opt/fiducy/release",
@@ -63,9 +63,9 @@ run_on_host() {
   if [ "$step" = "start" ]; then
     # Keep the built apps and enclave image from the build step; only rerun the start logic.
     commands=$(jq -cn --arg bucket "$BUCKET" --arg key "$KEY_ARN" --arg ip "$PUBLIC_IP" \
-      --arg region "$AWS_REGION" '[
+      --arg region "$AWS_REGION" --arg table "$KEYS_TABLE" '[
         "set -euo pipefail",
-        "export AWS_REGION=\($region) FIDUCY_BUCKET=\($bucket) FIDUCY_KMS_KEY_ID=\($key) FIDUCY_PUBLIC_IP=\($ip)",
+        "export AWS_REGION=\($region) FIDUCY_BUCKET=\($bucket) FIDUCY_KMS_KEY_ID=\($key) FIDUCY_PUBLIC_IP=\($ip) FIDUCY_KEYS_TABLE=\($table)",
         "bash /opt/fiducy/release/infra/aws/parent/host.sh start"
       ]')
   fi
@@ -113,6 +113,7 @@ INSTANCE_ID=$(stack_output InstanceId)
 PUBLIC_IP=$(stack_output PublicIp)
 KEY_ARN=$(stack_output KeyArn)
 BUCKET=$(stack_output BucketName)
+KEYS_TABLE=$(stack_output KeysTableName)
 log "Host $INSTANCE_ID at $PUBLIC_IP, key $KEY_ARN"
 
 log "Uploading release"

@@ -2,7 +2,7 @@
 # Runs on the parent EC2 host through SSM. Two steps:
 #   host.sh build  -> install tools, build the apps and the enclave image, print its PCR0
 #   host.sh start  -> (re)start Postgres, the control plane, the demo, the enclave and Caddy
-# Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_PUBLIC_IP
+# Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP
 set -euo pipefail
 
 STEP="${1:?usage: host.sh build|start}"
@@ -11,6 +11,8 @@ STATE_DIR=/var/lib/fiducy
 SECRETS_FILE=/etc/fiducy/secrets.env
 BUN_VERSION=1.4.2
 CADDY_VERSION=2.10.2
+ENCLAVER_VERSION=0.6.1
+ENCLAVER_SHA256=aac505a98438e399e042d0be9dc1bc8bff4b02beee3eb149e5301af6a289730f
 ENCLAVE_CPU_COUNT=1
 ENCLAVE_MEMORY_MB=1536
 DASHED_IP="${FIDUCY_PUBLIC_IP//./-}"
@@ -55,14 +57,11 @@ install_tools() {
   fi
 
   if [ ! -x /usr/local/bin/enclaver ]; then
-    log "Installing Enclaver"
-    local asset_url
-    asset_url=$(curl -fsSL https://api.github.com/repos/enclaver-io/enclaver/releases/latest |
-      jq -r '.assets[] | select(.name | test("enclaver-linux-aarch64-.*\\.tar\\.gz$")) | .browser_download_url')
-    curl -fsSL -o /tmp/enclaver.tgz "$asset_url"
+    log "Installing Enclaver $ENCLAVER_VERSION"
+    curl -fsSL -o /tmp/enclaver.tgz "https://github.com/enclaver-io/enclaver/releases/download/v${ENCLAVER_VERSION}/enclaver-linux-aarch64-v${ENCLAVER_VERSION}.tar.gz"
+    echo "${ENCLAVER_SHA256}  /tmp/enclaver.tgz" | sha256sum -c -
     tar -xzf /tmp/enclaver.tgz -C /tmp
-    install -m 755 /tmp/enclaver-linux-aarch64-*/enclaver /usr/local/bin/enclaver
-    log "Enclaver from $asset_url"
+    install -m 755 "/tmp/enclaver-linux-aarch64-v${ENCLAVER_VERSION}/enclaver" /usr/local/bin/enclaver
   fi
 
   cat > /etc/nitro_enclaves/allocator.yaml <<EOF
@@ -116,6 +115,7 @@ build_release() {
   log "Building the enclave image"
   docker build -q -t fiducy-gateway-app:latest \
     --build-arg FIDUCY_KMS_KEY_ID="$FIDUCY_KMS_KEY_ID" \
+    --build-arg FIDUCY_KEYS_TABLE="$FIDUCY_KEYS_TABLE" \
     --build-arg FIDUCY_CONTROL_PLANE_URL="https://${CONTROL_HOST}" \
     --build-arg FIDUCY_GATEWAY_TOKEN_CIPHERTEXT="$token_ciphertext" \
     --build-arg AWS_REGION="$AWS_REGION" \

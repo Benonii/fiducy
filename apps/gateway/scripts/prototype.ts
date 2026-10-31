@@ -1,8 +1,3 @@
-// Runs the whole product on one machine: control plane, gateway and the demo chat.
-//   bun run prototype          real providers (paste a real OpenAI key in the widget)
-//   bun run prototype --mock   a local fake OpenAI, no key or spend needed
-// The gateway uses the same remote stores as the enclave build; only the key wrapper differs
-// (a local master key here, attested KMS on AWS).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -11,8 +6,8 @@ import { createProviderRegistry } from '@fiducy/providers';
 import { startMockProvider } from '@fiducy/testing';
 
 import { hashSecret } from '../src/hashing';
+import { createMemoryKeyStore } from '../src/memoryStores';
 import { createRemoteAppDirectory } from '../src/remoteAppDirectory';
-import { createRemoteKeyStore } from '../src/remoteKeyStore';
 import { createRemoteUsageLedger } from '../src/remoteUsageLedger';
 import { createGateway } from '../src/router';
 
@@ -40,7 +35,6 @@ function randomToken(byteLength: number): string {
   return Buffer.from(crypto.getRandomValues(new Uint8Array(byteLength))).toString('base64url');
 }
 
-// Kept on disk so sealed records stay openable across restarts.
 function loadSecrets(): PrototypeSecrets {
   mkdirSync(STATE_DIR, { recursive: true });
   if (existsSync(SECRETS_PATH)) return JSON.parse(readFileSync(SECRETS_PATH, 'utf8'));
@@ -111,8 +105,6 @@ await seedDemoApp(secrets);
 
 const mockProvider = useMockProvider ? startMockProvider() : null;
 
-// Shows that the gateway really decrypted the key: the fake OpenAI prints the last four
-// characters of the Authorization header it received. Real providers never get this log.
 function logMockRequests(provider: ReturnType<typeof startMockProvider>) {
   let seen = 0;
   setInterval(() => {
@@ -132,7 +124,7 @@ const gateway = Bun.serve({
   idleTimeout: 255,
   fetch: createGateway({
     keyWrapper: createLocalKeyWrapper(new Uint8Array(Buffer.from(secrets.masterKey, 'base64url'))),
-    keyStore: createRemoteKeyStore(connection),
+    keyStore: createMemoryKeyStore(),
     appDirectory: createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 }),
     usageLedger,
     providerRegistry: createProviderRegistry(

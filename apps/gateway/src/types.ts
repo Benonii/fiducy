@@ -1,11 +1,12 @@
+import type { DeleteItemCommand, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import type { DeleteItemCommandOutput, GetItemCommandOutput } from '@aws-sdk/client-dynamodb';
+import type { PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
 
 export type KeyAccessMode = 'gateway' | 'gateway_and_release';
 
-// 'fiducy': we keep sealed records and the app keeps handles. 'app': the app keeps both and
-// sends the record with each call, so we store nothing per key.
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface RegisteredApp {
@@ -116,4 +117,22 @@ export interface KmsSender {
 export interface KmsKeyWrapperOptions {
   client: KmsSender;
   keyID: string;
+}
+
+export interface DynamoSender {
+  send(command: GetItemCommand): Promise<GetItemCommandOutput>;
+  send(command: PutItemCommand): Promise<PutItemCommandOutput>;
+  send(command: DeleteItemCommand): Promise<DeleteItemCommandOutput>;
+}
+
+export interface DynamoKeyStoreOptions {
+  client: DynamoSender;
+  tableName: string;
+}
+
+export interface InstanceRoleCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string;
+  expiration: Date;
 }

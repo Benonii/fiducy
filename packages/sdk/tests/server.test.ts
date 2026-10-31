@@ -9,6 +9,7 @@ import { createFiducy, keyValueStorage, memoryStorage } from '../src/server';
 import type { SealedRecord } from '@fiducy/core';
 import type { AppRegistration } from '../../../apps/gateway/src/types';
 import type { FiducyStorage, KeyValueDriver, StoredUserKey } from '../src/server';
+import type { FetchGateway } from '../src/types';
 
 const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore_sdk',
@@ -29,12 +30,17 @@ beforeAll(async () => {
 
 afterAll(() => harness.stop());
 
-function createApp(app: AppRegistration, storage: FiducyStorage = memoryStorage()) {
+function createApp(
+  app: AppRegistration,
+  storage: FiducyStorage = memoryStorage(),
+  fetchGateway: FetchGateway = fetch
+) {
   return createFiducy({
     gatewayURL: harness.gatewayURL,
     appSecret: app.appSecret,
     storage,
-    getUserID: (request) => request.headers.get('x-user')
+    getUserID: (request) => request.headers.get('x-user'),
+    fetch: fetchGateway
   });
 }
 
@@ -107,6 +113,29 @@ describe('the app-side Fiducy handler', () => {
     expect(response.status).toBe(200);
     expect(await harness.keyStore.findRecord(keyID)).toBeNull();
     expect(await fiducy.providerSettings('openai', { userID: 'user_4' })).toBeNull();
+  });
+
+  it('keeps the key when the gateway fails to revoke it', async () => {
+    const storage = memoryStorage();
+    const { sealed } = await connect(createApp(CHAT_APP, storage), CHAT_APP, 'user_7');
+    const keyID = sealed.handle.slice(3, 25);
+    const failingGateway: FetchGateway = async () =>
+      Response.json({ data: null, message: 'Unavailable' }, { status: 503 });
+    const fiducy = createApp(CHAT_APP, storage, failingGateway);
+    const response = await fiducy.handler(
+      appRequest(`/keys/${keyID}`, 'user_7', { method: 'DELETE', headers: { origin: APP_URL } })
+    );
+    expect(response.status).toBe(502);
+    expect(await harness.keyStore.findRecord(keyID)).not.toBeNull();
+    expect(await fiducy.listKeys('user_7')).toHaveLength(1);
+  });
+
+  it('uses the newest key when a provider has two', async () => {
+    const storage = memoryStorage();
+    const base = { userID: 'user_8', provider: 'openai' as const, handle: 'kh_x' };
+    await storage.saveKey({ ...base, keyID: 'old', createdAt: '2026-01-01T00:00:00.000Z' });
+    await storage.saveKey({ ...base, keyID: 'new', createdAt: '2026-02-01T00:00:00.000Z' });
+    expect((await storage.findKey('user_8', 'openai'))?.keyID).toBe('new');
   });
 
   it('keeps users apart and refuses anonymous and cross-site requests', async () => {
