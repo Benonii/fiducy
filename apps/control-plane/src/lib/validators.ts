@@ -39,16 +39,6 @@ export const usageBatchSchema = z.object({
   events: z.array(usageEventSchema).max(MAXIMUM_USAGE_BATCH_SIZE)
 });
 
-const base64URLSchema = z.string().regex(/^[A-Za-z0-9_-]+$/, 'Use base64url');
-
-export const keyRecordSchema = z.object({
-  keyID: z.string().regex(/^[A-Za-z0-9_-]{22}$/, 'Use a 22 character key ID'),
-  appID: z.string().min(1).max(80),
-  ciphertext: base64URLSchema.max(4096),
-  iv: base64URLSchema.max(64),
-  wrappedShareB: base64URLSchema.max(4096)
-});
-
 export const seededAppSchema = appSettingsSchema.extend({
   appID: z.string().regex(/^app_[A-Za-z0-9_-]{1,64}$/, 'App IDs start with app_'),
   appSecretHash: z.string().regex(/^[a-f0-9]{64}$/, 'Send a SHA-256 hex digest')

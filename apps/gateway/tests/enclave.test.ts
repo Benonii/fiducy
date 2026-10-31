@@ -1,23 +1,22 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 
+import { DeleteItemCommand, type GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import { openSecret, sealSecret } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 
+import { createDynamoKeyStore } from '../src/dynamoKeyStore';
 import { createKmsKeyWrapper, decryptBootSecret } from '../src/kmsKeyWrapper';
 import { createMemoryAppDirectory, createMemoryUsageLedger } from '../src/memoryStores';
 import { createMemoryKeyStore } from '../src/memoryStores';
-import { createRemoteKeyStore } from '../src/remoteKeyStore';
 import { createGateway } from '../src/router';
-import { GATEWAY_TOKEN, startFakeControlPlane } from './fakeControlPlane';
 import { CHAT_APP } from './harness';
 
-import type { KmsOutput, KmsSender } from '../src/types';
+import type { AttributeValue } from '@aws-sdk/client-dynamodb';
+import type { DynamoSender, KmsOutput, KmsSender } from '../src/types';
 
 const KEY_ID = 'arn:aws:kms:us-east-1:111122223333:key/test';
 
-// Stands in for KMS: encrypts by prefixing the context, and refuses to decrypt when the
-// attestation check fails, the way the real key policy refuses a parent-side Decrypt.
 function createFakeKms() {
   let attested = true;
   const sealed = new Map<string, { plaintext: Uint8Array; context: string }>();
@@ -95,27 +94,67 @@ describe('wrapping share B with KMS', () => {
   });
 });
 
-describe('keeping sealed records on the control plane', () => {
-  const controlPlane = startFakeControlPlane();
-  const store = createRemoteKeyStore({
-    controlPlaneURL: controlPlane.controlPlaneURL,
-    gatewayToken: GATEWAY_TOKEN
-  });
-  afterAll(() => controlPlane.stop());
+function createFakeDynamo() {
+  const items = new Map<string, Record<string, AttributeValue>>();
+  const requests: Array<{ tableName?: string; condition?: string }> = [];
+  const keyOf = (key: Record<string, AttributeValue> | undefined) => key?.keyID?.S ?? '';
+  const send = async (command: GetItemCommand | PutItemCommand | DeleteItemCommand) => {
+    requests.push({
+      tableName: command.input.TableName,
+      condition:
+        'ConditionExpression' in command.input ? command.input.ConditionExpression : undefined
+    });
+    if (command instanceof PutItemCommand) {
+      const keyID = keyOf(command.input.Item);
+      if (items.has(keyID)) throw new Error('ConditionalCheckFailedException');
+      items.set(keyID, command.input.Item ?? {});
+      return {};
+    }
+    const keyID = keyOf(command.input.Key);
+    const item = items.get(keyID);
+    if (command instanceof DeleteItemCommand) {
+      items.delete(keyID);
+      return { Attributes: item };
+    }
+    return { Item: item };
+  };
+  return { client: { send } as unknown as DynamoSender, items, requests };
+}
 
-  it('saves, finds and deletes a record', async () => {
-    const record = {
-      keyID: 'AAAAAAAAAAAAAAAAAAAAAA',
-      appID: 'app_one',
-      ciphertext: 'abc',
-      iv: 'def',
-      wrappedShareB: 'ghi'
-    };
+describe('keeping sealed records in DynamoDB', () => {
+  const record = {
+    keyID: 'AAAAAAAAAAAAAAAAAAAAAA',
+    appID: 'app_one',
+    ciphertext: 'abc',
+    iv: 'def',
+    wrappedShareB: 'ghi'
+  };
+
+  it('saves, finds and deletes a record in its table', async () => {
+    const dynamo = createFakeDynamo();
+    const store = createDynamoKeyStore({ client: dynamo.client, tableName: 'fiducy-keys' });
     await store.saveRecord(record);
     expect(await store.findRecord(record.keyID)).toEqual(record);
     expect(await store.deleteRecord(record.keyID)).toBe(true);
     expect(await store.findRecord(record.keyID)).toBeNull();
     expect(await store.deleteRecord(record.keyID)).toBe(false);
+    expect(dynamo.requests.every((request) => request.tableName === 'fiducy-keys')).toBe(true);
+  });
+
+  it('never overwrites an existing record', async () => {
+    const dynamo = createFakeDynamo();
+    const store = createDynamoKeyStore({ client: dynamo.client, tableName: 'fiducy-keys' });
+    await store.saveRecord(record);
+    await expect(store.saveRecord({ ...record, ciphertext: 'replaced' })).rejects.toThrow();
+    expect(await store.findRecord(record.keyID)).toEqual(record);
+    expect(dynamo.requests[0]?.condition).toBe('attribute_not_exists(keyID)');
+  });
+
+  it('treats an item with missing fields as no record', async () => {
+    const dynamo = createFakeDynamo();
+    dynamo.items.set(record.keyID, { keyID: { S: record.keyID } });
+    const store = createDynamoKeyStore({ client: dynamo.client, tableName: 'fiducy-keys' });
+    expect(await store.findRecord(record.keyID)).toBeNull();
   });
 });
 
