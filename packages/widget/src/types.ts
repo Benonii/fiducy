@@ -10,7 +10,6 @@ export interface MountKeyWidgetOptions {
   gatewayURL: string;
   appID: string;
   container: HTMLElement;
-  /** record is set only when the app stores its own sealed records. */
   onHandle: (handle: string, record?: WidgetSealedRecord) => void;
   onError?: (message: string) => void;
 }

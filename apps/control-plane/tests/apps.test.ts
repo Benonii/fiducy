@@ -4,6 +4,7 @@ import { hashSecret as hashSecretInGateway } from '../../gateway/src/hashing';
 import { createApp, deleteApp, listApps, listGatewayApps } from '../src/lib/appService';
 import { rotateAppSecret, seedApp, updateApp } from '../src/lib/appService';
 import { hashSecret } from '../src/lib/secrets';
+import { appSettingsUpdateSchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID, createTestStore } from './fixtures';
 
 describe('creating an app', () => {
@@ -64,6 +65,11 @@ describe('changing an app', () => {
     });
     expect(updated).toMatchObject({ ok: true, value: { monthlyRequestLimitPerKey: 5 } });
     expect((await store.findApp(app.appID))?.appSecretHash).toBe(before?.appSecretHash ?? '');
+  });
+
+  it('keeps where sealed keys live fixed after creation', () => {
+    const parsed = appSettingsUpdateSchema.parse({ name: 'Renamed', recordStorage: 'app' });
+    expect(parsed).toEqual({ name: 'Renamed' });
   });
 
   it('rotates the secret so the old one no longer matches', async () => {

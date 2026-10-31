@@ -66,7 +66,7 @@ export async function updateApp(
   store: ControlStore,
   ownerID: string,
   appID: string,
-  changes: Partial<AppSettings>
+  changes: Partial<Omit<AppSettings, 'recordStorage'>>
 ): Promise<ControlResult<AppView>> {
   const owned = await findOwnedApp(store, ownerID, appID);
   if (!owned.ok) return owned;

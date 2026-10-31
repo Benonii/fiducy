@@ -63,7 +63,6 @@ export async function startDemoStack() {
   buildPackage('sdk');
   buildPackage('farm');
   buildPackage('assistant-ui');
-  // Each run gets its own key records, so earlier runs never leak a connected key.
   const dataDirectory = mkdtempSync(join(tmpdir(), 'fiducy-demo-'));
   const mockProvider = startMockProvider();
   const gateway = await startGateway(demoURL, mockProvider.baseURL);

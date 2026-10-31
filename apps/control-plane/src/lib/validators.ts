@@ -26,7 +26,7 @@ export const appSettingsSchema = z.object({
   recordStorage: z.enum(['fiducy', 'app']).default('fiducy')
 });
 
-export const appSettingsUpdateSchema = appSettingsSchema.partial();
+export const appSettingsUpdateSchema = appSettingsSchema.omit({ recordStorage: true }).partial();
 
 export const usageEventSchema = z.object({
   appID: z.string().min(1),

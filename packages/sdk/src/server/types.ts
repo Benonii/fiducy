@@ -6,7 +6,6 @@ export interface StoredUserKey {
   provider: GatewayProvider;
   keyID: string;
   handle: string;
-  /** Present only when the app stores its own sealed records. */
   record?: SealedRecord;
   createdAt: string;
 }
@@ -17,7 +16,6 @@ export interface UserKeySummary {
   createdAt: string;
 }
 
-/** Where the app keeps handles (and records, in app-owned mode). Like a Better Auth adapter. */
 export interface FiducyStorage {
   saveKey: (key: StoredUserKey) => Promise<void>;
   findKey: (userID: string, provider: GatewayProvider) => Promise<StoredUserKey | null>;
@@ -25,7 +23,6 @@ export interface FiducyStorage {
   deleteKey: (userID: string, keyID: string) => Promise<boolean>;
 }
 
-/** The shape of unstorage and Farm.js storage mounts, so either can back Fiducy. */
 export interface KeyValueDriver {
   getItem: (key: string) => Promise<unknown>;
   setItem: (key: string, value: StoredUserKey) => Promise<void>;
@@ -37,9 +34,7 @@ export interface CreateFiducyOptions {
   gatewayURL: string;
   appSecret: string;
   storage: FiducyStorage;
-  /** Returns the signed-in user for a request, for example from your Better Auth session. */
   getUserID: (request: Request) => Promise<string | null> | string | null;
-  /** Where the handler is mounted. Defaults to /api/fiducy. */
   basePath?: string;
   fetch?: FetchGateway;
 }

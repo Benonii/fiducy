@@ -48,6 +48,8 @@ export function readAppSettingsForm(form: HTMLFormElement): AppSettings {
     monthlyRequestLimitPerKey: Number(formData.get('monthlyRequestLimitPerKey')),
     accessMode:
       formData.get('accessMode') === 'gateway_and_release' ? 'gateway_and_release' : 'gateway',
-    recordStorage: formData.get('recordStorage') === 'app' ? 'app' : 'fiducy'
+    ...(formData.has('recordStorage') && {
+      recordStorage: formData.get('recordStorage') === 'app' ? 'app' : 'fiducy'
+    })
   };
 }
