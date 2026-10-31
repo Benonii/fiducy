@@ -2,7 +2,7 @@ name: AWS prototype
 
 on:
   push:
-    branches: [phase-7-enclave]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:

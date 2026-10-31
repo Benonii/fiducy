@@ -11,8 +11,6 @@ function buildEncryptionContext(appID: string): Record<string, string> {
 }
 
 export function createKmsClient(endpoint: string, region: string): KmsSender {
-  // Inside the enclave, the Enclaver KMS proxy re-signs every call with the parent's role
-  // and attaches the attestation document, so these placeholder credentials never reach AWS.
   const kms = new KMSClient({ endpoint, region, credentials: ENCLAVE_PLACEHOLDER_CREDENTIALS });
   return {
     send: (command) => (command instanceof EncryptCommand ? kms.send(command) : kms.send(command))

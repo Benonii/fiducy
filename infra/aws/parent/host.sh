@@ -11,6 +11,8 @@ STATE_DIR=/var/lib/fiducy
 SECRETS_FILE=/etc/fiducy/secrets.env
 BUN_VERSION=1.4.2
 CADDY_VERSION=2.10.2
+ENCLAVER_VERSION=0.6.1
+ENCLAVER_SHA256=aac505a98438e399e042d0be9dc1bc8bff4b02beee3eb149e5301af6a289730f
 ENCLAVE_CPU_COUNT=1
 ENCLAVE_MEMORY_MB=1536
 DASHED_IP="${FIDUCY_PUBLIC_IP//./-}"
@@ -56,14 +58,11 @@ install_tools() {
   fi
 
   if [ ! -x /usr/local/bin/enclaver ]; then
-    log "Installing Enclaver"
-    local asset_url
-    asset_url=$(curl -fsSL https://api.github.com/repos/enclaver-io/enclaver/releases/latest |
-      jq -r '.assets[] | select(.name | test("enclaver-linux-aarch64-.*\\.tar\\.gz$")) | .browser_download_url')
-    curl -fsSL -o /tmp/enclaver.tgz "$asset_url"
+    log "Installing Enclaver $ENCLAVER_VERSION"
+    curl -fsSL -o /tmp/enclaver.tgz "https://github.com/enclaver-io/enclaver/releases/download/v${ENCLAVER_VERSION}/enclaver-linux-aarch64-v${ENCLAVER_VERSION}.tar.gz"
+    echo "${ENCLAVER_SHA256}  /tmp/enclaver.tgz" | sha256sum -c -
     tar -xzf /tmp/enclaver.tgz -C /tmp
-    install -m 755 /tmp/enclaver-linux-aarch64-*/enclaver /usr/local/bin/enclaver
-    log "Enclaver from $asset_url"
+    install -m 755 "/tmp/enclaver-linux-aarch64-v${ENCLAVER_VERSION}/enclaver" /usr/local/bin/enclaver
   fi
 
   cat > /etc/nitro_enclaves/allocator.yaml <<EOF
