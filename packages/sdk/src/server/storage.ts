@@ -3,13 +3,18 @@ import type { FiducyStorage, KeyValueDriver, StoredUserKey } from './types';
 
 const KEY_PREFIX = 'fiducy';
 
+function newestFirst(keys: StoredUserKey[]): StoredUserKey[] {
+  return [...keys].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
 function lastSegment(key: string): string {
   return key.split(':').at(-1) ?? key;
 }
 
 export function memoryStorage(): FiducyStorage {
   const keys = new Map<string, StoredUserKey>();
-  const userKeys = (userID: string) => [...keys.values()].filter((key) => key.userID === userID);
+  const userKeys = (userID: string) =>
+    newestFirst([...keys.values()].filter((key) => key.userID === userID));
   return {
     saveKey: async (key) => {
       keys.set(key.keyID, structuredClone(key));
@@ -24,7 +29,6 @@ export function memoryStorage(): FiducyStorage {
   };
 }
 
-/** Backs Fiducy with any unstorage-style driver, such as a Farm.js storage mount. */
 export function keyValueStorage(driver: KeyValueDriver): FiducyStorage {
   const itemKey = (userID: string, keyID: string) => `${KEY_PREFIX}:${userID}:${keyID}`;
 
@@ -33,7 +37,9 @@ export function keyValueStorage(driver: KeyValueDriver): FiducyStorage {
     const items = await Promise.all(
       itemKeys.map((key) => driver.getItem(itemKey(userID, lastSegment(key))))
     );
-    return items.filter((item): item is StoredUserKey => item !== null && item !== undefined);
+    return newestFirst(
+      items.filter((item): item is StoredUserKey => item !== null && item !== undefined)
+    );
   };
 
   return {

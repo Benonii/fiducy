@@ -1,4 +1,4 @@
-import { parseHandle } from '@fiducy/core';
+import { SEALED_RECORD_FIELDS, parseHandle } from '@fiducy/core';
 
 import { KEY_RECORD_HEADER, PROVIDER_BASE_PATHS } from '../constants';
 import { createGatewayClient } from '../gatewayClient';
@@ -9,9 +9,10 @@ import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from '.
 import type { UserKeySummary } from './types';
 
 const DEFAULT_BASE_PATH = '/api/fiducy';
-const RECORD_FIELDS = ['keyID', 'appID', 'ciphertext', 'iv', 'wrappedShareB'] as const;
 
 class FiducyInputError extends Error {}
+
+class FiducyGatewayError extends Error {}
 
 function respondWith(status: number, data: unknown, message: string): Response {
   return Response.json({ data, message }, { status });
@@ -28,14 +29,13 @@ function isProvider(value: unknown): value is GatewayProvider {
 function isSealedRecord(value: unknown): value is SealedRecord {
   if (typeof value !== 'object' || value === null) return false;
   const fields = value as Record<string, unknown>;
-  return RECORD_FIELDS.every((field) => typeof fields[field] === 'string');
+  return SEALED_RECORD_FIELDS.every((field) => typeof fields[field] === 'string');
 }
 
 function encodeRecord(record: SealedRecord): string {
   return Buffer.from(JSON.stringify(record)).toString('base64url');
 }
 
-// A cookie-authenticated POST or DELETE from another site would otherwise act as the user.
 function isCrossSite(request: Request): boolean {
   const origin = request.headers.get('origin');
   if (origin === null) return false;
@@ -62,8 +62,12 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
   const revokeKey = async (userID: string, keyID: string) => {
     const stored = (await storage.listKeys(userID)).find((key) => key.keyID === keyID);
     if (!stored) return false;
-    // In Fiducy-stored mode the record lives at the gateway, so delete it there too.
-    if (!stored.record) await gateway.revokeKey(stored.handle);
+    if (!stored.record) {
+      const revoked = await gateway.revokeKey(stored.handle);
+      if (!revoked.ok && revoked.error.status !== 404) {
+        throw new FiducyGatewayError(`The key could not be revoked: ${revoked.error.message}`);
+      }
+    }
     return storage.deleteKey(userID, keyID);
   };
 
@@ -84,7 +88,9 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
       createdAt: new Date().toISOString()
     };
     await storage.saveKey(stored);
-    if (previous && previous.keyID !== keyID) await revokeKey(userID, previous.keyID);
+    if (previous && previous.keyID !== keyID) {
+      await revokeKey(userID, previous.keyID).catch(() => false);
+    }
     return toSummary(stored);
   };
 
@@ -125,6 +131,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
       return await route(request, userID, pathname.slice(basePath.length));
     } catch (error) {
       if (error instanceof FiducyInputError) return respondWith(400, null, error.message);
+      if (error instanceof FiducyGatewayError) return respondWith(502, null, error.message);
       throw error;
     }
   };
