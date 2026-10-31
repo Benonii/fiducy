@@ -18,8 +18,7 @@ export function ConnectKey({ config }: ConnectKeyProps) {
       <CardHeader>
         <CardTitle render={(props) => <h2 {...props} />}>Connect your OpenAI key</CardTitle>
         <CardDescription>
-          The box below is served by the Fiducy gateway. This page never sees your key. The app
-          server stores a handle for your account.
+          The box below is served by the Fiducy gateway. This page never sees your key.
         </CardDescription>
       </CardHeader>
       <CardPanel className="grid gap-4">
