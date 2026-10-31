@@ -10,7 +10,6 @@ export const GATEWAY_APPS_PATH = '/api/gateway/apps';
 export const GATEWAY_USAGE_PATH = '/api/gateway/usage';
 export const MINIMUM_REFRESH_GAP_MILLISECONDS = 1000;
 export const MAXIMUM_USAGE_BATCH_SIZE = 1000;
-export const GATEWAY_KEYS_PATH = '/api/gateway/keys';
 export const ATTESTATION_PATH = '/v1/attestation';
 export const MAXIMUM_NONCE_LENGTH = 512;
 export const GATEWAY_TOKEN_PURPOSE = 'gateway-token';
@@ -18,3 +17,14 @@ export const ENCLAVE_PLACEHOLDER_CREDENTIALS = {
   accessKeyId: 'enclave-placeholder',
   secretAccessKey: 'enclave-placeholder'
 };
+export const IMDS_URL = 'http://169.254.169.254';
+export const IMDS_TOKEN_PATH = '/latest/api/token';
+export const IMDS_ROLE_PATH = '/latest/meta-data/iam/security-credentials/';
+export const IMDS_TOKEN_TTL_SECONDS = 300;
+export const SEALED_RECORD_FIELDS = [
+  'keyID',
+  'appID',
+  'ciphertext',
+  'iv',
+  'wrappedShareB'
+] as const;

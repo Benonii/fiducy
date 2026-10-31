@@ -12,6 +12,7 @@ egress:
   allow:
     - 169.254.169.254
     - kms.${AWS_REGION}.amazonaws.com
+    - dynamodb.${AWS_REGION}.amazonaws.com
     - ${CONTROL_PLANE_HOST}
     - api.openai.com
     - api.anthropic.com
