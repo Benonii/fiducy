@@ -10,7 +10,9 @@ import type { GatewayDependencies } from '../types';
 
 function isFromForeignOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
-  return origin !== null && origin !== new URL(request.url).origin;
+  if (origin === null) return false;
+  const gatewayHost = request.headers.get('host') ?? new URL(request.url).host;
+  return URL.parse(origin)?.host !== gatewayHost;
 }
 
 export async function storeKey(request: Request, dependencies: GatewayDependencies) {

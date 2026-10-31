@@ -1,10 +1,11 @@
 import { fail, succeed } from './result';
 
-import { APP_NOT_FOUND } from './failures';
+import { SYSTEM_OWNER_ID } from './constants';
+import { APP_NOT_FOUND, APP_OWNED_BY_USER } from './failures';
 import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from './secrets';
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
-import type { CreatedApp, GatewayApp, StoredApp } from './types';
+import type { CreatedApp, GatewayApp, SeededApp, StoredApp } from './types';
 
 export function toAppView({ appSecretHash, ownerID, ...app }: StoredApp): AppView {
   return app;
@@ -102,4 +103,20 @@ export async function deleteApp(
 export async function listGatewayApps(store: ControlStore): Promise<GatewayApp[]> {
   const apps = await store.listAllApps();
   return apps.map(toGatewayApp);
+}
+
+export async function seedApp(
+  store: ControlStore,
+  seeded: SeededApp
+): Promise<ControlResult<GatewayApp>> {
+  const existing = await store.findApp(seeded.appID);
+  if (existing && existing.ownerID !== SYSTEM_OWNER_ID) return fail(APP_OWNED_BY_USER);
+  const app: StoredApp = {
+    ...seeded,
+    ownerID: SYSTEM_OWNER_ID,
+    appSecretPreview: '****',
+    createdAt: existing?.createdAt ?? new Date().toISOString()
+  };
+  await store.saveApp(app);
+  return succeed(toGatewayApp(app));
 }

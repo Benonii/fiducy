@@ -41,6 +41,11 @@ export interface UsageSummary {
   requestsByKey: Record<string, number>;
 }
 
+export interface SeededApp extends AppSettings {
+  appID: string;
+  appSecretHash: string;
+}
+
 export interface KeyValueStore {
   getItem: (key: string) => Promise<unknown>;
   setItem: (key: string, value: StoredApp | UsageSummary | true) => Promise<void>;

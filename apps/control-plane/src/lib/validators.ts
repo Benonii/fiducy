@@ -38,3 +38,8 @@ export const usageEventSchema = z.object({
 export const usageBatchSchema = z.object({
   events: z.array(usageEventSchema).max(MAXIMUM_USAGE_BATCH_SIZE)
 });
+
+export const seededAppSchema = appSettingsSchema.extend({
+  appID: z.string().regex(/^app_[A-Za-z0-9_-]{1,64}$/, 'App IDs start with app_'),
+  appSecretHash: z.string().regex(/^[a-f0-9]{64}$/, 'Send a SHA-256 hex digest')
+});
