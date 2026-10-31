@@ -5,3 +5,10 @@ export const MASTER_KEY_LENGTH = 32;
 export const HANDLE_PREFIX = 'kh_';
 export const HANDLE_PATTERN = /^kh_([A-Za-z0-9_-]{22})\.([A-Za-z0-9_-]{43})$/;
 export const WRAPPER_SALT = 'fiducy-local-wrapper-v1';
+export const SEALED_RECORD_FIELDS = [
+  'keyID',
+  'appID',
+  'ciphertext',
+  'iv',
+  'wrappedShareB'
+] as const;
