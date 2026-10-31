@@ -30,7 +30,7 @@
   },
   "overrides": [
     {
-      "include": ["apps/control-plane/src/app/**", "apps/control-plane/farm.config.ts"],
+      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts"],
       "linter": {
         "rules": {
           "style": {
