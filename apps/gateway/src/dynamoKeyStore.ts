@@ -1,9 +1,9 @@
 import { DeleteItemCommand, DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { SEALED_RECORD_FIELDS } from '@fiducy/core';
 import { FetchHttpHandler } from '@smithy/fetch-http-handler';
 
 import { IMDS_ROLE_PATH, IMDS_TOKEN_PATH, IMDS_TOKEN_TTL_SECONDS, IMDS_URL } from './constants';
-import { SEALED_RECORD_FIELDS } from './constants';
 
 import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import type { SealedRecord } from '@fiducy/core';

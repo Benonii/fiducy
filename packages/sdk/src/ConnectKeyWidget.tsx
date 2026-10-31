@@ -3,10 +3,6 @@ import { useSaveConnectedKey } from './useFiducyKeys';
 
 import type { ConnectKeyWidgetProps } from './types';
 
-/**
- * The key widget plus the round trip to your server: when the user saves a key, the handle
- * (and the sealed record, in app-owned mode) is posted to your Fiducy handler for this user.
- */
 export function ConnectKeyWidget({
   gatewayURL,
   appID,

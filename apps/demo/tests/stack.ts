@@ -62,7 +62,6 @@ export async function startDemoStack() {
   const demoURL = `http://localhost:${DEMO_PORT}`;
   buildPackage('sdk');
   buildPackage('farm');
-  // Each run gets its own key records, so earlier runs never leak a connected key.
   const dataDirectory = mkdtempSync(join(tmpdir(), 'fiducy-demo-'));
   const mockProvider = startMockProvider();
   const gateway = await startGateway(demoURL, mockProvider.baseURL);
