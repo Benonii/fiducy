@@ -8,8 +8,6 @@ import { readJSONBody, validateStoreKeyBody } from '../validators';
 
 import type { GatewayDependencies } from '../types';
 
-// Compares hosts, not full origins: behind a TLS proxy the gateway sees http:// while the
-// widget page, and so the browser's Origin header, is https://.
 function isFromForeignOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
   if (origin === null) return false;
@@ -29,10 +27,11 @@ export async function storeKey(request: Request, dependencies: GatewayDependenci
     ...body.value,
     keyWrapper: dependencies.keyWrapper
   });
+  if (app.recordStorage !== 'app') await dependencies.keyStore.saveRecord(record);
+  await dependencies.keyEvents?.report({ type: 'saved', appID: app.appID, keyID: record.keyID });
   if (app.recordStorage === 'app') {
     return respondWith(201, { handle, record }, 'Key sealed. Store the handle and the record');
   }
-  await dependencies.keyStore.saveRecord(record);
   return respondWith(201, { handle }, 'Key stored. Save the handle, not the key');
 }
 
@@ -50,6 +49,7 @@ export async function revokeKey(
   if (record?.appID !== app.value.appID) return respondWith(404, null, 'No key found with this ID');
 
   await dependencies.keyStore.deleteRecord(keyID);
+  await dependencies.keyEvents?.report({ type: 'revoked', appID: app.value.appID, keyID });
   return respondWith(200, { keyID }, 'Key revoked');
 }
 

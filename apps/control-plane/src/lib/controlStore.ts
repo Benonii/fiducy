@@ -1,9 +1,9 @@
-import { APP_NAMESPACE, KEY_RECORD_NAMESPACE, OWNER_NAMESPACE } from './constants';
+import { APP_NAMESPACE, OWNER_NAMESPACE } from './constants';
 import { DAILY_USAGE_NAMESPACE, GATEWAY_HEARTBEAT_KEY, KEY_ENTRY_NAMESPACE } from './constants';
 import { USAGE_NAMESPACE } from './constants';
 
 import type { ControlStore, KeyValueStore, StoredApp, UsageSummary } from './types';
-import type { DailyUsage, GatewayHeartbeat, StoredKeyEntry, StoredKeyRecord } from './types';
+import type { DailyUsage, GatewayHeartbeat, StoredKeyEntry } from './types';
 
 function createEmptyUsage(month: string): UsageSummary {
   return { month, requestCount: 0, inputTokens: 0, outputTokens: 0, requestsByKey: {} };
@@ -55,19 +55,6 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
     },
     saveUsage: async (appID, summary) => {
       await keyValueStore.setItem(`${USAGE_NAMESPACE}:${appID}:${summary.month}`, summary);
-    },
-    saveKeyRecord: async (record) => {
-      await keyValueStore.setItem(`${KEY_RECORD_NAMESPACE}:${record.keyID}`, record);
-    },
-    findKeyRecord: async (keyID) => {
-      const stored = await keyValueStore.getItem(`${KEY_RECORD_NAMESPACE}:${keyID}`);
-      return (stored as StoredKeyRecord | null) ?? null;
-    },
-    deleteKeyRecord: async (keyID) => {
-      const key = `${KEY_RECORD_NAMESPACE}:${keyID}`;
-      if ((await keyValueStore.getItem(key)) === null) return false;
-      await keyValueStore.removeItem(key);
-      return true;
     },
     saveKeyEntry: async (entry) => {
       await keyValueStore.setItem(`${KEY_ENTRY_NAMESPACE}:${entry.appID}:${entry.keyID}`, entry);

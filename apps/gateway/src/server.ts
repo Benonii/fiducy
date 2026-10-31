@@ -3,16 +3,17 @@ import { createProviderRegistry } from '@fiducy/providers';
 
 import { createEnclaverAttestation } from './attestation';
 import { GATEWAY_TOKEN_PURPOSE } from './constants';
+import { createDynamoClient, createDynamoKeyStore } from './dynamoKeyStore';
 import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKeyWrapper';
 import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
 import { createMemoryUsageLedger } from './memoryStores';
 import { createRemoteAppDirectory } from './remoteAppDirectory';
-import { createRemoteKeyStore } from './remoteKeyStore';
+import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
 
 import type { KeyWrapper } from '@fiducy/core';
-import type { AppRegistration, ControlPlaneConnection, KmsSender } from './types';
+import type { AppRegistration, ControlPlaneConnection, KeyStore, KmsSender } from './types';
 
 interface KmsSettings {
   client: KmsSender;
@@ -54,6 +55,13 @@ async function readControlPlaneConnection(
   return { controlPlaneURL, gatewayToken };
 }
 
+function selectKeyStore(): KeyStore {
+  const tableName = process.env.FIDUCY_KEYS_TABLE;
+  if (!tableName) return createMemoryKeyStore();
+  const client = createDynamoClient(process.env.AWS_REGION ?? 'us-east-1');
+  return createDynamoKeyStore({ client, tableName });
+}
+
 function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
   return kms ? createKmsKeyWrapper(kms) : createLocalKeyWrapper(readMasterKey());
 }
@@ -64,7 +72,8 @@ const enclaveAPIURL = process.env.FIDUCY_ENCLAVE_API_URL;
 
 const gateway = createGateway({
   keyWrapper: selectKeyWrapper(kms),
-  keyStore: connection ? createRemoteKeyStore(connection) : createMemoryKeyStore(),
+  keyStore: selectKeyStore(),
+  keyEvents: connection ? createRemoteKeyEvents(connection) : undefined,
   appDirectory: connection
     ? createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 })
     : await createMemoryAppDirectory(readAppRegistrations()),

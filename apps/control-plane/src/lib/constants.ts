@@ -10,7 +10,6 @@ export const MAXIMUM_USAGE_BATCH_SIZE = 1000;
 export const APP_NAMESPACE = 'apps';
 export const OWNER_NAMESPACE = 'owners';
 export const USAGE_NAMESPACE = 'usage';
-export const KEY_RECORD_NAMESPACE = 'keys';
 export const SYSTEM_OWNER_ID = 'system';
 export const CONTROL_STORAGE_MOUNT = 'control';
 export const KEY_ENTRY_NAMESPACE = 'key-entries';

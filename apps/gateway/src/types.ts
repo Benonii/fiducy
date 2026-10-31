@@ -1,3 +1,6 @@
+import type { DeleteItemCommand, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import type { DeleteItemCommandOutput, GetItemCommandOutput } from '@aws-sdk/client-dynamodb';
+import type { PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
@@ -55,6 +58,7 @@ export interface GatewayDependencies {
   usageLedger: UsageLedger;
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
+  keyEvents?: KeyEventReporter;
 }
 
 export interface StoreKeyBody {
@@ -117,4 +121,32 @@ export interface KmsSender {
 export interface KmsKeyWrapperOptions {
   client: KmsSender;
   keyID: string;
+}
+
+export interface DynamoSender {
+  send(command: GetItemCommand): Promise<GetItemCommandOutput>;
+  send(command: PutItemCommand): Promise<PutItemCommandOutput>;
+  send(command: DeleteItemCommand): Promise<DeleteItemCommandOutput>;
+}
+
+export interface DynamoKeyStoreOptions {
+  client: DynamoSender;
+  tableName: string;
+}
+
+export interface InstanceRoleCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string;
+  expiration: Date;
+}
+
+export interface KeyEvent {
+  type: 'saved' | 'revoked';
+  appID: string;
+  keyID: string;
+}
+
+export interface KeyEventReporter {
+  report: (event: KeyEvent) => Promise<void>;
 }

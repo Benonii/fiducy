@@ -2,7 +2,7 @@
 # Runs on the parent EC2 host through SSM. Two steps:
 #   host.sh build  -> install tools, build the apps and the enclave image, print its PCR0
 #   host.sh start  -> (re)start Postgres, the control plane, the demo, the site, the enclave and Caddy
-# Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_PUBLIC_IP
+# Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP
 set -euo pipefail
 
 STEP="${1:?usage: host.sh build|start}"
@@ -118,6 +118,7 @@ build_release() {
   log "Building the enclave image"
   docker build -q -t fiducy-gateway-app:latest \
     --build-arg FIDUCY_KMS_KEY_ID="$FIDUCY_KMS_KEY_ID" \
+    --build-arg FIDUCY_KEYS_TABLE="$FIDUCY_KEYS_TABLE" \
     --build-arg FIDUCY_CONTROL_PLANE_URL="https://${CONTROL_HOST}" \
     --build-arg FIDUCY_GATEWAY_TOKEN_CIPHERTEXT="$token_ciphertext" \
     --build-arg AWS_REGION="$AWS_REGION" \

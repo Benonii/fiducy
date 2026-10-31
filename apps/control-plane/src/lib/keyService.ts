@@ -6,17 +6,17 @@ import { KEY_NOT_FOUND } from './failures';
 import { toUsageMonth } from './usageService';
 
 import type { AppKeyView, ControlResult, ControlStore, StoredKeyEntry } from './types';
-import type { StoredKeyRecord, UsageEvent } from './types';
+import type { KeyEvent, UsageEvent } from './types';
 
 function laterTime(first: string | null, second: string): string {
   return first && first > second ? first : second;
 }
 
-export async function noteSavedRecord(store: ControlStore, record: StoredKeyRecord) {
-  if (await store.findKeyEntry(record.appID, record.keyID)) return;
+export async function noteSavedKey(store: ControlStore, { appID, keyID }: KeyEvent) {
+  if (await store.findKeyEntry(appID, keyID)) return;
   await store.saveKeyEntry({
-    keyID: record.keyID,
-    appID: record.appID,
+    keyID,
+    appID,
     provider: UNKNOWN_PROVIDER,
     createdAt: new Date().toISOString(),
     lastUsedAt: null,
@@ -74,8 +74,6 @@ export async function revokeAppKey(
   const entry = await store.findKeyEntry(appID, keyID);
   if (!entry) return fail(KEY_NOT_FOUND);
   await noteRevokedKey(store, appID, keyID);
-  const record = await store.findKeyRecord(keyID);
-  if (record?.appID === appID) await store.deleteKeyRecord(keyID);
   return succeed(keyID);
 }
 
@@ -87,4 +85,9 @@ export async function noteRevokedKey(store: ControlStore, appID: string, keyID: 
 export async function listRevokedKeyIDs(store: ControlStore, appID: string): Promise<string[]> {
   const entries = await store.listKeyEntries(appID);
   return entries.filter((entry) => entry.status === 'revoked').map((entry) => entry.keyID);
+}
+
+export async function noteKeyEvent(store: ControlStore, event: KeyEvent) {
+  if (event.type === 'saved') await noteSavedKey(store, event);
+  else await noteRevokedKey(store, event.appID, event.keyID);
 }

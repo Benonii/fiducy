@@ -2,26 +2,24 @@ import { describe, expect, it } from 'bun:test';
 
 import { createApp, listGatewayApps } from '../src/lib/appService';
 import { noteGatewayContact, readGatewayStatus } from '../src/lib/gatewayStatusService';
-import { listAppKeys, noteSavedRecord, revokeAppKey } from '../src/lib/keyService';
+import { listAppKeys, noteKeyEvent, revokeAppKey } from '../src/lib/keyService';
 import { readUsageSeries, recordUsageBatch } from '../src/lib/usageService';
 import { usageSeriesQuerySchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID } from './fixtures';
 import { createTestStore, createUsageEvent } from './fixtures';
 
-import type { StoredKeyRecord } from '../src/lib/types';
-
 const NOW = new Date();
 const EARLIER_TODAY = new Date(NOW.getTime() - 60 * 1000).toISOString();
 
-function createRecord(appID: string, keyID: string): StoredKeyRecord {
-  return { keyID, appID, ciphertext: 'c', iv: 'i', wrappedShareB: 'w' };
+function savedKey(appID: string, keyID: string) {
+  return { type: 'saved' as const, appID, keyID };
 }
 
 describe('listing an app keys', () => {
   it('shows stored and used keys with their provider, last use and requests this month', async () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
-    await noteSavedRecord(store, createRecord(app.appID, 'key_stored'));
+    await noteKeyEvent(store, savedKey(app.appID, 'key_stored'));
     await recordUsageBatch(store, [
       createUsageEvent(app.appID, 'key_used', EARLIER_TODAY),
       createUsageEvent(app.appID, 'key_used', EARLIER_TODAY)
@@ -56,17 +54,14 @@ describe('listing an app keys', () => {
 });
 
 describe('revoking a key from the dashboard', () => {
-  it('marks it revoked, deletes its sealed record and tells the gateway', async () => {
+  it('marks it revoked and tells the gateway', async () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
-    const record = createRecord(app.appID, 'key_a');
-    await store.saveKeyRecord(record);
-    await noteSavedRecord(store, record);
+    await noteKeyEvent(store, savedKey(app.appID, 'key_a'));
     expect(await revokeAppKey(store, OWNER_ID, app.appID, 'key_a')).toEqual({
       ok: true,
       value: 'key_a'
     });
-    expect(await store.findKeyRecord('key_a')).toBeNull();
     const keys = await listAppKeys(store, OWNER_ID, app.appID);
     expect(keys).toMatchObject({ ok: true, value: [{ keyID: 'key_a', status: 'revoked' }] });
     const [gatewayApp] = await listGatewayApps(store);
@@ -76,7 +71,7 @@ describe('revoking a key from the dashboard', () => {
   it('refuses unknown keys and other owners', async () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
-    await noteSavedRecord(store, createRecord(app.appID, 'key_a'));
+    await noteKeyEvent(store, savedKey(app.appID, 'key_a'));
     expect(await revokeAppKey(store, OWNER_ID, app.appID, 'key_missing')).toMatchObject({
       ok: false,
       error: { status: 404 }
@@ -85,6 +80,18 @@ describe('revoking a key from the dashboard', () => {
       ok: false,
       error: { status: 404 }
     });
+  });
+});
+
+describe('key events from the gateway', () => {
+  it('lists a saved key and marks a revoked one', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    await noteKeyEvent(store, savedKey(app.appID, 'key_a'));
+    await noteKeyEvent(store, savedKey(app.appID, 'key_a'));
+    await noteKeyEvent(store, { type: 'revoked', appID: app.appID, keyID: 'key_a' });
+    const keys = await listAppKeys(store, OWNER_ID, app.appID);
+    expect(keys).toMatchObject({ ok: true, value: [{ keyID: 'key_a', status: 'revoked' }] });
   });
 });
 
