@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 
 import { parseHandle } from '@fiducy/core';
 import { SAMPLE_API_KEY } from '@fiducy/testing';
+import { createRemoteUsageLedger } from '../../gateway/src/remoteUsageLedger';
 import { startStack } from './stack';
 
 import type { Browser, Page } from 'playwright';
@@ -110,6 +111,26 @@ describe('a developer onboarding through the dashboard', () => {
     await page.getByTestId('request-count').filter({ hasText: '1' }).waitFor({ timeout: 30000 });
   });
 
+  it('keeps the monthly request count when the gateway restarts', async () => {
+    const response = await page.evaluate(async (url) => {
+      const keys = await fetch(url);
+      return keys.json();
+    }, `/api/apps/${created.appID}/keys`);
+    const usedKey = (response.data as Array<{ keyID: string; status: string }>).find(
+      (key) => key.status === 'active'
+    );
+    const restartedLedger = createRemoteUsageLedger({
+      ...stack.gatewayConnection,
+      flushIntervalMilliseconds: 60000
+    });
+    const requestCount = await restartedLedger.countRequestsThisMonth(
+      created.appID,
+      usedKey?.keyID ?? ''
+    );
+    expect(requestCount).toBe(1);
+    await restartedLedger.stop();
+  });
+
   it('lists the user key and revokes it so the gateway refuses it', async () => {
     const callDashboard = (path: string, method = 'GET') =>
       page.evaluate(
@@ -168,6 +189,14 @@ describe('a developer managing an app', () => {
 describe('control plane access rules', () => {
   it('refuses the gateway feed without the gateway token', async () => {
     const response = await fetch(`${stack.controlPlaneURL}/api/gateway/apps`, {
+      headers: { authorization: 'Bearer wrong_token' }
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it('refuses the gateway request count without the gateway token', async () => {
+    const query = new URLSearchParams({ appID: 'app_any', keyID: 'AAAAAAAAAAAAAAAAAAAAAA' });
+    const response = await fetch(`${stack.controlPlaneURL}/api/gateway/usage/count?${query}`, {
       headers: { authorization: 'Bearer wrong_token' }
     });
     expect(response.status).toBe(401);

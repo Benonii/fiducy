@@ -37,17 +37,20 @@ function isSameMonth(first: Date, second: Date): boolean {
   );
 }
 
+export function countMonthEvents(events: UsageEvent[], appID: string, keyID: string): number {
+  const now = new Date();
+  return events.filter(
+    (event) => event.appID === appID && event.keyID === keyID && isSameMonth(event.recordedAt, now)
+  ).length;
+}
+
 export function createMemoryUsageLedger(): UsageLedger & { listEvents: () => UsageEvent[] } {
   const events: UsageEvent[] = [];
   return {
     recordUsage: async (event) => {
       events.push(event);
     },
-    countRequestsThisMonth: async (keyID) => {
-      const now = new Date();
-      return events.filter((event) => event.keyID === keyID && isSameMonth(event.recordedAt, now))
-        .length;
-    },
+    countRequestsThisMonth: async (appID, keyID) => countMonthEvents(events, appID, keyID),
     listEvents: () => [...events]
   };
 }

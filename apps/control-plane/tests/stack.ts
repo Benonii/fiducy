@@ -71,6 +71,7 @@ export async function startStack() {
     controlPlaneURL,
     gatewayURL: gateway.gatewayURL,
     usageLedger: gateway.usageLedger,
+    gatewayConnection: { controlPlaneURL, gatewayToken: GATEWAY_TOKEN },
     stop
   };
 }

@@ -12,6 +12,10 @@ const connection = { controlPlaneURL: controlPlane.controlPlaneURL, gatewayToken
 
 afterAll(() => controlPlane.stop());
 
+function createLedger() {
+  return createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 60000 });
+}
+
 function createUsageEvent(keyID: string): UsageEvent {
   return {
     appID: CHAT_APP.appID,
@@ -72,10 +76,10 @@ describe('loading app configs from the control plane', () => {
 
 describe('sending usage to the control plane', () => {
   it('batches token counts with the gateway token and keeps local request counts', async () => {
-    const ledger = createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 60000 });
+    const ledger = createLedger();
     await ledger.recordUsage(createUsageEvent('key_one'));
     await ledger.recordUsage(createUsageEvent('key_one'));
-    expect(await ledger.countRequestsThisMonth('key_one')).toBe(2);
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_one')).toBe(2);
     expect(await ledger.flush()).toBe(2);
     expect(controlPlane.usageBatches.at(-1)?.events).toEqual([
       {
@@ -93,12 +97,55 @@ describe('sending usage to the control plane', () => {
   });
 
   it('keeps events queued when the control plane is down and sends them later', async () => {
-    const ledger = createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 60000 });
+    const ledger = createLedger();
     controlPlane.failUsageWith(503);
     await ledger.recordUsage(createUsageEvent('key_two'));
     expect(await ledger.flush()).toBe(0);
     controlPlane.failUsageWith(202);
     expect(await ledger.flush()).toBe(1);
+    await ledger.stop();
+  });
+});
+
+describe('keeping monthly request counts across gateway restarts', () => {
+  it('starts from the control plane count after a restart', async () => {
+    const firstLedger = createLedger();
+    await firstLedger.recordUsage(createUsageEvent('key_restart'));
+    await firstLedger.recordUsage(createUsageEvent('key_restart'));
+    await firstLedger.stop();
+    const restartedLedger = createLedger();
+    expect(await restartedLedger.countRequestsThisMonth(CHAT_APP.appID, 'key_restart')).toBe(2);
+    await restartedLedger.recordUsage(createUsageEvent('key_restart'));
+    expect(await restartedLedger.countRequestsThisMonth(CHAT_APP.appID, 'key_restart')).toBe(3);
+    await restartedLedger.stop();
+  });
+
+  it('asks the control plane once per key and counts sent events once', async () => {
+    const ledger = createLedger();
+    const before = controlPlane.countRequestCountLookups();
+    await ledger.recordUsage(createUsageEvent('key_sent'));
+    await ledger.flush();
+    await ledger.recordUsage(createUsageEvent('key_sent'));
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_sent')).toBe(2);
+    await ledger.flush();
+    await ledger.recordUsage(createUsageEvent('key_sent'));
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_sent')).toBe(3);
+    expect(controlPlane.countRequestCountLookups() - before).toBe(1);
+    await ledger.stop();
+  });
+
+  it('keeps counting locally while the control plane is down and catches up later', async () => {
+    const firstLedger = createLedger();
+    await firstLedger.recordUsage(createUsageEvent('key_outage'));
+    await firstLedger.stop();
+    const ledger = createLedger();
+    controlPlane.failUsageWith(503);
+    await ledger.recordUsage(createUsageEvent('key_outage'));
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_outage')).toBe(1);
+    controlPlane.failUsageWith(202);
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_outage')).toBe(2);
+    await ledger.flush();
+    expect(await ledger.countRequestsThisMonth(CHAT_APP.appID, 'key_outage')).toBe(2);
     await ledger.stop();
   });
 });

@@ -60,3 +60,5 @@ export const keyEventSchema = z.object({
   appID: z.string().min(1).max(80),
   keyID: z.string().regex(/^[A-Za-z0-9_-]{22}$/, 'Use a 22 character key ID')
 });
+
+export const gatewayUsageCountQuerySchema = keyEventSchema.pick({ appID: true, keyID: true });

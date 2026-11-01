@@ -44,7 +44,7 @@ export interface UsageEvent {
 
 export interface UsageLedger {
   recordUsage: (event: UsageEvent) => Promise<void>;
-  countRequestsThisMonth: (keyID: string) => Promise<number>;
+  countRequestsThisMonth: (appID: string, keyID: string) => Promise<number>;
 }
 
 export type AttestationSource = (nonce: Uint8Array | null) => Promise<Uint8Array | null>;
@@ -96,6 +96,10 @@ export interface RemoteAppDirectoryOptions extends ControlPlaneConnection {
 
 export interface RemoteUsageLedgerOptions extends ControlPlaneConnection {
   flushIntervalMilliseconds: number;
+}
+
+export interface RemoteRequestCount {
+  requestCount: number;
 }
 
 export interface RemoteAppConfig extends RegisteredApp {

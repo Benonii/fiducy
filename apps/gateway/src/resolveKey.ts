@@ -60,7 +60,7 @@ export async function enforceRequestLimit(
   keyID: string,
   { usageLedger }: GatewayDependencies
 ): Promise<GatewayResult<number>> {
-  const requestCount = await usageLedger.countRequestsThisMonth(keyID);
+  const requestCount = await usageLedger.countRequestsThisMonth(app.appID, keyID);
   if (requestCount >= app.monthlyRequestLimitPerKey) {
     return fail(describeFailure(429, 'This key reached its monthly request limit'));
   }

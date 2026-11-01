@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test';
 
 import { createApp } from '../src/lib/appService';
-import { readMonthlyUsage, recordUsageBatch } from '../src/lib/usageService';
+import { countKeyRequestsThisMonth, readMonthlyUsage } from '../src/lib/usageService';
+import { recordUsageBatch } from '../src/lib/usageService';
 import { appSettingsSchema, usageBatchSchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID } from './fixtures';
 import { createTestStore, createUsageEvent } from './fixtures';
@@ -40,6 +41,19 @@ describe('recording usage from the gateway', () => {
     await recordUsageBatch(store, [event]);
     const usage = await readMonthlyUsage(store, OWNER_ID, app.appID, '2026-10');
     expect(usage).toMatchObject({ ok: true, value: { requestCount: 2, inputTokens: 20 } });
+  });
+
+  it('counts one key this month for the gateway', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    await recordUsageBatch(store, [
+      createUsageEvent(app.appID, 'key_a', '2026-10-02T08:00:00.000Z'),
+      createUsageEvent(app.appID, 'key_a', '2026-10-03T08:00:00.000Z'),
+      createUsageEvent(app.appID, 'key_a', '2026-09-30T08:00:00.000Z')
+    ]);
+    const today = new Date('2026-10-20T08:00:00.000Z');
+    expect(await countKeyRequestsThisMonth(store, app.appID, 'key_a', today)).toBe(2);
+    expect(await countKeyRequestsThisMonth(store, app.appID, 'key_unused', today)).toBe(0);
   });
 
   it('skips events for apps that no longer exist', async () => {

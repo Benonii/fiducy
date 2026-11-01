@@ -94,6 +94,16 @@ export async function readMonthlyUsage(
   return succeed(await store.readUsage(appID, month));
 }
 
+export async function countKeyRequestsThisMonth(
+  store: ControlStore,
+  appID: string,
+  keyID: string,
+  today = new Date()
+): Promise<number> {
+  const summary = await store.readUsage(appID, toUsageMonth(today));
+  return summary.requestsByKey[keyID] ?? 0;
+}
+
 function listDates(days: number, today: Date): string[] {
   return Array.from({ length: days }, (_, index) =>
     toUsageDate(new Date(today.getTime() - (days - 1 - index) * MILLISECONDS_PER_DAY))
