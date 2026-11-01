@@ -1,15 +1,17 @@
 import { PROVIDERS } from '@/lib/constants';
 
 const NODE_CLASS = '[&_rect]:fill-white [&_rect]:stroke-control [&_rect]:[stroke-dasharray:3_3]';
-const HUB_CLASS = '[&_rect]:fill-wash [&_rect]:stroke-ink';
-const LINE_CLASS = 'fill-none stroke-ink stroke-[1.25]';
+const HUB_CLASS = '[&_rect]:fill-wash [&_rect]:stroke-ink-quiet';
+const LINE_CLASS = 'fill-none stroke-[1.25]';
 const HANDLE_LINE_CLASS = 'fill-none stroke-ink-quiet stroke-[1.25] [stroke-dasharray:4_5]';
 const NODE_TITLE_CLASS = 'fill-ink text-[15px] font-[650]';
 const DETAIL_CLASS = 'fill-ink-muted text-xs font-light';
-const PULSE_CLASS = 'fill-ink motion-reduce:hidden';
+const PULSE_CLASS = 'motion-reduce:hidden';
 const HANDLE_PULSE_CLASS = 'fill-ink-quiet motion-reduce:hidden';
 const CYCLE_SECONDS = 8;
 const PROVIDER_ROWS = [44, 124, 204, 284];
+const PROVIDER_COLORS = ['#10a37f', '#d97757', '#4285f4', '#8b5cf6'];
+const STACKED_LINE_COLOR = 'var(--color-ink)';
 
 function providerPath(rowTop: number) {
   const y = rowTop + 26;
@@ -28,15 +30,20 @@ function HorizontalFlow() {
         Your app sends a handle to the Fiducy enclave, which opens the key and calls the provider
       </title>
       <path className={HANDLE_LINE_CLASS} d="M240 190 H380" />
-      {PROVIDER_ROWS.map((rowTop) => (
-        <path key={rowTop} className={LINE_CLASS} d={providerPath(rowTop)} />
+      {PROVIDER_ROWS.map((rowTop, index) => (
+        <path
+          key={rowTop}
+          className={LINE_CLASS}
+          stroke={PROVIDER_COLORS[index]}
+          d={providerPath(rowTop)}
+        />
       ))}
 
       <text className={DETAIL_CLASS} x="310" y="176" textAnchor="middle">
         handle
       </text>
-      <text className={DETAIL_CLASS} x="660" y="28" textAnchor="middle">
-        key, opened for one request
+      <text className={DETAIL_CLASS} x="480" y="280" textAnchor="middle">
+        key opened for one request
       </text>
 
       <g className={NODE_CLASS}>
@@ -88,7 +95,13 @@ function HorizontalFlow() {
         />
       </circle>
       {PROVIDER_ROWS.map((rowTop, index) => (
-        <circle key={rowTop} className={PULSE_CLASS} r="4" opacity="0">
+        <circle
+          key={rowTop}
+          className={PULSE_CLASS}
+          fill={PROVIDER_COLORS[index]}
+          r="4"
+          opacity="0"
+        >
           <animateMotion
             dur={`${CYCLE_SECONDS}s`}
             begin={`${index * (CYCLE_SECONDS / 4) + 1.1}s`}
@@ -125,7 +138,7 @@ function StackedFlow() {
         Your app sends a handle to the Fiducy enclave, which opens the key and calls the provider
       </title>
       <path className={HANDLE_LINE_CLASS} d="M180 84 V164" />
-      <path className={LINE_CLASS} d="M180 292 V372" />
+      <path className={LINE_CLASS} stroke={STACKED_LINE_COLOR} d="M180 292 V372" />
       <text className={DETAIL_CLASS} x="194" y="128">
         handle
       </text>
@@ -168,7 +181,7 @@ function StackedFlow() {
           {PROVIDERS.slice(2).join(', ')}
         </text>
       </g>
-      <circle className={PULSE_CLASS} r="4">
+      <circle className={PULSE_CLASS} fill={STACKED_LINE_COLOR} r="4">
         <animateMotion dur="3s" repeatCount="indefinite" path="M180 84 V164 M180 292 V372" />
       </circle>
     </svg>
