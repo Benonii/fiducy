@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
 import { formatCompact, formatDay, formatNumber } from './format';
 
+import type { PointerEvent } from 'react';
 import type { UsageBarsProps } from './types';
 
 const METRIC_UNITS = {
@@ -16,11 +17,32 @@ const METRIC_UNITS = {
 
 export function UsageBars({ days, metric }: UsageBarsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
   const values = days.map((day) => day[metric]);
   const peak = Math.max(1, ...values);
   const total = values.reduce((sum, value) => sum + value, 0);
   const activeDay = activeIndex === null ? null : days[activeIndex];
   const unit = METRIC_UNITS[metric];
+
+  function indexAt(clientX: number): number | null {
+    const box = chartRef.current?.getBoundingClientRect();
+    if (!box || !days.length || box.width === 0) return null;
+    const ratio = (clientX - box.left) / box.width;
+    return Math.min(days.length - 1, Math.max(0, Math.floor(ratio * days.length)));
+  }
+
+  function scrub(event: PointerEvent<HTMLDivElement>) {
+    setActiveIndex(indexAt(event.clientX));
+  }
+
+  function press(event: PointerEvent<HTMLDivElement>) {
+    const index = indexAt(event.clientX);
+    setActiveIndex(event.pointerType !== 'mouse' && index === activeIndex ? null : index);
+  }
+
+  function leave(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === 'mouse') setActiveIndex(null);
+  }
 
   return (
     <div className="grid gap-3">
@@ -38,15 +60,14 @@ export function UsageBars({ days, metric }: UsageBarsProps) {
           {formatCompact(peak)}
         </span>
         <div
-          className="flex h-44 items-end gap-0.5 border-b border-foreground"
-          onPointerLeave={() => setActiveIndex(null)}
+          ref={chartRef}
+          className="flex h-44 cursor-crosshair touch-pan-y items-end gap-0.5 border-b border-foreground"
+          onPointerDown={press}
+          onPointerMove={scrub}
+          onPointerLeave={leave}
         >
           {days.map((day, index) => (
-            <div
-              key={day.date}
-              className="flex h-full flex-1 cursor-crosshair items-end justify-center"
-              onPointerEnter={() => setActiveIndex(index)}
-            >
+            <div key={day.date} className="flex h-full flex-1 items-end justify-center">
               <div
                 className={cn(
                   'w-full max-w-6 origin-bottom animate-bar-grow transition-colors',

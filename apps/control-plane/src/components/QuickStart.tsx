@@ -1,3 +1,4 @@
+import { CopyButton } from './CopyButton';
 import { Panel } from './Panel';
 
 import type { QuickStartProps } from './types';
@@ -36,17 +37,20 @@ export function QuickStart(props: QuickStartProps) {
       title="Connect your app"
       description="Two steps. Both values below are already filled in for this app."
     >
-      <ol className="grid gap-6">
+      <ol className="grid min-w-0 gap-6">
         {buildSteps(props).map((step, index) => (
-          <li key={step.title} className="grid gap-2">
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-ink-quiet text-xs">0{index + 1}</span>
-              <div className="grid gap-0.5">
-                <p className="font-medium text-foreground text-sm">{step.title}</p>
-                <p className="text-ink-quiet text-xs">{step.detail}</p>
+          <li key={step.title} className="grid min-w-0 gap-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-ink-quiet text-xs">0{index + 1}</span>
+                <div className="grid gap-0.5">
+                  <p className="font-medium text-foreground text-sm">{step.title}</p>
+                  <p className="text-ink-quiet text-xs">{step.detail}</p>
+                </div>
               </div>
+              <CopyButton label="code" value={step.code} />
             </div>
-            <pre className="overflow-x-auto border bg-surface p-4 text-xs leading-relaxed">
+            <pre className="min-w-0 overflow-x-auto border bg-surface p-4 text-xs leading-relaxed">
               {step.code}
             </pre>
           </li>

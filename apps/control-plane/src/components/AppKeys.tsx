@@ -3,6 +3,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppKeys, useUsage } from '@/lib/queries';
 
+import { KeysList } from './KeysList';
 import { KeysTable } from './KeysTable';
 import { Panel } from './Panel';
 import { QuietState } from './QuietState';
@@ -28,12 +29,24 @@ export function AppKeys({ app }: AppProps) {
         />
       ) : null}
       {keys.data?.length ? (
-        <KeysTable
-          appID={app.appID}
-          keys={keys.data}
-          usage={usage.data}
-          monthlyLimit={app.monthlyRequestLimitPerKey}
-        />
+        <>
+          <div className="md:hidden">
+            <KeysList
+              appID={app.appID}
+              keys={keys.data}
+              usage={usage.data}
+              monthlyLimit={app.monthlyRequestLimitPerKey}
+            />
+          </div>
+          <div className="hidden md:block">
+            <KeysTable
+              appID={app.appID}
+              keys={keys.data}
+              usage={usage.data}
+              monthlyLimit={app.monthlyRequestLimitPerKey}
+            />
+          </div>
+        </>
       ) : null}
     </Panel>
   );

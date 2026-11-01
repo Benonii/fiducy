@@ -18,6 +18,10 @@ export interface DashboardShellProps {
   children: ReactNode;
 }
 
+export interface SidebarBodyProps {
+  activeAppID?: string;
+}
+
 export interface AppNavigationProps {
   activeAppID?: string;
 }
@@ -140,6 +144,10 @@ export interface SecurityRow {
 export interface CopyValueProps {
   value: string;
   label: string;
+}
+
+export interface CopyButtonProps extends CopyValueProps {
+  className?: string;
 }
 
 export interface AppSettingsFieldsProps {

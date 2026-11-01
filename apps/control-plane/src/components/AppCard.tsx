@@ -10,7 +10,7 @@ export function AppCard({ app }: AppProps) {
   const usage = useUsage(app.appID);
   const keyCount = Object.keys(usage.data?.requestsByKey ?? {}).length;
   return (
-    <article className="group relative grid gap-6 border bg-background p-5 transition-colors hover:border-foreground">
+    <article className="group relative grid gap-6 border bg-background p-5 transition-colors hover:border-foreground active:border-foreground">
       <div className="grid gap-1">
         <h2 className="font-medium text-foreground">
           <a className="no-underline after:absolute after:inset-0" href={`/dashboard/${app.appID}`}>

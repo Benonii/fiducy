@@ -13,16 +13,13 @@ import type { AppSettings } from '@/lib/types';
 import type { AppSettingsFieldsProps } from './types';
 
 const ACCESS_MODES = [
-  { label: 'Gateway only (keys never leave Fiducy)', value: 'gateway' },
-  {
-    label: 'Gateway and key release (your server may fetch a key for 5 minutes)',
-    value: 'gateway_and_release'
-  }
+  { label: 'Gateway only', value: 'gateway' },
+  { label: 'Gateway and key release', value: 'gateway_and_release' }
 ];
 
 const RECORD_STORAGE_OPTIONS = [
-  { label: 'With Fiducy (your app stores only a handle)', value: 'fiducy' },
-  { label: 'In your database (your app sends the record with each call)', value: 'app' }
+  { label: 'With Fiducy', value: 'fiducy' },
+  { label: 'In your database', value: 'app' }
 ];
 
 function describeRecordStorage(recordStorage: AppSettings['recordStorage']): string {
@@ -42,6 +39,9 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
         <Textarea
           name="allowedOrigins"
           className="font-mono"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           defaultValue={defaults?.allowedOrigins.join('\n')}
         />
         <FieldDescription>
@@ -54,6 +54,7 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
           name="monthlyRequestLimitPerKey"
           required
           type="number"
+          inputMode="numeric"
           min={1}
           defaultValue={defaults?.monthlyRequestLimitPerKey ?? 10000}
         />
@@ -77,7 +78,8 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
           </SelectPopup>
         </Select>
         <FieldDescription>
-          Key release sends the plain key to your server. Leave it off unless a feature needs it.
+          Gateway only keeps keys inside Fiducy. Key release lets your server fetch a plain key for
+          5 minutes. Leave it off unless a feature needs it.
         </FieldDescription>
       </Field>
       {defaults ? (
@@ -103,7 +105,10 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
               ))}
             </SelectPopup>
           </Select>
-          <FieldDescription>You can't change this after the app is created.</FieldDescription>
+          <FieldDescription>
+            With Fiducy, your app stores only a handle. In your database, your app sends the sealed
+            record with each call. You can't change this after the app is created.
+          </FieldDescription>
         </Field>
       )}
     </>

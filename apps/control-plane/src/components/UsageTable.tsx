@@ -13,7 +13,7 @@ import type { UsageTableProps } from './types';
 
 export function UsageTable({ days }: UsageTableProps) {
   return (
-    <div className="max-h-64 overflow-y-auto border">
+    <div className="max-h-80 overflow-y-auto border">
       <Table>
         <TableHeader>
           <TableRow>
