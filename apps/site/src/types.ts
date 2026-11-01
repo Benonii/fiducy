@@ -132,3 +132,7 @@ export interface TypedTagProps {
   startsAt: number;
   className: string;
 }
+
+export interface LeakCardProps {
+  leak: LeakScene;
+}
