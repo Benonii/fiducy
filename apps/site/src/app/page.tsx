@@ -67,7 +67,9 @@ export default function HomePage() {
             <KeyFlow />
           </section>
 
-          <section className={SECTION_CLASS}>
+          <section
+            className={`${SECTION_CLASS} lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-start`}
+          >
             <div className={SECTION_HEAD_CLASS}>
               <h2 className={TITLE_CLASS}>Ship bring-your-own-key this week</h2>
               <p className={DESCRIPTION_CLASS}>
