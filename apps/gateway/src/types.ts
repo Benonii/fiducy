@@ -57,6 +57,7 @@ export interface GatewayDependencies {
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
   keyEvents?: KeyEventReporter;
+  controlPlaneToken?: string;
 }
 
 export interface StoreKeyBody {
@@ -143,6 +144,11 @@ export interface KeyEvent {
   type: 'saved' | 'revoked';
   appID: string;
   keyID: string;
+}
+
+export interface RevokeCaller {
+  appID: string;
+  isControlPlane: boolean;
 }
 
 export interface KeyEventReporter {

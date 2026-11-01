@@ -5,6 +5,7 @@ export const KEY_ROUTE_PATTERN = /^\/keys\/([A-Za-z0-9_-]{22})$/;
 export const APP_SECRET_HEADERS = ['authorization', 'x-api-key', 'x-goog-api-key'];
 export const KEY_HANDLE_HEADER = 'x-key-handle';
 export const KEY_RECORD_HEADER = 'x-key-record';
+export const APP_ID_QUERY_PARAMETER = 'appID';
 export const MAX_RECORD_HEADER_LENGTH = 8192;
 export const GATEWAY_APPS_PATH = '/api/gateway/apps';
 export const GATEWAY_USAGE_PATH = '/api/gateway/usage';

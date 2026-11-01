@@ -81,7 +81,8 @@ const gateway = createGateway({
     ? createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 })
     : createMemoryUsageLedger(),
   providerRegistry: createProviderRegistry(),
-  attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined
+  attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined,
+  controlPlaneToken: connection?.gatewayToken
 });
 
 const server = Bun.serve({
