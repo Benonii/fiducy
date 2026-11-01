@@ -10,14 +10,13 @@ export const REQUEST_TRACE = [
   { step: 'key dropped', detail: 'request ended' }
 ];
 
-export const SHOWCASE_CODE = `import { ConnectKeyWidget } from '@fiducy/sdk/react';
+export const SHOWCASE_CODE = `import { createFiducy } from '@fiducy/sdk/server';
 
-<ConnectKeyWidget provider="openai" appID="app_acme" />
-
-const settings = await fiducy.providerSettings('openai', { userID });
-const result = streamText({
-  model: createOpenAI(settings).chat('gpt-4o-mini'),
-  messages
+export const fiducy = createFiducy({
+  gatewayURL: env.FIDUCY_GATEWAY_URL,
+  appSecret: env.FIDUCY_APP_SECRET,
+  storage,
+  getUserID
 });`;
 export const SHOWCASE_KEY = 'sk-proj-7Tq2m9Lx4bVn8cRk0wXWYZ';
 export const SHOWCASE_QUESTION = 'Summarize this contract in three lines.';

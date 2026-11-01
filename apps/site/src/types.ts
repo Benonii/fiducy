@@ -117,3 +117,7 @@ export interface ShowcaseClock {
   elapsed: number;
   isRunning: boolean;
 }
+
+export interface CodeBlockProps {
+  code: string;
+}
