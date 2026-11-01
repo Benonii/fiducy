@@ -1,5 +1,5 @@
 import { defineConfig } from '@farm.js/core';
-import { localStorage } from '@farm.js/core/storage';
+import { localStorage, postgresStorage } from '@farm.js/core/storage';
 import { fiducy } from '@fiducy/farm';
 import { z } from 'zod';
 
@@ -8,7 +8,14 @@ import { fiducyServer } from './src/lib/fiducy';
 
 const dataDirectory = process.env.FIDUCY_DEMO_DATA_DIR ?? '.farm';
 
+function createDemoStorageClient() {
+  const databaseURL = process.env.DATABASE_URL;
+  if (databaseURL) return postgresStorage({ url: databaseURL, tableName: 'fiducy_demo' });
+  return localStorage({ base: `${dataDirectory}/fiducy` });
+}
+
 export default defineConfig({
+  deploy: { target: 'vercel' },
   env: {
     public: {
       FIDUCY_APP_ID: z.string().min(1),
@@ -19,7 +26,7 @@ export default defineConfig({
     }
   },
   storage: {
-    mounts: { [FIDUCY_STORAGE_MOUNT]: localStorage({ base: `${dataDirectory}/fiducy` }) }
+    mounts: { [FIDUCY_STORAGE_MOUNT]: createDemoStorageClient() }
   },
   integrations: {
     byok: fiducy({ instance: fiducyServer })
