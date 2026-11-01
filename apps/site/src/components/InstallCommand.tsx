@@ -17,9 +17,9 @@ export function InstallCommand() {
   };
 
   return (
-    <div className="flex h-10 max-w-full min-w-0 items-center gap-1 rounded-lg border border-input bg-white pr-1 pl-3 shadow-xs/5 sm:h-9">
+    <div className="flex h-10 max-w-full min-w-0 items-center gap-1 max-sm:w-full rounded-lg border border-input bg-white pr-1 pl-3 shadow-xs/5 sm:h-9">
       <span className="font-mono text-ink-quiet select-none">$</span>
-      <code className="min-w-0 overflow-x-auto font-mono text-[0.8125rem] whitespace-nowrap text-ink-body">
+      <code className="min-w-0 flex-1 overflow-x-auto font-mono text-[0.8125rem] whitespace-nowrap text-ink-body">
         {INSTALL_COMMAND}
       </code>
       <Button variant="ghost" size="xs" onClick={copy} aria-live="polite">

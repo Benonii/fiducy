@@ -1,12 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import type { ShowcaseFrameProps } from '@/types';
 
 export function ShowcaseKeyPanel({ frame }: ShowcaseFrameProps) {
   const visibleKey = frame.isKeySaved ? `${'•'.repeat(12)}${frame.key.slice(-4)}` : frame.key;
+  const isAfterKeyStep = frame.activeStep === 'ask' || frame.activeStep === 'answer';
   return (
-    <div className="grid content-start gap-3 p-5.5">
+    <div
+      className={cn('grid content-start gap-3 p-5.5 max-md:p-4', isAfterKeyStep && 'max-md:hidden')}
+    >
       <p className="font-semibold">Connect your OpenAI key</p>
       <div className="flex gap-2">
         <Input
