@@ -12,7 +12,7 @@ import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
 
-import type { KeyWrapper } from '@fiducy/core';
+import type { Bytes, KeyWrapper } from '@fiducy/core';
 import type { AppRegistration, ControlPlaneConnection, KeyStore, KmsSender } from './types';
 
 interface KmsSettings {
@@ -20,7 +20,7 @@ interface KmsSettings {
   keyID: string;
 }
 
-function readMasterKey(): Uint8Array {
+function readMasterKey(): Bytes {
   const encodedMasterKey = process.env.FIDUCY_MASTER_KEY;
   if (!encodedMasterKey) throw new Error('Set FIDUCY_MASTER_KEY to 32 random bytes in base64url');
   return new Uint8Array(Buffer.from(encodedMasterKey, 'base64url'));

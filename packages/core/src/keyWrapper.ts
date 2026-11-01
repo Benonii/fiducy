@@ -2,7 +2,7 @@ import { IV_LENGTH, MASTER_KEY_LENGTH, WRAPPER_SALT } from './constants';
 import { concatenateBytes, encodeText, generateRandomBytes } from './encoding';
 import { fail, succeed } from './result';
 
-import type { KeyWrapper } from './types';
+import type { Bytes, KeyWrapper } from './types';
 
 async function deriveAppKey(masterKey: CryptoKey, appID: string): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
@@ -14,17 +14,17 @@ async function deriveAppKey(masterKey: CryptoKey, appID: string): Promise<Crypto
   );
 }
 
-function assertMasterKeyLength(masterKey: Uint8Array): void {
+function assertMasterKeyLength(masterKey: Bytes): void {
   if (masterKey.length !== MASTER_KEY_LENGTH) {
     throw new Error(`Master key must be ${MASTER_KEY_LENGTH} bytes, received ${masterKey.length}`);
   }
 }
 
-export function createLocalKeyWrapper(rawMasterKey: Uint8Array): KeyWrapper {
+export function createLocalKeyWrapper(rawMasterKey: Bytes): KeyWrapper {
   assertMasterKeyLength(rawMasterKey);
   const masterKey = crypto.subtle.importKey('raw', rawMasterKey, 'HKDF', false, ['deriveKey']);
 
-  const wrap = async (appID: string, bytes: Uint8Array): Promise<Uint8Array> => {
+  const wrap = async (appID: string, bytes: Bytes): Promise<Bytes> => {
     const iv = generateRandomBytes(IV_LENGTH);
     const appKey = await deriveAppKey(await masterKey, appID);
     const additionalData = encodeText(appID);
@@ -36,7 +36,7 @@ export function createLocalKeyWrapper(rawMasterKey: Uint8Array): KeyWrapper {
     return concatenateBytes(iv, new Uint8Array(encrypted));
   };
 
-  const unwrap = async (appID: string, wrapped: Uint8Array) => {
+  const unwrap = async (appID: string, wrapped: Bytes) => {
     try {
       const appKey = await deriveAppKey(await masterKey, appID);
       const iv = wrapped.slice(0, IV_LENGTH);

@@ -1,31 +1,33 @@
+import type { Bytes } from './types';
+
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-export function encodeBase64URL(bytes: Uint8Array): string {
+export function encodeBase64URL(bytes: Bytes): string {
   return Buffer.from(bytes).toString('base64url');
 }
 
-export function decodeBase64URL(text: string): Uint8Array {
+export function decodeBase64URL(text: string): Bytes {
   return new Uint8Array(Buffer.from(text, 'base64url'));
 }
 
-export function encodeText(text: string): Uint8Array {
+export function encodeText(text: string): Bytes {
   return textEncoder.encode(text);
 }
 
-export function decodeText(bytes: Uint8Array): string {
+export function decodeText(bytes: Bytes): string {
   return textDecoder.decode(bytes);
 }
 
-export function generateRandomBytes(length: number): Uint8Array {
+export function generateRandomBytes(length: number): Bytes {
   return crypto.getRandomValues(new Uint8Array(length));
 }
 
-export function wipeBytes(bytes: Uint8Array): void {
+export function wipeBytes(bytes: Bytes): void {
   bytes.fill(0);
 }
 
-export function concatenateBytes(first: Uint8Array, second: Uint8Array): Uint8Array {
+export function concatenateBytes(first: Bytes, second: Bytes): Bytes {
   const combined = new Uint8Array(first.length + second.length);
   combined.set(first, 0);
   combined.set(second, first.length);
