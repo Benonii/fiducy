@@ -56,6 +56,7 @@ export type StoredValue =
   | StoredKeyEntry
   | DailyUsage
   | GatewayHeartbeat
+  | string[]
   | true;
 
 export interface KeyValueStore {
@@ -76,6 +77,8 @@ export interface ControlStore {
   saveKeyEntry: (entry: StoredKeyEntry) => Promise<void>;
   findKeyEntry: (appID: string, keyID: string) => Promise<StoredKeyEntry | null>;
   listKeyEntries: (appID: string) => Promise<StoredKeyEntry[]>;
+  listRevokedKeyIDs: (appID: string) => Promise<string[]>;
+  addRevokedKeyID: (appID: string, keyID: string) => Promise<void>;
   readDailyUsage: (appID: string, date: string) => Promise<DailyUsage>;
   saveDailyUsage: (appID: string, usage: DailyUsage) => Promise<void>;
   readGatewayHeartbeat: () => Promise<GatewayHeartbeat | null>;

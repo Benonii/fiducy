@@ -2,7 +2,7 @@ import type { DeleteItemCommand, GetItemCommand, PutItemCommand } from '@aws-sdk
 import type { DeleteItemCommandOutput, GetItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
-import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
+import type { Bytes, KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
 
 export type KeyAccessMode = 'gateway' | 'gateway_and_release';
@@ -169,4 +169,16 @@ export interface TokenBucketOptions {
 export interface TokenBucket {
   tokens: number;
   refilledAt: number;
+}
+
+export interface CachingKeyWrapperOptions {
+  keyWrapper: KeyWrapper;
+  timeToLiveMilliseconds: number;
+  maximumEntries: number;
+  readCurrentTime?: () => number;
+}
+
+export interface CachedShare {
+  share: Bytes;
+  expiresAt: number;
 }

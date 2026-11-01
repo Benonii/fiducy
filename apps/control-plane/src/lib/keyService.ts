@@ -1,6 +1,7 @@
 import { fail, succeed } from './result';
 
 import { findOwnedApp } from './appService';
+import { groupBy } from './common';
 import { UNKNOWN_PROVIDER } from './constants';
 import { KEY_NOT_FOUND } from './failures';
 import { toUsageMonth } from './usageService';
@@ -24,21 +25,38 @@ export async function noteSavedKey(store: ControlStore, { appID, keyID }: KeyEve
   });
 }
 
-export async function noteKeyUse(store: ControlStore, event: UsageEvent) {
-  const existing = await store.findKeyEntry(event.appID, event.keyID);
+function pickLatestEvent(events: UsageEvent[]): UsageEvent {
+  return events.reduce((latest, event) => (event.recordedAt >= latest.recordedAt ? event : latest));
+}
+
+function pickEarliestTime(events: UsageEvent[]): string {
+  return events.reduce(
+    (earliest, event) => (event.recordedAt < earliest ? event.recordedAt : earliest),
+    events[0]?.recordedAt ?? ''
+  );
+}
+
+async function noteKeyUse(store: ControlStore, keyEvents: UsageEvent[]) {
+  const latestEvent = pickLatestEvent(keyEvents);
+  const existing = await store.findKeyEntry(latestEvent.appID, latestEvent.keyID);
   const entry: StoredKeyEntry = existing ?? {
-    keyID: event.keyID,
-    appID: event.appID,
-    provider: event.provider,
-    createdAt: event.recordedAt,
+    keyID: latestEvent.keyID,
+    appID: latestEvent.appID,
+    provider: latestEvent.provider,
+    createdAt: pickEarliestTime(keyEvents),
     lastUsedAt: null,
     status: 'active'
   };
   await store.saveKeyEntry({
     ...entry,
-    provider: event.provider,
-    lastUsedAt: laterTime(entry.lastUsedAt, event.recordedAt)
+    provider: latestEvent.provider,
+    lastUsedAt: laterTime(entry.lastUsedAt, latestEvent.recordedAt)
   });
+}
+
+export async function noteKeyUses(store: ControlStore, events: UsageEvent[]) {
+  const eventsByKey = groupBy(events, (event) => `${event.appID}|${event.keyID}`);
+  for (const keyEvents of eventsByKey.values()) await noteKeyUse(store, keyEvents);
 }
 
 function byMostRecent(first: AppKeyView, second: AppKeyView): number {
@@ -79,12 +97,9 @@ export async function revokeAppKey(
 
 export async function noteRevokedKey(store: ControlStore, appID: string, keyID: string) {
   const entry = await store.findKeyEntry(appID, keyID);
-  if (entry) await store.saveKeyEntry({ ...entry, status: 'revoked' });
-}
-
-export async function listRevokedKeyIDs(store: ControlStore, appID: string): Promise<string[]> {
-  const entries = await store.listKeyEntries(appID);
-  return entries.filter((entry) => entry.status === 'revoked').map((entry) => entry.keyID);
+  if (!entry) return;
+  await store.saveKeyEntry({ ...entry, status: 'revoked' });
+  await store.addRevokedKeyID(appID, keyID);
 }
 
 export async function noteKeyEvent(store: ControlStore, event: KeyEvent) {

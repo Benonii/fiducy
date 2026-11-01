@@ -1,6 +1,6 @@
 import { APP_NAMESPACE, OWNER_NAMESPACE } from './constants';
 import { DAILY_USAGE_NAMESPACE, GATEWAY_HEARTBEAT_KEY, KEY_ENTRY_NAMESPACE } from './constants';
-import { USAGE_NAMESPACE } from './constants';
+import { REVOKED_KEYS_NAMESPACE, USAGE_NAMESPACE } from './constants';
 
 import type { ControlStore, KeyValueStore, StoredApp, UsageSummary } from './types';
 import type { DailyUsage, GatewayHeartbeat, StoredKeyEntry } from './types';
@@ -25,6 +25,9 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
     const apps = await Promise.all(appIDs.map(findApp));
     return apps.filter((app): app is StoredApp => app !== null);
   };
+
+  const listRevokedKeyIDs = async (appID: string) =>
+    ((await keyValueStore.getItem(`${REVOKED_KEYS_NAMESPACE}:${appID}`)) as string[] | null) ?? [];
 
   const findKeyEntry = async (appID: string, keyID: string) =>
     ((await keyValueStore.getItem(
@@ -66,6 +69,12 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
         keys.map((key) => findKeyEntry(appID, lastKeySegment(key)))
       );
       return entries.filter((entry): entry is StoredKeyEntry => entry !== null);
+    },
+    listRevokedKeyIDs,
+    addRevokedKeyID: async (appID, keyID) => {
+      const revokedKeyIDs = await listRevokedKeyIDs(appID);
+      if (revokedKeyIDs.includes(keyID)) return;
+      await keyValueStore.setItem(`${REVOKED_KEYS_NAMESPACE}:${appID}`, [...revokedKeyIDs, keyID]);
     },
     readDailyUsage: async (appID, date) => {
       const stored = await keyValueStore.getItem(`${DAILY_USAGE_NAMESPACE}:${appID}:${date}`);
