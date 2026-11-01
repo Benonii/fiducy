@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { trackEvent } from '@/lib/analytics';
 import { INSTALL_COMMAND } from '@/lib/constants';
 
 const COPIED_RESET_MILLISECONDS = 1600;
@@ -12,6 +13,7 @@ export function InstallCommand() {
 
   const copy = async () => {
     await navigator.clipboard.writeText(INSTALL_COMMAND).catch(() => null);
+    trackEvent('copy_install');
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), COPIED_RESET_MILLISECONDS);
   };

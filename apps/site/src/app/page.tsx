@@ -9,8 +9,8 @@ import { ProviderStrip } from '@/components/ProviderStrip';
 import { Showcase } from '@/components/Showcase';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
+import { WaitlistForm } from '@/components/WaitlistForm';
 import { buttonVariants } from '@/components/ui/button';
-import { DEMO_URL } from '@/lib/constants';
 import { DESCRIPTION_CLASS, SECTION_CLASS, SECTION_HEAD_CLASS } from '@/lib/styles';
 import { TITLE_CLASS } from '@/lib/styles';
 
@@ -109,9 +109,8 @@ export default function HomePage() {
             <PlanCard
               title="Managed"
               price="Coming soon"
-              description="Skip the infrastructure. We run the enclave and the dashboard, you add the SDK."
-              linkLabel={DEMO_URL ? 'Try the demo' : 'Read the quickstart'}
-              linkURL={DEMO_URL ?? '/docs/quickstart'}
+              description="Skip the infrastructure. We run the enclave and the dashboard, you add the SDK. Leave your email and you hear first."
+              action={<WaitlistForm source="plan-managed" />}
             />
           </section>
         </main>
