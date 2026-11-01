@@ -1,11 +1,12 @@
 'use client';
 
-import { Dithering } from '@paper-design/shaders-react';
+import { MeshGradient } from '@paper-design/shaders-react';
 import { useEffect, useState } from 'react';
 
 import type { ShaderBoxProps } from '@/types';
 
-const SHADER_SPEED = 0.4;
+const SHADER_SPEED = 0.3;
+const SHADER_COLORS = ['#ffffff', '#d4d4d4', '#f2f2f2', '#bdbdbd'];
 
 function toPercent(value: number, total: number) {
   return `${(value / total) * 100}%`;
@@ -22,7 +23,7 @@ function useMotionAllowed() {
 export function EnclaveShader({ x, y, width, height, viewWidth, viewHeight }: ShaderBoxProps) {
   const isMotionAllowed = useMotionAllowed();
   return (
-    <Dithering
+    <MeshGradient
       aria-hidden
       className="pointer-events-none absolute"
       style={{
@@ -31,13 +32,12 @@ export function EnclaveShader({ x, y, width, height, viewWidth, viewHeight }: Sh
         width: toPercent(width, viewWidth),
         height: toPercent(height, viewHeight)
       }}
-      colorBack="#ffffff"
-      colorFront="#dcdcdc"
-      shape="warp"
-      type="4x4"
-      size={2}
+      colors={SHADER_COLORS}
+      distortion={0.8}
+      swirl={0.3}
+      grainMixer={0}
+      grainOverlay={0.25}
       speed={isMotionAllowed ? SHADER_SPEED : 0}
-      scale={0.8}
     />
   );
 }
