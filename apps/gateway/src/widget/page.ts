@@ -21,20 +21,30 @@ export function renderWidgetPage({ appID, appName, parentOrigin, nonce }: Widget
 <title>Connect your API key</title>
 <style nonce="${nonce}">${WIDGET_STYLES}</style>
 </head>
-<body>
-<form id="key-form" autocomplete="off">
-  <label for="api-key">Your API key</label>
-  <div class="row">
-    <input id="api-key" name="api-key" type="password" spellcheck="false" autocapitalize="off" placeholder="sk-..." required>
-    <button id="save-button" type="submit">Save key</button>
+<body class="m-0 bg-white p-4 font-sans text-sm leading-[1.55] text-ink antialiased selection:bg-ink selection:text-white">
+<form id="key-form" class="grid gap-2.5" autocomplete="off">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <label for="api-key" class="text-[15px] font-semibold tracking-[-0.01em]">Your API key</label>
+    <span class="inline-flex items-center gap-1.5 border border-border px-1.5 py-0.5 text-xs text-muted-foreground"><span class="size-1.5 bg-ink"></span>Sealed in an enclave</span>
   </div>
-  <p class="note">${escapeHTML(appName)} never sees your key. It is encrypted and only used to call your AI provider.</p>
-  <p id="status" class="status" role="status"></p>
+  <div class="flex gap-2">
+    <div class="flex min-w-0 flex-1 items-center border border-input bg-white shadow-xs/5 transition-shadow focus-within:border-ink focus-within:ring-2 focus-within:ring-ink/10">
+      <input id="api-key" name="api-key" type="password" spellcheck="false" autocapitalize="off" placeholder="sk-..." required class="h-9 min-w-0 flex-1 border-0 bg-transparent px-3 font-mono text-[13px] [font-variant-ligatures:none] outline-none placeholder:text-muted-foreground">
+      <button id="toggle-button" type="button" aria-controls="api-key" aria-pressed="false" class="mr-1 h-7 cursor-pointer px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-ink focus-visible:ring-2 focus-visible:ring-ink">Show</button>
+    </div>
+    <button id="save-button" type="submit" class="inline-flex h-9 shrink-0 cursor-pointer items-center border border-primary bg-primary px-3 font-medium text-white shadow-xs hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-1 disabled:cursor-wait disabled:opacity-64">Save key</button>
+  </div>
+  <p class="m-0 text-xs font-light text-muted-foreground">${escapeHTML(appName)} never sees your key. It is sealed and only opened to call your AI provider.</p>
+  <p id="status" class="m-0 min-h-[1.55em] text-[13px] data-[state=error]:text-destructive" role="status"></p>
 </form>
-<div id="saved" class="saved" hidden>
-  <p class="status">Key saved and encrypted.</p>
-  <p class="note">${escapeHTML(appName)} now holds a handle, not your key. You can revoke it at any time.</p>
+<div id="saved" class="grid animate-settle gap-2.5 motion-reduce:animate-none" hidden>
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <p class="m-0 text-[15px] font-semibold tracking-[-0.01em]">Key saved and encrypted.</p>
+    <span id="key-hint" class="font-mono text-xs text-muted-foreground"></span>
+  </div>
+  <p class="m-0 text-xs font-light text-muted-foreground">${escapeHTML(appName)} now holds a handle, not your key. You can revoke it at any time.</p>
 </div>
+<p class="mt-3.5 mb-0 border-t border-dashed border-border pt-2.5 text-[11px] text-muted-foreground">Secured by Fiducy</p>
 <script nonce="${nonce}">${buildWidgetScript(appID, parentOrigin)}</script>
 </body>
 </html>`;
@@ -45,6 +55,7 @@ export function buildWidgetSecurityHeaders(nonce: string, parentOrigin: string):
     "default-src 'none'",
     `script-src 'nonce-${nonce}'`,
     `style-src 'nonce-${nonce}'`,
+    "font-src 'self'",
     "connect-src 'self'",
     `frame-ancestors ${parentOrigin}`,
     "base-uri 'none'",

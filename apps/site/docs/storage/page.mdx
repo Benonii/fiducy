@@ -1,0 +1,59 @@
+---
+title: Storage
+order: 6
+description: Where handles and sealed records live, and how to plug in your own database.
+---
+
+# Storage
+
+There are two things to store:
+
+- the **handle**, always in your app, through the `storage` adapter you pass to `createFiducy`
+- the **sealed record**, either with Fiducy (default) or in your app
+
+## Where sealed records live
+
+Set this per app in the dashboard under "Where sealed keys live".
+
+| Setting | Records live | Notes |
+| --- | --- | --- |
+| `fiducy` (default) | Fiducy's storage | Smallest setup. Revoke deletes the record on the gateway |
+| `app` | Your storage, next to the handle | You own all the data. The SDK sends the record to the gateway in the `x-key-record` header on each call |
+
+In `app` mode the gateway keeps nothing per key. A record is ciphertext plus a KMS-wrapped share, so your database still cannot open a key on its own. Revoking a key means deleting the row; the SDK does this for you.
+
+## Adapters
+
+### keyValueStorage(driver)
+
+Works with any unstorage-style driver, including Farm.js storage mounts.
+
+```ts
+import { getStorage } from '@farm.js/core/storage';
+import { keyValueStorage } from '@fiducy/sdk/server';
+
+const storage = keyValueStorage(getStorage('fiducy'));
+```
+
+Keys are stored as `fiducy:<userID>:<keyID>`.
+
+### memoryStorage()
+
+In-memory, for tests and local experiments. Everything is lost on restart.
+
+### Your own database
+
+Implement four methods:
+
+```ts
+import type { FiducyStorage } from '@fiducy/sdk/server';
+
+export const storage: FiducyStorage = {
+  saveKey: (key) => db.insert(userKeys).values(key),
+  findKey: (userID, provider) => db.query.userKeys.findFirst({ where: { userID, provider } }),
+  listKeys: (userID) => db.query.userKeys.findMany({ where: { userID } }),
+  deleteKey: async (userID, keyID) => (await db.delete(userKeys).where({ userID, keyID })).count > 0
+};
+```
+
+A stored key is `{ userID, provider, keyID, handle, record?, createdAt }`. Treat the handle like a password hash: it is not secret enough to publish, but it is useless without the gateway.

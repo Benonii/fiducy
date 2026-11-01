@@ -5,9 +5,10 @@ import type { RecordedRequest } from './types';
 const encoder = new TextEncoder();
 
 export const OPENAI_STREAM_CHUNKS = [
-  'data: {"choices":[{"delta":{"content":"Here is"}}]}\n\n',
-  'data: {"choices":[{"delta":{"content":" a summ',
-  'ary."}}]}\n\ndata: {"choices":[],"usage":{"prompt_tokens":41,"completion_tokens":17}}\n\n',
+  'data: {"id":"chatcmpl-1","choices":[{"index":0,"delta":{"role":"assistant","content":"Here is"}}]}\n\n',
+  'data: {"id":"chatcmpl-1","choices":[{"index":0,"delta":{"content":" a summ',
+  'ary."}}]}\n\ndata: {"id":"chatcmpl-1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
+  'data: {"id":"chatcmpl-1","choices":[],"usage":{"prompt_tokens":41,"completion_tokens":17}}\n\n',
   'data: [DONE]\n\n'
 ];
 
@@ -34,7 +35,10 @@ function answerChatCompletion(body: string): Response {
   if (JSON.parse(body).stream) return streamChunks(OPENAI_STREAM_CHUNKS);
   return Response.json(
     {
-      choices: [{ message: { content: 'Hello' } }],
+      id: 'chatcmpl-0',
+      choices: [
+        { index: 0, message: { role: 'assistant', content: 'Hello' }, finish_reason: 'stop' }
+      ],
       usage: { prompt_tokens: 9, completion_tokens: 3 }
     },
     { headers: { 'set-cookie': 'tracking=1' } }

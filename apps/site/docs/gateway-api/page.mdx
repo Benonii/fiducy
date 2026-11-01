@@ -1,0 +1,55 @@
+---
+title: Gateway API
+order: 7
+description: The HTTP endpoints the gateway serves.
+---
+
+# Gateway API
+
+The SDK wraps all of these. You only need this page for custom clients.
+
+Every response is JSON `{ data, message }`, except provider proxy responses, which are passed through untouched.
+
+## Authentication
+
+Server calls send the app secret: `authorization: Bearer fsk_...`. The widget's `POST /keys` is authenticated by the browser origin instead.
+
+## Endpoints
+
+| Method and path | Who calls it | Purpose |
+| --- | --- | --- |
+| `GET /health` | anyone | Liveness |
+| `GET /attestation?nonce=` | anyone | Nitro attestation document for the running enclave |
+| `GET /widget?app=&origin=` | the iframe | Key entry page. CSP locks `frame-ancestors` to `origin` |
+| `POST /keys` | the iframe | Seal a key. Returns `{ handle }` or `{ handle, record }` |
+| `DELETE /keys/:keyID` | your server | Revoke (Fiducy-stored records only) |
+| `POST /release` | your server | Return the plaintext key (keep it in memory, 5 minute TTL). Off unless enabled |
+| `ANY /{provider}/...` | your server | Proxy to the provider with the user's key |
+
+## Provider proxy
+
+| Provider | Gateway base URL |
+| --- | --- |
+| OpenAI | `/openai/v1` |
+| Anthropic | `/anthropic/v1` |
+| Gemini | `/gemini/v1beta` |
+| OpenRouter | `/openrouter/api/v1` |
+
+Headers:
+
+| Header | Value |
+| --- | --- |
+| `authorization` | `Bearer fsk_...` (your app secret, not the user's key) |
+| `x-key-handle` | `kh_...` |
+| `x-key-record` | base64url JSON record, only in app-owned mode |
+
+Errors from the gateway itself:
+
+| Status | Meaning |
+| --- | --- |
+| `400` | Missing or malformed handle or record |
+| `401` | Bad app secret |
+| `403` | The handle belongs to another app or cannot open its key, key release is off for this app, or a key was added outside the widget |
+| `404` | No key with this ID for this app |
+| `409` | Revoke through the gateway on an app that stores its own records. Delete the record instead |
+| `429` | The key reached its monthly request limit |

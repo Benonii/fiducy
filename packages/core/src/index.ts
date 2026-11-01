@@ -1,3 +1,4 @@
+export { SEALED_RECORD_FIELDS } from './constants';
 export { combineShares, decryptSecret, encryptSecret } from './crypto';
 export { generateDataKey, splitDataKey } from './crypto';
 export { createHandle, generateKeyID, parseHandle } from './handle';

@@ -5,7 +5,8 @@
   "scripts": {
     "test": "bun test",
     "lint": "biome check .",
-    "typecheck": "for project in packages/core packages/providers packages/testing packages/widget apps/gateway; do bunx tsc --noEmit -p $project || exit 1; done"
+    "typecheck": "for project in packages/core packages/providers packages/testing packages/widget packages/sdk packages/farm packages/assistant-ui apps/gateway apps/control-plane apps/demo apps/site; do bunx tsc --noEmit -p $project || exit 1; done",
+    "prototype": "bun apps/gateway/scripts/prototype.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

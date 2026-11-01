@@ -1,0 +1,43 @@
+---
+title: How it works
+order: 3
+description: The path a key takes, from the widget to the provider.
+---
+
+# How it works
+
+## Saving a key
+
+1. Your page renders `<ConnectKeyWidget />`, which loads `GET /widget?app=...&origin=...` from the gateway in an iframe. The iframe is on the gateway's origin, so your page's JavaScript cannot read what the user types.
+2. The user pastes a key. The iframe sends it to `POST /keys` on the gateway over TLS.
+3. Inside the enclave the gateway:
+   - generates a random 256-bit data key and encrypts the API key with AES-GCM,
+   - splits the data key into two shares: **share A** (random) and **share B** (data key XOR share A),
+   - wraps share B with AWS KMS. KMS only unwraps for an enclave whose image hash matches the key policy.
+4. The gateway returns a handle, `kh_<keyID>.<shareA>`, and stores the sealed record `{ keyID, appID, ciphertext, iv, wrappedShareB }`, or hands the record back to you in [app-owned mode](/docs/storage).
+5. The iframe posts the handle to your page, and `ConnectKeyWidget` saves it to your server through `POST /api/fiducy/keys`.
+
+## Using a key
+
+1. Your server calls `providerSettings('openai', { userID })`. It returns a gateway `baseURL`, your app secret as `apiKey`, and the handle in the `x-key-handle` header.
+2. Your AI SDK sends a normal provider request to the gateway.
+3. Inside the enclave the gateway checks the app secret, finds the record, unwraps share B through attested KMS, rebuilds the data key from both shares, decrypts the API key, and forwards the request to the provider.
+4. The provider's response streams straight back. The plaintext key is dropped when the request ends.
+
+## Why two shares
+
+Neither side can open a key alone:
+
+| Who has it | What they hold | Can they decrypt? |
+| --- | --- | --- |
+| Your database | Handle (share A) | No: share B is wrapped by KMS |
+| Fiducy storage | Record (ciphertext, wrapped share B) | No: share A is only in your handle |
+| AWS account owner | KMS key | No: the key policy only allows the attested enclave |
+| The enclave | Code only, no stored state | Only while serving a request that carries both |
+
+## Modes
+
+Every app picks an access mode in the dashboard:
+
+- **Gateway only** (default). Keys can only be used through the gateway proxy.
+- **Gateway and release.** Your server may call `POST /release` to get the plaintext key, valid for 5 minutes of in-memory use, for providers or features the proxy does not cover. This gives up most of the protection, so leave it off unless you need it.
