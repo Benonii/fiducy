@@ -65,7 +65,7 @@ describe('a developer onboarding through the dashboard', () => {
     expect(created.appID).toMatch(/^app_/);
     expect(created.appSecret).toMatch(/^fsk_/);
     await page.reload();
-    await page.getByRole('link', { name: 'Chatforge' }).waitFor();
+    await page.getByRole('main').getByRole('link', { name: 'Chatforge' }).waitFor();
     expect(await page.content()).not.toContain(created.appSecret);
   });
 
@@ -106,20 +106,63 @@ describe('a developer onboarding through the dashboard', () => {
 
   it('shows the request in the app usage after the gateway reports it', async () => {
     expect(await stack.usageLedger.flush()).toBe(1);
-    await page.getByRole('link', { name: 'Chatforge' }).click();
+    await page.getByRole('main').getByRole('link', { name: 'Chatforge' }).click();
     await page.getByTestId('request-count').filter({ hasText: '1' }).waitFor({ timeout: 30000 });
+  });
+
+  it('lists the user key and revokes it so the gateway refuses it', async () => {
+    const callDashboard = (path: string, method = 'GET') =>
+      page.evaluate(
+        async ([url, verb]) => {
+          const response = await fetch(url ?? '', { method: verb });
+          return { status: response.status, body: await response.json() };
+        },
+        [path, method]
+      );
+    const keys = await callDashboard(`/api/apps/${created.appID}/keys`);
+    expect(keys.status).toBe(200);
+    const listed = keys.body.data as Array<{ keyID: string; status: string }>;
+    expect(listed.map((key) => key.status).sort()).toEqual(['active', 'revoked']);
+    const usedKey = listed.find((key) => key.status === 'active');
+    expect(usedKey).toMatchObject({ provider: 'openai', requestCount: 1 });
+    const keyID = usedKey?.keyID;
+    const series = await callDashboard(`/api/apps/${created.appID}/usage/series?days=7`);
+    expect(series.body.data.byProvider).toMatchObject([{ provider: 'openai', requestCount: 1 }]);
+    const status = await callDashboard('/api/gateway-status');
+    expect(status.body.data.reachable).toBe(true);
+
+    const revoked = await callDashboard(`/api/apps/${created.appID}/keys/${keyID}`, 'DELETE');
+    expect(revoked.status).toBe(200);
+    const after = await callDashboard(`/api/apps/${created.appID}/keys`);
+    const statusesAfter = (after.body.data as Array<{ status: string }>).map((key) => key.status);
+    expect(statusesAfter).toEqual(['revoked', 'revoked']);
   });
 
   it('hides the app from other developers', async () => {
     const otherPage = await browser.newPage();
     await signUp(otherPage, 'mallory@elsewhere.example');
-    expect(await otherPage.getByText('No apps yet').isVisible()).toBe(true);
+    await otherPage.getByText('No apps yet').waitFor({ timeout: 30000 });
     const response = await otherPage.request.get(
       `${stack.controlPlaneURL}/api/apps/${created.appID}`
     );
     expect(response.status()).toBe(404);
     await otherPage.close();
   });
+});
+
+describe('a developer managing an app', () => {
+  it('rotates the secret and deletes the app through bodiless requests', async () => {
+    const page = await browser.newPage();
+    await signUp(page, 'ops@chatforge.example');
+    const { appID } = await createAppInDashboard(page);
+    const statuses = await page.evaluate(async (id) => {
+      const rotated = await fetch(`/api/apps/${id}/secret`, { method: 'POST' });
+      const deleted = await fetch(`/api/apps/${id}`, { method: 'DELETE' });
+      return [rotated.status, deleted.status];
+    }, appID);
+    expect(statuses).toEqual([200, 200]);
+    await page.close();
+  }, 90000);
 });
 
 describe('control plane access rules', () => {

@@ -8,6 +8,7 @@ import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKe
 import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
 import { createMemoryUsageLedger } from './memoryStores';
 import { createRemoteAppDirectory } from './remoteAppDirectory';
+import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
 
@@ -72,6 +73,7 @@ const enclaveAPIURL = process.env.FIDUCY_ENCLAVE_API_URL;
 const gateway = createGateway({
   keyWrapper: selectKeyWrapper(kms),
   keyStore: selectKeyStore(),
+  keyEvents: connection ? createRemoteKeyEvents(connection) : undefined,
   appDirectory: connection
     ? createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 })
     : await createMemoryAppDirectory(readAppRegistrations()),

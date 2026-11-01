@@ -104,7 +104,8 @@ describe('the gateway feed', () => {
       'appID',
       'appSecretHash',
       'monthlyRequestLimitPerKey',
-      'name'
+      'name',
+      'revokedKeyIDs'
     ]);
   });
 });

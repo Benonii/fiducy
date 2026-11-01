@@ -8,6 +8,7 @@ import { startMockProvider } from '@fiducy/testing';
 
 import { createMemoryKeyStore } from '../../gateway/src/memoryStores';
 import { createRemoteAppDirectory } from '../../gateway/src/remoteAppDirectory';
+import { createRemoteKeyEvents } from '../../gateway/src/remoteKeyEvents';
 import { createRemoteUsageLedger } from '../../gateway/src/remoteUsageLedger';
 import { createGateway } from '../../gateway/src/router';
 
@@ -31,6 +32,7 @@ function startGateway(controlPlaneURL: string, providerURL: string) {
   const gateway = createGateway({
     keyWrapper: createLocalKeyWrapper(crypto.getRandomValues(new Uint8Array(32))),
     keyStore: createMemoryKeyStore(),
+    keyEvents: createRemoteKeyEvents(connection),
     appDirectory: createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 60000 }),
     usageLedger,
     providerRegistry: createProviderRegistry({ openai: providerURL })

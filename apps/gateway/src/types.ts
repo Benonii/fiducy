@@ -16,6 +16,7 @@ export interface RegisteredApp {
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
+  revokedKeyIDs?: string[];
 }
 
 export interface AppRegistration extends RegisteredApp {
@@ -55,6 +56,7 @@ export interface GatewayDependencies {
   usageLedger: UsageLedger;
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
+  keyEvents?: KeyEventReporter;
 }
 
 export interface StoreKeyBody {
@@ -135,4 +137,14 @@ export interface InstanceRoleCredentials {
   secretAccessKey: string;
   sessionToken: string;
   expiration: Date;
+}
+
+export interface KeyEvent {
+  type: 'saved' | 'revoked';
+  appID: string;
+  keyID: string;
+}
+
+export interface KeyEventReporter {
+  report: (event: KeyEvent) => Promise<void>;
 }

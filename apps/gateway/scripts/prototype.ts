@@ -8,6 +8,7 @@ import { startMockProvider } from '@fiducy/testing';
 import { hashSecret } from '../src/hashing';
 import { createMemoryKeyStore } from '../src/memoryStores';
 import { createRemoteAppDirectory } from '../src/remoteAppDirectory';
+import { createRemoteKeyEvents } from '../src/remoteKeyEvents';
 import { createRemoteUsageLedger } from '../src/remoteUsageLedger';
 import { createGateway } from '../src/router';
 
@@ -125,6 +126,7 @@ const gateway = Bun.serve({
   fetch: createGateway({
     keyWrapper: createLocalKeyWrapper(new Uint8Array(Buffer.from(secrets.masterKey, 'base64url'))),
     keyStore: createMemoryKeyStore(),
+    keyEvents: createRemoteKeyEvents(connection),
     appDirectory: createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 }),
     usageLedger,
     providerRegistry: createProviderRegistry(

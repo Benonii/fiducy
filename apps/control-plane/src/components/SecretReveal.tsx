@@ -18,13 +18,13 @@ export function SecretReveal({ appSecret }: SecretRevealProps) {
       </AlertTitle>
       <AlertDescription className="grid gap-3">
         <code
-          className="block break-all border border-foreground border-dashed p-2.5 text-foreground"
+          className="block select-all break-all border border-foreground border-dashed p-2.5 text-foreground"
           data-testid="app-secret"
         >
           {appSecret}
         </code>
         <Button
-          className="justify-self-start"
+          className="justify-self-start max-sm:justify-self-stretch"
           variant="outline"
           size="sm"
           onClick={() => copySecret.mutate()}

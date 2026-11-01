@@ -195,7 +195,7 @@ const SCENES: LeakScene[] = [
 
 function LeakCard({ leak }: LeakCardProps) {
   return (
-    <figure className="group m-0 grid content-start gap-4 border-dashed border-frame px-gutter pt-6 pb-10 outline-none max-md:w-[84%] max-md:shrink-0 max-md:snap-start max-md:border-r max-md:last:border-r-0 md:border-b md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0">
+    <figure className="group m-0 grid content-start gap-3 border-dashed border-frame px-gutter pt-6 pb-8 outline-none max-md:border-b max-md:last:border-b-0 md:border-b md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0">
       <p
         className={`${LABEL_CLASS} flex items-center gap-2.5 before:size-1.5 before:bg-ink group-focus-visible:text-ink group-focus-visible:underline`}
       >
@@ -206,7 +206,7 @@ function LeakCard({ leak }: LeakCardProps) {
         <span>{leak.hint}</span>
         <span className="text-ink normal-case">{leak.stat}</span>
       </div>
-      <h3 className="text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.15] font-semibold tracking-[-0.035em] text-balance">
+      <h3 className="text-[clamp(1.25rem,2vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.035em] text-balance">
         {leak.title} <span className="text-ink-quiet">{leak.quiet}</span>
       </h3>
       <p className={`${DESCRIPTION_CLASS} max-w-[46ch]`}>{leak.description}</p>
@@ -216,7 +216,7 @@ function LeakCard({ leak }: LeakCardProps) {
 
 export function LeakScenes() {
   return (
-    <div className="-mx-gutter grid border-t border-dashed border-frame max-md:flex max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:[scrollbar-width:none] md:grid-cols-2">
+    <div className="-mx-gutter grid border-t border-dashed border-frame md:grid-cols-2">
       {SCENES.map((leak) => (
         <LeakCard key={leak.label} leak={leak} />
       ))}

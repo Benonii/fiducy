@@ -42,6 +42,9 @@ export async function resolveApiKey(
     return fail(describeFailure(400, `Send the user's key handle in ${KEY_HANDLE_HEADER}`));
   const parsedHandle = parseHandle(handle);
   if (!parsedHandle.ok) return fail(describeOpenFailure(parsedHandle.error));
+  if (app.revokedKeyIDs?.includes(parsedHandle.value.keyID)) {
+    return fail(describeFailure(403, 'This key was revoked by the app'));
+  }
 
   const found = await findRecord(app, headers, parsedHandle.value.keyID, keyStore);
   if (!found.ok) return found;
