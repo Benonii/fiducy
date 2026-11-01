@@ -7,20 +7,10 @@ import { QueryProvider } from '@/components/QueryProvider';
 import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
-  title: 'Fiducy demo chat',
-  description: 'A chat app where users bring their own OpenAI key through Fiducy'
+  title: 'Acme Chat, a Fiducy demo',
+  description: 'An assistant-ui chat where users bring their own model keys through Fiducy'
 };
 
 export default function RootLayout({ children }: LayoutProps) {
-  return (
-    <QueryProvider>
-      <div className="mx-auto max-w-3xl px-4 pb-16">
-        <header className="mb-8 flex items-center justify-between border-b py-5">
-          <span className="font-bold font-mono tracking-wider">FIDUCY DEMO</span>
-          <span className="text-muted-foreground text-sm">Bring your own key chat</span>
-        </header>
-        {children}
-      </div>
-    </QueryProvider>
-  );
+  return <QueryProvider>{children}</QueryProvider>;
 }

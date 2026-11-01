@@ -7,7 +7,7 @@ import { ISO_STEAL, ISO_TAG_FIRST, ISO_TAG_LAST } from '@/lib/isoStyles';
 import { LEAK_FIRST_AT, LEAK_LAST_AT } from '@/lib/isoStyles';
 import { DESCRIPTION_CLASS, LABEL_CLASS } from '@/lib/styles';
 
-import type { LeakScene } from '@/types';
+import type { LeakCardProps, LeakScene } from '@/types';
 import type { CSSProperties } from 'react';
 
 function moves(variables: Record<string, string>): CSSProperties {
@@ -193,29 +193,32 @@ const SCENES: LeakScene[] = [
   }
 ];
 
+function LeakCard({ leak }: LeakCardProps) {
+  return (
+    <figure className="group m-0 grid content-start gap-4 border-dashed border-frame px-gutter pt-6 pb-10 outline-none max-md:w-[84%] max-md:shrink-0 max-md:snap-start max-md:border-r max-md:last:border-r-0 md:border-b md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0">
+      <p
+        className={`${LABEL_CLASS} flex items-center gap-2.5 before:size-1.5 before:bg-ink group-focus-visible:text-ink group-focus-visible:underline`}
+      >
+        {leak.label}
+      </p>
+      <IsoScene>{leak.scene}</IsoScene>
+      <div className={`${LABEL_CLASS} flex flex-wrap justify-between gap-x-3 gap-y-1`}>
+        <span>{leak.hint}</span>
+        <span className="text-ink normal-case">{leak.stat}</span>
+      </div>
+      <h3 className="text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.15] font-semibold tracking-[-0.035em] text-balance">
+        {leak.title} <span className="text-ink-quiet">{leak.quiet}</span>
+      </h3>
+      <p className={`${DESCRIPTION_CLASS} max-w-[46ch]`}>{leak.description}</p>
+    </figure>
+  );
+}
+
 export function LeakScenes() {
   return (
-    <div className="-mx-gutter grid border-t border-dashed border-frame md:grid-cols-2">
+    <div className="-mx-gutter grid border-t border-dashed border-frame max-md:flex max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:[scrollbar-width:none] md:grid-cols-2">
       {SCENES.map((leak) => (
-        <figure
-          key={leak.label}
-          className="group m-0 grid content-start gap-3.5 border-b border-dashed border-frame px-gutter pt-8 pb-11 outline-none md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0 max-md:last:border-b-0"
-        >
-          <p
-            className={`${LABEL_CLASS} flex items-center gap-2.5 before:size-1.5 before:bg-ink group-focus-visible:text-ink group-focus-visible:underline`}
-          >
-            {leak.label}
-          </p>
-          <IsoScene>{leak.scene}</IsoScene>
-          <div className={`${LABEL_CLASS} mt-1 flex justify-between gap-4`}>
-            <span>{leak.hint}</span>
-            <span className="text-ink normal-case">{leak.stat}</span>
-          </div>
-          <h3 className="text-[clamp(1.375rem,2.2vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.035em] text-balance">
-            {leak.title} <span className="text-ink-quiet">{leak.quiet}</span>
-          </h3>
-          <p className={DESCRIPTION_CLASS}>{leak.description}</p>
-        </figure>
+        <LeakCard key={leak.label} leak={leak} />
       ))}
     </div>
   );

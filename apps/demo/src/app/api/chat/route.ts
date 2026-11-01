@@ -1,30 +1,38 @@
-import { createOpenAI } from '@ai-sdk/openai';
+import { frontendTools } from '@assistant-ui/react-ai-sdk';
+import { requestKey, withoutKeyRequests } from '@fiducy/assistant-ui/server';
 import { convertToModelMessages, streamText } from 'ai';
 
 import { describeChatError } from '@/lib/chatErrors';
 import { readServerDemoConfig } from '@/lib/config';
 import { fiducyServer, readDemoUser } from '@/lib/fiducy';
+import { createLanguageModel, findDemoModel } from '@/lib/models';
 import { respondWith } from '@/lib/responses';
 import { chatRequestSchema } from '@/lib/validators';
 
 import type { ChatRequestBody } from '@/lib/types';
 
 export async function POST(request: Request) {
-  const config = readServerDemoConfig();
-  if (!config) return respondWith(503, null, 'Set FIDUCY_APP_ID and FIDUCY_APP_SECRET');
+  if (!readServerDemoConfig())
+    return respondWith(503, null, 'Set FIDUCY_APP_ID and FIDUCY_APP_SECRET');
   const parsed = chatRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return respondWith(400, null, parsed.error.issues[0]?.message ?? 'Invalid chat request');
   }
-  const { messages } = parsed.data as ChatRequestBody;
-
+  const body = parsed.data as ChatRequestBody;
   const userID = readDemoUser(request);
-  const settings = userID ? await fiducyServer.providerSettings('openai', { userID }) : null;
-  if (!settings) return respondWith(400, null, 'Connect your API key first');
+  if (!userID) return respondWith(401, null, 'Reload the page to start a demo session');
 
+  const model = findDemoModel(body.model);
+  const settings = await fiducyServer.providerSettings(model.provider, { userID });
+  // No key yet: the reply asks for one, and the key box opens inside the thread.
+  if (!settings) return requestKey({ provider: model.provider });
+
+  const tools = frontendTools(body.tools ?? {});
   const result = streamText({
-    model: createOpenAI(settings).chat(config.model),
-    messages: await convertToModelMessages(messages),
+    model: createLanguageModel(model, settings),
+    system: 'You are Acme Chat, a concise assistant.',
+    messages: await convertToModelMessages(withoutKeyRequests(body.messages), { tools }),
+    tools,
     maxRetries: 0
   });
   return result.toUIMessageStreamResponse({ onError: describeChatError });

@@ -85,3 +85,33 @@
     font-variant-ligatures: none;
   }
 }
+
+/*
+  @fiducy/assistant-ui renders its key box with plain fiducy-tool class hooks so it works in any
+  app; these give it the same look as the coss ui card around it.
+*/
+@layer components {
+  .fiducy-tool {
+    @apply grid max-w-[460px] gap-1.5 border bg-card p-4;
+  }
+
+  .fiducy-tool-title {
+    @apply font-semibold text-foreground tracking-tight;
+  }
+
+  .fiducy-tool-widget {
+    @apply mt-1.5 [&_iframe]:block [&_iframe]:border-0!;
+  }
+
+  .fiducy-tool-error {
+    @apply text-destructive text-sm;
+  }
+
+  .fiducy-tool-done {
+    @apply flex max-w-none items-center gap-2.5 border-0 p-0 font-mono text-muted-foreground text-xs;
+  }
+
+  .fiducy-tool-done::before {
+    @apply size-1.5 bg-foreground content-[''];
+  }
+}
