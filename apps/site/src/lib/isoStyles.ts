@@ -14,3 +14,6 @@ export const ISO_STEAL = 'animate-leak-steal motion-reduce:animate-none';
 export const ISO_TAG_FIRST = 'opacity-0 animate-leak-first motion-reduce:animate-none';
 export const ISO_TAG_LAST =
   'opacity-0 animate-leak-last motion-reduce:animate-none motion-reduce:opacity-100';
+export const LEAK_LOOP_MILLISECONDS = 6000;
+export const LEAK_FIRST_AT = 1440;
+export const LEAK_LAST_AT = 4200;
