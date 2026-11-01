@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { ENCLAVE_STEPS } from '@/lib/constants';
 import { startEnclaveRenderer } from '@/lib/enclaveRenderer';
 
 const LABEL_CLASS =
@@ -13,6 +14,7 @@ export function EnclaveCanvas() {
   const handleLabelRef = useRef<HTMLSpanElement>(null);
   const storedLabelRef = useRef<HTMLSpanElement>(null);
   const requestLabelRef = useRef<HTMLSpanElement>(null);
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -21,21 +23,31 @@ export function EnclaveCanvas() {
     const storedHalf = storedLabelRef.current;
     const request = requestLabelRef.current;
     if (!host || !canvas || !handleHalf || !storedHalf || !request) return;
-    return startEnclaveRenderer(canvas, host, { handleHalf, storedHalf, request });
+    return startEnclaveRenderer(canvas, host, { handleHalf, storedHalf, request }, setStep);
   }, []);
 
   return (
-    <div ref={hostRef} className="absolute inset-0 cursor-grab active:cursor-grabbing">
-      <canvas ref={canvasRef} className="block size-full touch-pan-y" />
-      <span ref={handleLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 -translate-y-full`}>
-        half in your handle
-      </span>
-      <span ref={storedLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 text-ink-muted`}>
-        half sealed here
-      </span>
-      <span ref={requestLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 -translate-y-full`}>
-        provider call
-      </span>
+    <div className="absolute inset-0 grid grid-rows-[minmax(0,1fr)_auto] gap-3">
+      <div ref={hostRef} className="relative cursor-grab active:cursor-grabbing">
+        <canvas ref={canvasRef} className="block size-full touch-pan-y" />
+        <span ref={handleLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 -translate-y-full`}>
+          half 1 · lives with you
+        </span>
+        <span ref={storedLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 text-ink-muted`}>
+          half 2 · lives with us
+        </span>
+        <span ref={requestLabelRef} className={`${LABEL_CLASS} -translate-x-1/2`}>
+          one call to OpenAI
+        </span>
+      </div>
+      <p className="flex min-h-[3em] gap-3 text-sm leading-[1.5] text-ink-body">
+        <span className="shrink-0 font-mono text-xs leading-[1.75] text-ink-muted">
+          0{step + 1}/0{ENCLAVE_STEPS.length}
+        </span>
+        <span key={step} className="animate-rise-in text-pretty motion-reduce:animate-none">
+          {ENCLAVE_STEPS[step]}
+        </span>
+      </p>
     </div>
   );
 }

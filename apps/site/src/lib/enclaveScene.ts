@@ -9,7 +9,8 @@ import type { EnclaveParts, KeyHalves } from '@/types';
 const VAULT_SIZE = 3.0;
 const TRACK_LENGTH = 6.6;
 const TRACK_END = TRACK_LENGTH / 2;
-const CYCLE_SECONDS = 6;
+const CYCLE_SECONDS = 12;
+const STEP_STARTS = [0, 0.22, 0.44, 0.74];
 const JOINED_X = 0.17;
 const KEY_OPEN_GRAY = 0x2a2a2a;
 const KEY_SEALED_WHITE = 0xffffff;
@@ -56,17 +57,22 @@ function phaseProgress(cycle: number, start: number, end: number): number {
   return easeInOut((cycle - start) / (end - start));
 }
 
+export function readEnclaveStep(elapsedSeconds: number): number {
+  const cycle = (elapsedSeconds % CYCLE_SECONDS) / CYCLE_SECONDS;
+  return STEP_STARTS.filter((start) => cycle >= start).length - 1;
+}
+
 export function animateEnclave(parts: EnclaveParts, elapsedSeconds: number): void {
   const cycle = (elapsedSeconds % CYCLE_SECONDS) / CYCLE_SECONDS;
-  const arriving = phaseProgress(cycle, 0, 0.32);
-  const leaving = phaseProgress(cycle, 0.62, 0.92);
-  const opened = phaseProgress(cycle, 0.3, 0.38) - phaseProgress(cycle, 0.56, 0.64);
+  const arriving = phaseProgress(cycle, 0, 0.22);
+  const leaving = phaseProgress(cycle, 0.76, 0.95);
+  const opened = phaseProgress(cycle, 0.42, 0.48) - phaseProgress(cycle, 0.7, 0.76);
   const { handleHalf, keyFaces } = parts.halves;
   handleHalf.position.x = MathUtils.lerp(-TRACK_END, JOINED_X, arriving) - leaving * TRACK_END;
   keyFaces.color
     .setHex(KEY_SEALED_WHITE)
     .lerp(keyFaces.color.clone().setHex(KEY_OPEN_GRAY), opened);
-  parts.request.position.x = MathUtils.lerp(0, TRACK_END, phaseProgress(cycle, 0.38, 0.62));
-  parts.request.visible = cycle > 0.36 && cycle < 0.64;
+  parts.request.position.x = MathUtils.lerp(0, TRACK_END, phaseProgress(cycle, 0.48, 0.72));
+  parts.request.visible = cycle > 0.46 && cycle < 0.74;
   parts.attestationFrame.rotation.y = elapsedSeconds * 0.12;
 }

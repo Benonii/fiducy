@@ -1,7 +1,7 @@
 import { MathUtils, Object3D, PerspectiveCamera, Vector3 } from 'three';
 import { WebGLRenderer } from 'three';
 
-import { animateEnclave, createEnclaveParts } from '@/lib/enclaveScene';
+import { animateEnclave, createEnclaveParts, readEnclaveStep } from '@/lib/enclaveScene';
 
 import type { EnclaveParts, PointerState } from '@/types';
 import type { SceneLabel, SceneLabelElements } from '@/types';
@@ -13,6 +13,7 @@ const POINTER_YAW = 0.55;
 const POINTER_PITCH = 0.3;
 const FOLLOW_RATE = 0.06;
 const DRAG_FRICTION = 0.94;
+const REDUCED_MOTION_SECONDS = 6.5;
 
 function createPointerState(): PointerState {
   return { targetX: 0, targetY: 0, dragVelocity: 0, isDragging: false, lastClientX: 0 };
@@ -62,7 +63,7 @@ function pinLabels(parts: EnclaveParts, elements: SceneLabelElements): SceneLabe
   return [
     { element: elements.handleHalf, anchor: createAnchor(parts.halves.handleHalf, -1.1, 0.75) },
     { element: elements.storedHalf, anchor: createAnchor(parts.halves.storedHalf, 1.0, -0.6) },
-    { element: elements.request, anchor: createAnchor(parts.request, 0, 0.4) }
+    { element: elements.request, anchor: createAnchor(parts.request, 0, -0.3) }
   ];
 }
 
@@ -92,7 +93,8 @@ function resizeRenderer(
 export function startEnclaveRenderer(
   canvas: HTMLCanvasElement,
   host: HTMLElement,
-  labelElements: SceneLabelElements
+  labelElements: SceneLabelElements,
+  onStep: (step: number) => void
 ): () => void {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
@@ -111,7 +113,9 @@ export function startEnclaveRenderer(
     spin += pointer.dragVelocity;
     pointer.dragVelocity *= pointer.isDragging ? 1 : DRAG_FRICTION;
     steerTurntable(parts, pointer, spin);
-    animateEnclave(parts, isReducedMotion ? 2.2 : (now - startedAt) / 1000);
+    const elapsedSeconds = isReducedMotion ? REDUCED_MOTION_SECONDS : (now - startedAt) / 1000;
+    animateEnclave(parts, elapsedSeconds);
+    onStep(readEnclaveStep(elapsedSeconds));
     renderer.render(parts.scene, camera);
     placeLabels(labels, camera, host);
     frame = isVisible && !document.hidden ? requestAnimationFrame(render) : 0;
