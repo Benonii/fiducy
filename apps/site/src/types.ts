@@ -29,6 +29,12 @@ export interface TagProps {
   className?: string;
 }
 
+export interface IsoKeyProps {
+  at: Point;
+  tone?: BoxProps['tone'];
+  part?: 'whole' | 'bow' | 'tip';
+}
+
 export interface IsoSceneProps {
   children: ReactNode;
 }
@@ -84,8 +90,15 @@ export interface PlanCardProps {
   title: string;
   price: string;
   description: string;
-  linkLabel: string;
-  linkURL: string;
+  linkLabel?: string;
+  linkURL?: string;
+  action?: ReactNode;
+}
+
+export type WaitlistStatus = 'idle' | 'sending' | 'joined' | 'already_joined' | 'error';
+
+export interface WaitlistFormProps {
+  source: string;
 }
 
 export type ShowcaseStep = 'key' | 'ask' | 'answer';

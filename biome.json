@@ -10,7 +10,8 @@
       "**/farm.d.ts",
       "**/*.generated.ts",
       "apps/site/src/components/ui",
-      "apps/site/src/lib/utils.ts"
+      "apps/site/src/lib/utils.ts",
+      "apps/site/convex/_generated"
     ]
   },
   "formatter": {
@@ -40,7 +41,12 @@
   },
   "overrides": [
     {
-      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts", "apps/*/docs.config.ts"],
+      "include": [
+        "apps/*/src/app/**",
+        "apps/*/farm.config.ts",
+        "apps/*/docs.config.ts",
+        "apps/site/convex/schema.ts"
+      ],
       "linter": {
         "rules": {
           "style": {
