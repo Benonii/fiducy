@@ -1,6 +1,7 @@
 import { createEndpoint } from '@farm.js/core/api';
 
 import { deleteApp, findOwnedApp, toAppView, updateApp } from '@/lib/appService';
+import { getGatewayClient } from '@/lib/gatewayClient';
 import { requireOwner } from '@/lib/middleware';
 import { respondWith, respondWithFailure } from '@/lib/responses';
 import { getControlStore } from '@/lib/storage';
@@ -25,7 +26,12 @@ export const PATCH = createEndpoint(
 export const DELETE = createEndpoint(
   { middleware: [requireOwner] },
   async ({ context, params }) => {
-    const deleted = await deleteApp(getControlStore(), context.ownerID, String(params.appID));
+    const deleted = await deleteApp(
+      getControlStore(),
+      getGatewayClient(),
+      context.ownerID,
+      String(params.appID)
+    );
     if (!deleted.ok) return respondWithFailure(deleted.error);
     return respondWith(200, { appID: deleted.value }, 'App deleted');
   }
