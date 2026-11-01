@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 export function HeroStage() {
   return (
     <div
-      className="relative h-[clamp(280px,40vw,500px)] animate-fade-in overflow-hidden"
+      className="relative h-[clamp(360px,40vw,500px)] animate-fade-in overflow-hidden"
       aria-hidden="true"
     >
       <EnclaveCanvas />

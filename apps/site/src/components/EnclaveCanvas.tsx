@@ -36,7 +36,7 @@ export function EnclaveCanvas() {
         <span ref={storedLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 text-ink-muted`}>
           half 2 · lives with us
         </span>
-        <span ref={requestLabelRef} className={`${LABEL_CLASS} -translate-x-1/2`}>
+        <span ref={requestLabelRef} className={`${LABEL_CLASS} -translate-x-1/2 max-sm:hidden`}>
           one call to OpenAI
         </span>
       </div>
