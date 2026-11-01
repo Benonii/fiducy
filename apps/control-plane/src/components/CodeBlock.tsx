@@ -31,7 +31,7 @@ export function CodeBlock({ code }: CodeBlockProps) {
   return (
     <Collapsible className="grid gap-2">
       <div className="flex items-center justify-between gap-2">
-        <CollapsibleTrigger render={<Button className="group" size="xs" variant="outline" />}>
+        <CollapsibleTrigger render={<Button className="group" size="xs" variant="link" />}>
           <ChevronDownIcon className="transition-transform group-data-panel-open:rotate-180" />
           <span className="group-data-panel-open:hidden">Show code</span>
           <span className="hidden group-data-panel-open:inline">Hide code</span>
