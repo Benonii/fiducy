@@ -96,8 +96,8 @@ export default function HomePage() {
               title="Managed"
               price="Coming soon"
               description="We run the enclave, KMS and dashboard. You add the SDK and choose where records live."
-              linkLabel="Try the demo"
-              linkURL={DEMO_URL}
+              linkLabel={DEMO_URL ? 'Try the demo' : 'Read the quickstart'}
+              linkURL={DEMO_URL ?? '/docs/quickstart'}
             />
           </section>
         </main>

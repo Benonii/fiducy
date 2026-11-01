@@ -9,3 +9,5 @@ enclave/gateway.js
 enclave/enclaver.yaml
 .prototype/
 apps/site/.farm/
+.vercel
+.env*
