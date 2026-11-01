@@ -26,8 +26,8 @@
   --animate-leak-scroll: leak-scroll 18s linear infinite;
   --animate-marquee: marquee 16s linear infinite;
   --animate-leak-steal: leak-steal 6s var(--ease-out-expo) infinite;
-  --animate-leak-first: leak-first 6s ease infinite;
-  --animate-leak-last: leak-last 6s ease infinite;
+  --animate-leak-first: leak-first 6s linear infinite;
+  --animate-leak-last: leak-last 6s linear infinite;
 
   @keyframes leak-steal {
     0%,
@@ -57,26 +57,26 @@
 
   @keyframes leak-first {
     0%,
-    24%,
+    23.9%,
     66%,
     100% {
       opacity: 0;
     }
-    32%,
-    58% {
+    24%,
+    65.9% {
       opacity: 1;
     }
   }
 
   @keyframes leak-last {
     0%,
-    70%,
+    69.9%,
     96%,
     100% {
       opacity: 0;
     }
-    78%,
-    90% {
+    70%,
+    95.9% {
       opacity: 1;
     }
   }

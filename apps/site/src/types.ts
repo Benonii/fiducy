@@ -125,3 +125,10 @@ export interface CodeBlockProps {
 export interface ProviderLogoProps {
   name: string;
 }
+
+export interface TypedTagProps {
+  at: Point;
+  text: string;
+  startsAt: number;
+  className: string;
+}

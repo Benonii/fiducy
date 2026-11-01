@@ -1,8 +1,10 @@
 import { IsoScene } from '@/components/IsoScene';
-import { Box, Line, Plate, Tag, offset } from '@/components/isometric';
+import { TypedTag } from '@/components/TypedTag';
+import { Box, Line, Plate, offset } from '@/components/isometric';
 import { ISO_DETAIL, ISO_GHOST, ISO_LINE_STRONG } from '@/lib/isoStyles';
 import { ISO_SCREEN, ISO_SCROLL, ISO_SLOT } from '@/lib/isoStyles';
 import { ISO_STEAL, ISO_TAG_FIRST, ISO_TAG_LAST } from '@/lib/isoStyles';
+import { LEAK_FIRST_AT, LEAK_LAST_AT } from '@/lib/isoStyles';
 import { DESCRIPTION_CLASS, LABEL_CLASS } from '@/lib/styles';
 
 import type { LeakScene } from '@/types';
@@ -40,13 +42,19 @@ function DatabaseScene() {
       <Plate at={[2.4, 2.6, 4.1]} size={[1.2, 0.8]} className={ISO_GHOST} />
       <g className={ISO_STEAL} style={moves({ '--to': offset(0, 0, 3.4) })}>
         <Box at={[2.4, 2.6, 4.1]} size={[1.2, 0.8, 0.25]} tone="solid" />
-        <Tag at={[4.2, 2.6, 4.6]} className={ISO_TAG_FIRST}>
-          stolen: kh_9f2c…
-        </Tag>
+        <TypedTag
+          at={[4.2, 2.6, 4.6]}
+          text="stolen: kh_9f2c…"
+          startsAt={LEAK_FIRST_AT}
+          className={ISO_TAG_FIRST}
+        />
       </g>
-      <Tag at={[4.2, 2.6, 7.8]} className={ISO_TAG_LAST}>
-        opens nothing
-      </Tag>
+      <TypedTag
+        at={[4.2, 2.6, 7.8]}
+        text="opens nothing"
+        startsAt={LEAK_LAST_AT}
+        className={ISO_TAG_LAST}
+      />
     </>
   );
 }
@@ -75,12 +83,18 @@ function LogsScene() {
           <Line from={[0.5, 0.8, 0.8]} to={[7.5, 0.8, 0.8]} className={ISO_LINE_STRONG} />
         </g>
       </g>
-      <Tag at={[2.2, -1.4, 0.8]} className={ISO_TAG_FIRST}>
-        looking for keys
-      </Tag>
-      <Tag at={[2.2, -1.4, 0.8]} className={ISO_TAG_LAST}>
-        0 keys found
-      </Tag>
+      <TypedTag
+        at={[2.2, -1.4, 0.8]}
+        text="looking for keys"
+        startsAt={LEAK_FIRST_AT}
+        className={ISO_TAG_FIRST}
+      />
+      <TypedTag
+        at={[2.2, -1.4, 0.8]}
+        text="0 keys found"
+        startsAt={LEAK_LAST_AT}
+        className={ISO_TAG_LAST}
+      />
     </>
   );
 }
@@ -94,13 +108,19 @@ function StorageScene() {
       </Box>
       <g className={ISO_STEAL} style={moves({ '--to': offset(2.6, 0, 1.6) })}>
         <Box at={[2.2, 0, 0]} size={[2.2, 4.4, 3]} tone="solid" />
-        <Tag at={[6.2, 2.2, 1]} className={ISO_TAG_FIRST}>
-          stolen: half a key
-        </Tag>
+        <TypedTag
+          at={[6.2, 2.2, 1]}
+          text="stolen: half a key"
+          startsAt={LEAK_FIRST_AT}
+          className={ISO_TAG_FIRST}
+        />
       </g>
-      <Tag at={[6.2, 2.2, 2.6]} className={ISO_TAG_LAST}>
-        opens nothing
-      </Tag>
+      <TypedTag
+        at={[6.2, 2.2, 2.6]}
+        text="opens nothing"
+        startsAt={LEAK_LAST_AT}
+        className={ISO_TAG_LAST}
+      />
     </>
   );
 }
@@ -118,12 +138,18 @@ function EnclaveScene() {
         <Box at={[-3.4, 2.25, 4.6]} size={[2.4, 0.5, 0.35]} tone="solid" />
         <Box at={[-4.4, 2, 4.55]} size={[1, 1, 0.45]} />
       </g>
-      <Tag at={[4.4, 0.2, 5.4]} className={ISO_TAG_FIRST}>
-        admin: decrypt key
-      </Tag>
-      <Tag at={[4.4, 0.2, 5.4]} className={ISO_TAG_LAST}>
-        KMS: unwrap denied
-      </Tag>
+      <TypedTag
+        at={[4.4, 0.2, 5.4]}
+        text="admin: decrypt key"
+        startsAt={LEAK_FIRST_AT}
+        className={ISO_TAG_FIRST}
+      />
+      <TypedTag
+        at={[4.4, 0.2, 5.4]}
+        text="KMS: unwrap denied"
+        startsAt={LEAK_LAST_AT}
+        className={ISO_TAG_LAST}
+      />
     </>
   );
 }
