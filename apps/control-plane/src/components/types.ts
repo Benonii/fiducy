@@ -18,8 +18,12 @@ export interface DashboardShellProps {
   children: ReactNode;
 }
 
-export interface SidebarBodyProps {
+export interface MobileMenuProps {
   activeAppID?: string;
+}
+
+export interface SidebarFooterProps {
+  className?: string;
 }
 
 export interface AppNavigationProps {
@@ -39,7 +43,13 @@ export interface PanelProps {
   description?: string;
   action?: ReactNode;
   className?: string;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
   children: ReactNode;
+}
+
+export interface CodeBlockProps {
+  code: string;
 }
 
 export interface QuietStateProps {

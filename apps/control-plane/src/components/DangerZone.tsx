@@ -24,6 +24,8 @@ export function DangerZone({ appID }: AppReferenceProps) {
 
   return (
     <Panel
+      collapsible
+      defaultOpen={false}
       className="border-dashed"
       title="Secret and removal"
       description="Rotating breaks servers still using the old secret. Deleting breaks every stored key handle."

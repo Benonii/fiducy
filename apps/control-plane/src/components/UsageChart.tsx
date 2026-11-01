@@ -59,6 +59,7 @@ export function UsageChart({ appID }: AppReferenceProps) {
   );
   return (
     <Panel
+      collapsible
       title="Last 30 days"
       description="Daily traffic through the gateway, in UTC."
       action={controls}

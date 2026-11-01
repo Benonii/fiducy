@@ -7,52 +7,54 @@ import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetPanel,
   SheetPopup,
   SheetTitle,
   SheetTrigger
 } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 import { AppNavigation } from './AppNavigation';
 import { GatewayStatusLine } from './GatewayStatusLine';
 import { Wordmark } from './Wordmark';
 
-import type { DashboardShellProps, SidebarBodyProps } from './types';
+import type { DashboardShellProps, MobileMenuProps, SidebarFooterProps } from './types';
 
 async function leave() {
   await signOut();
   window.location.href = '/sign-in';
 }
 
-function SidebarBody({ activeAppID }: SidebarBodyProps) {
+function SidebarFooter({ className }: SidebarFooterProps) {
   return (
-    <>
-      <AppNavigation activeAppID={activeAppID} />
-      <div className="mt-auto grid gap-4 border-t border-dashed px-2 pt-4">
-        <GatewayStatusLine />
-        <Button className="justify-self-start" size="xs" variant="ghost" onClick={leave}>
-          Sign out
-        </Button>
-      </div>
-    </>
+    <div className={cn('grid gap-4', className)}>
+      <GatewayStatusLine />
+      <Button className="justify-self-start" size="xs" variant="ghost" onClick={leave}>
+        Sign out
+      </Button>
+    </div>
   );
 }
 
-function MobileMenu({ activeAppID }: SidebarBodyProps) {
+function MobileMenu({ activeAppID }: MobileMenuProps) {
   return (
     <Sheet>
       <SheetTrigger render={<Button aria-label="Open menu" size="icon" variant="ghost" />}>
         <MenuIcon />
       </SheetTrigger>
-      <SheetPopup side="left">
+      <SheetPopup className="h-full" side="left">
         <SheetHeader>
           <SheetTitle render={<Wordmark />} />
           <SheetDescription className="sr-only">Your apps and the gateway status</SheetDescription>
         </SheetHeader>
-        <SheetPanel className="flex min-h-0 flex-1 flex-col gap-6">
-          <SidebarBody activeAppID={activeAppID} />
+        <SheetPanel className="flex-1">
+          <AppNavigation activeAppID={activeAppID} />
         </SheetPanel>
+        <SheetFooter className="border-t border-dashed">
+          <SidebarFooter className="w-full" />
+        </SheetFooter>
       </SheetPopup>
     </Sheet>
   );
@@ -70,7 +72,8 @@ export function DashboardShell({ activeAppID, children }: DashboardShellProps) {
           <div className="px-2">
             <Wordmark />
           </div>
-          <SidebarBody activeAppID={activeAppID} />
+          <AppNavigation activeAppID={activeAppID} />
+          <SidebarFooter className="mt-auto border-t border-dashed px-2 pt-4" />
         </div>
       </aside>
       <div className="mx-auto w-full min-w-0 max-w-6xl px-4 py-6 sm:px-8 md:py-10">{children}</div>

@@ -81,7 +81,12 @@ export function AppOverview({ app, onOpenTab }: OverviewProps) {
         <div className="grid content-start gap-6">
           <UsageChart appID={app.appID} />
           <div className="grid gap-6 md:grid-cols-2">
-            <Panel title="Busiest keys" description="This month, against the per-key limit.">
+            <Panel
+              collapsible
+              defaultOpen={false}
+              title="Busiest keys"
+              description="This month, against the per-key limit."
+            >
               {usage.data ? (
                 <KeyLoadList usage={usage.data} monthlyLimit={app.monthlyRequestLimitPerKey} />
               ) : (
@@ -91,7 +96,12 @@ export function AppOverview({ app, onOpenTab }: OverviewProps) {
                 />
               )}
             </Panel>
-            <Panel title="By provider" description="Requests in the last 30 days.">
+            <Panel
+              collapsible
+              defaultOpen={false}
+              title="By provider"
+              description="Requests in the last 30 days."
+            >
               <ProviderBreakdown providers={series.data?.byProvider ?? []} />
             </Panel>
           </div>
@@ -99,13 +109,19 @@ export function AppOverview({ app, onOpenTab }: OverviewProps) {
         <div className="grid content-start gap-6">
           {doneCount < steps.length ? (
             <Panel
+              collapsible
               title="Get to first request"
               description={`${doneCount} of ${steps.length} done`}
             >
               <SetupChecklist steps={steps} onOpenTab={onOpenTab} />
             </Panel>
           ) : null}
-          <Panel title="Security" description="How this app handles user keys.">
+          <Panel
+            collapsible
+            defaultOpen={false}
+            title="Security"
+            description="How this app handles user keys."
+          >
             <SecurityPanel app={app} />
           </Panel>
         </div>
