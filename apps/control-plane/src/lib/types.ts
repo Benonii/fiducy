@@ -1,10 +1,12 @@
 export type KeyAccessMode = 'gateway' | 'gateway_and_release';
+export type RecordStorage = 'fiducy' | 'app';
 
 export interface AppSettings {
   name: string;
   accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
+  recordStorage?: RecordStorage;
 }
 
 export interface StoredApp extends AppSettings {

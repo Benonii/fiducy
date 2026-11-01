@@ -11,7 +11,6 @@ export interface ServerDemoConfig extends PublicDemoConfig {
 }
 
 export interface ChatRequestBody {
-  handle: string;
   messages: UIMessage[];
 }
 

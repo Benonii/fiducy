@@ -22,7 +22,7 @@ const submitKey = async (apiKey) => {
   });
   const body = await response.json();
   if (!response.ok) throw new Error(body.message);
-  return body.data.handle;
+  return body.data;
 };
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -31,10 +31,10 @@ form.addEventListener('submit', async (event) => {
   button.disabled = true;
   showStatus('Encrypting and saving...', false);
   try {
-    const handle = await submitKey(apiKey);
+    const { handle, record } = await submitKey(apiKey);
     form.hidden = true;
     saved.hidden = false;
-    notifyParent({ type: settings.messageTypes.handle, handle });
+    notifyParent({ type: settings.messageTypes.handle, handle, record });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     showStatus(message, true);

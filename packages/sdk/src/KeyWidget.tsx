@@ -17,7 +17,7 @@ export function KeyWidget({ gatewayURL, appID, onHandle, onError, className }: K
       gatewayURL,
       appID,
       container,
-      onHandle: (handle) => onHandleRef.current(handle),
+      onHandle: (handle, record) => onHandleRef.current(handle, record),
       onError: (message) => onErrorRef.current?.(message)
     });
     return widget.unmount;

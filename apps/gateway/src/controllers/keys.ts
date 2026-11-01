@@ -27,6 +27,9 @@ export async function storeKey(request: Request, dependencies: GatewayDependenci
     ...body.value,
     keyWrapper: dependencies.keyWrapper
   });
+  if (app.recordStorage === 'app') {
+    return respondWith(201, { handle, record }, 'Key sealed. Store the handle and the record');
+  }
   await dependencies.keyStore.saveRecord(record);
   return respondWith(201, { handle }, 'Key stored. Save the handle, not the key');
 }
@@ -38,6 +41,9 @@ export async function revokeKey(
 ) {
   const app = await authenticateApp(dependencies.appDirectory, request.headers);
   if (!app.ok) return respondWithFailure(app.error);
+  if (app.value.recordStorage === 'app') {
+    return respondWith(409, null, 'This app stores its own records. Delete the record to revoke');
+  }
   const record = await dependencies.keyStore.findRecord(keyID);
   if (record?.appID !== app.value.appID) return respondWith(404, null, 'No key found with this ID');
 

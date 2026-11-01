@@ -31,7 +31,8 @@ export function mountKeyWidget({
 
   const handleMessage = (event: MessageEvent<WidgetMessage>) => {
     if (event.origin !== gatewayOrigin || event.source !== iframe.contentWindow) return;
-    if (event.data?.type === WIDGET_MESSAGE_TYPES.handle) onHandle(event.data.handle);
+    if (event.data?.type === WIDGET_MESSAGE_TYPES.handle)
+      onHandle(event.data.handle, event.data.record);
     if (event.data?.type === WIDGET_MESSAGE_TYPES.error) onError?.(event.data.message);
   };
 

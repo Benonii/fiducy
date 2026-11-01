@@ -13,21 +13,30 @@
       "types": "./src/react.ts",
       "bun": "./src/react.ts",
       "default": "./dist/react.js"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "bun": "./src/server.ts",
+      "default": "./dist/server.js"
     }
   },
   "files": ["dist", "src"],
   "scripts": {
-    "build": "bun build src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime && bun build src/index.ts --outdir dist --target node"
+    "build": "bun build src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime --external @tanstack/react-query && bun build src/index.ts src/server.ts --outdir dist --target node"
   },
   "dependencies": {
     "@fiducy/core": "workspace:*",
     "@fiducy/widget": "workspace:*"
   },
   "peerDependencies": {
-    "react": "19.2.0"
+    "react": "19.2.0",
+    "@tanstack/react-query": "^5.104.2"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
       "optional": true
     }
   },
@@ -35,6 +44,7 @@
     "@ai-sdk/anthropic": "4.0.79",
     "@ai-sdk/openai": "4.0.93",
     "@fiducy/testing": "workspace:*",
+    "@tanstack/react-query": "5.104.2",
     "@types/react": "19.2.2",
     "ai": "7.0.139",
     "zod": "3.25.76"

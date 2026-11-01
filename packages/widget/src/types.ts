@@ -1,8 +1,16 @@
+export interface WidgetSealedRecord {
+  keyID: string;
+  appID: string;
+  ciphertext: string;
+  iv: string;
+  wrappedShareB: string;
+}
+
 export interface MountKeyWidgetOptions {
   gatewayURL: string;
   appID: string;
   container: HTMLElement;
-  onHandle: (handle: string) => void;
+  onHandle: (handle: string, record?: WidgetSealedRecord) => void;
   onError?: (message: string) => void;
 }
 
@@ -13,5 +21,5 @@ export interface MountedKeyWidget {
 
 export type WidgetMessage =
   | { type: 'fiducy:ready' }
-  | { type: 'fiducy:handle'; handle: string }
+  | { type: 'fiducy:handle'; handle: string; record?: WidgetSealedRecord }
   | { type: 'fiducy:error'; message: string };

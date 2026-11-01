@@ -19,6 +19,16 @@ const ACCESS_MODES = [
   }
 ];
 
+const RECORD_STORAGE_OPTIONS = [
+  { label: 'With Fiducy (your app stores only a handle)', value: 'fiducy' },
+  { label: 'In your database (your app sends the record with each call)', value: 'app' }
+];
+
+function describeRecordStorage(recordStorage: AppSettings['recordStorage']): string {
+  const value = recordStorage ?? 'fiducy';
+  return RECORD_STORAGE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+
 interface AppSettingsFieldsProps {
   defaults?: AppSettings;
 }
@@ -69,7 +79,36 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
             ))}
           </SelectPopup>
         </Select>
+        <FieldDescription>
+          Key release sends the plain key to your server. Leave it off unless a feature needs it.
+        </FieldDescription>
       </Field>
+      {defaults ? (
+        <Field>
+          <FieldLabel>Where sealed keys live</FieldLabel>
+          <Input readOnly value={describeRecordStorage(defaults.recordStorage)} />
+          <FieldDescription>
+            Set when the app is created. Create a new app to store keys the other way.
+          </FieldDescription>
+        </Field>
+      ) : (
+        <Field>
+          <FieldLabel>Where sealed keys live</FieldLabel>
+          <Select name="recordStorage" items={RECORD_STORAGE_OPTIONS} defaultValue="fiducy">
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectPopup>
+              {RECORD_STORAGE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
+          <FieldDescription>You can't change this after the app is created.</FieldDescription>
+        </Field>
+      )}
     </>
   );
 }

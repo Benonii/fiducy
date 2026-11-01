@@ -1,32 +1,32 @@
-import { KeyWidget } from '@fiducy/sdk/react';
+import { ConnectKeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardPanel, CardTitle } from '@/components/ui/card';
+import { FIDUCY_BASE_PATH } from '@/lib/constants';
 
 import type { PublicDemoConfig } from '@/lib/types';
 
 interface ConnectKeyProps {
   config: PublicDemoConfig;
-  onHandle: (handle: string) => void;
 }
 
-export function ConnectKey({ config, onHandle }: ConnectKeyProps) {
+export function ConnectKey({ config }: ConnectKeyProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   return (
     <Card render={<section />}>
       <CardHeader>
         <CardTitle render={(props) => <h2 {...props} />}>Connect your OpenAI key</CardTitle>
         <CardDescription>
-          The box below is served by the Fiducy gateway. This page never sees your key, only a
-          handle that works for this app.
+          The box below is served by the Fiducy gateway. This page never sees your key.
         </CardDescription>
       </CardHeader>
       <CardPanel className="grid gap-4">
-        <KeyWidget
+        <ConnectKeyWidget
           gatewayURL={config.gatewayURL}
           appID={config.appID}
-          onHandle={onHandle}
+          provider="openai"
+          basePath={FIDUCY_BASE_PATH}
           onError={setErrorMessage}
           className="[&_iframe]:block [&_iframe]:border [&_iframe]:border-border"
         />

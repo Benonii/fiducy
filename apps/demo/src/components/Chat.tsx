@@ -13,15 +13,11 @@ import { Card } from '@/components/ui/card';
 import { CHAT_API_PATH } from '@/lib/constants';
 
 interface ChatProps {
-  handle: string;
   onForgetKey: () => void;
 }
 
-export function Chat({ handle, onForgetKey }: ChatProps) {
-  const transport = useMemo(
-    () => new AssistantChatTransport({ api: CHAT_API_PATH, body: { handle } }),
-    [handle]
-  );
+export function Chat({ onForgetKey }: ChatProps) {
+  const transport = useMemo(() => new AssistantChatTransport({ api: CHAT_API_PATH }), []);
   const runtime = useChatRuntime({ transport });
 
   return (

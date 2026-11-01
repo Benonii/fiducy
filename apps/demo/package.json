@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun run --cwd ../../packages/sdk build && farm dev",
-    "build": "bun run --cwd ../../packages/sdk build && farm build",
+    "dev": "bun run --cwd ../../packages/sdk build && bun run --cwd ../../packages/farm build && farm dev",
+    "build": "bun run --cwd ../../packages/sdk build && bun run --cwd ../../packages/farm build && farm build",
     "start": "farm start"
   },
   "dependencies": {
@@ -15,6 +15,7 @@
     "@assistant-ui/react-ai-sdk": "1.4.17",
     "@base-ui/react": "1.9.0",
     "@farm.js/core": "0.1.40",
+    "@fiducy/farm": "workspace:*",
     "@fiducy/sdk": "workspace:*",
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",

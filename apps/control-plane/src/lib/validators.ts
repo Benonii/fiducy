@@ -21,10 +21,11 @@ export const appSettingsSchema = z.object({
   name: z.string().trim().min(1, 'Give the app a name').max(80),
   accessMode: z.enum(['gateway', 'gateway_and_release']).default('gateway'),
   monthlyRequestLimitPerKey: z.coerce.number().int().min(1).max(MAXIMUM_MONTHLY_REQUEST_LIMIT),
-  allowedOrigins: z.array(originSchema).max(MAXIMUM_ALLOWED_ORIGINS)
+  allowedOrigins: z.array(originSchema).max(MAXIMUM_ALLOWED_ORIGINS),
+  recordStorage: z.enum(['fiducy', 'app']).default('fiducy')
 });
 
-export const appSettingsUpdateSchema = appSettingsSchema.partial();
+export const appSettingsUpdateSchema = appSettingsSchema.omit({ recordStorage: true }).partial();
 
 export const usageEventSchema = z.object({
   appID: z.string().min(1),

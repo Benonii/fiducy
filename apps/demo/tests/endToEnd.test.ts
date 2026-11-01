@@ -1,3 +1,6 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { chromium } from 'playwright';
 
@@ -29,6 +32,14 @@ async function connectKey(page: Page) {
   await page.getByText('Your key is connected').waitFor();
 }
 
+function readStoredRecords(): string {
+  const directory = join(stack.dataDirectory, 'fiducy');
+  return readdirSync(directory, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => readFileSync(join(entry.parentPath, entry.name), 'utf8'))
+    .join('\n');
+}
+
 async function sendMessage(page: Page, text: string) {
   await page.getByLabel('Message').fill(text);
   await page.getByRole('button', { name: 'Send' }).click();
@@ -50,7 +61,9 @@ describe('demo chat with a bring-your-own key', () => {
       expect(await page.content()).not.toContain(SAMPLE_API_KEY);
       const storage = await page.evaluate(() => JSON.stringify(window.localStorage));
       expect(storage).not.toContain(SAMPLE_API_KEY);
-      expect(storage).toContain('kh_');
+      const records = readStoredRecords();
+      expect(records).toContain('kh_');
+      expect(records).not.toContain(SAMPLE_API_KEY);
       await page.close();
     },
     TEST_TIMEOUT_MILLISECONDS
@@ -72,11 +85,22 @@ describe('demo chat with a bring-your-own key', () => {
     TEST_TIMEOUT_MILLISECONDS
   );
 
-  it('refuses chat requests without a handle', async () => {
+  it('gives a new browser an http-only demo user cookie once', async () => {
+    const first = await fetch(`${stack.demoURL}/api/config`);
+    expect(first.headers.get('set-cookie')).toMatch(/^fiducy_demo_user=[0-9a-f-]{36};.*HttpOnly/);
+    const returning = await fetch(`${stack.demoURL}/api/config`, {
+      headers: { cookie: 'fiducy_demo_user=returning-user-01' }
+    });
+    expect(returning.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('refuses chat requests from a user with no connected key', async () => {
     const response = await fetch(`${stack.demoURL}/api/chat`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ handle: '', messages: [] })
+      headers: { 'content-type': 'application/json', cookie: 'fiducy_demo_user=no-key-user-01' },
+      body: JSON.stringify({
+        messages: [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'Hi' }] }]
+      })
     });
     expect(response.status).toBe(400);
     expect(((await response.json()) as { message: string }).message).toBe(

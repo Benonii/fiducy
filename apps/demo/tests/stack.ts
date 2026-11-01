@@ -1,3 +1,5 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { createLocalKeyWrapper } from '@fiducy/core';
@@ -27,11 +29,11 @@ async function waitForDemo(demoURL: string) {
   throw new Error('The demo did not start in time');
 }
 
-function buildSDK() {
+function buildPackage(name: string) {
   const build = Bun.spawnSync(['bun', 'run', 'build'], {
-    cwd: join(import.meta.dir, '../../../packages/sdk')
+    cwd: join(import.meta.dir, '../../../packages', name)
   });
-  if (build.exitCode !== 0) throw new Error(`SDK build failed: ${build.stderr.toString()}`);
+  if (build.exitCode !== 0) throw new Error(`${name} build failed: ${build.stderr.toString()}`);
 }
 
 async function startGateway(demoURL: string, providerURL: string) {
@@ -58,7 +60,9 @@ async function startGateway(demoURL: string, providerURL: string) {
 
 export async function startDemoStack() {
   const demoURL = `http://localhost:${DEMO_PORT}`;
-  buildSDK();
+  buildPackage('sdk');
+  buildPackage('farm');
+  const dataDirectory = mkdtempSync(join(tmpdir(), 'fiducy-demo-'));
   const mockProvider = startMockProvider();
   const gateway = await startGateway(demoURL, mockProvider.baseURL);
   const demo = Bun.spawn(['bunx', 'farm', 'dev', '--port', String(DEMO_PORT)], {
@@ -68,7 +72,8 @@ export async function startDemoStack() {
       FIDUCY_GATEWAY_URL: gateway.gatewayURL,
       FIDUCY_APP_ID: DEMO_APP_ID,
       FIDUCY_APP_SECRET: DEMO_APP_SECRET,
-      FIDUCY_DEMO_MODEL: 'gpt-4o-mini'
+      FIDUCY_DEMO_MODEL: 'gpt-4o-mini',
+      FIDUCY_DEMO_DATA_DIR: dataDirectory
     },
     stdout: 'ignore',
     stderr: 'ignore'
@@ -80,7 +85,8 @@ export async function startDemoStack() {
     mockProvider.server.stop(true);
     demo.kill();
     await demo.exited;
+    rmSync(dataDirectory, { recursive: true, force: true });
   };
 
-  return { demoURL, gatewayURL: gateway.gatewayURL, mockProvider, stop };
+  return { demoURL, dataDirectory, gatewayURL: gateway.gatewayURL, mockProvider, stop };
 }

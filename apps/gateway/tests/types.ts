@@ -1,5 +1,7 @@
+import type { SealedRecord } from '@fiducy/core';
+
 export interface StoreKeyResponseBody {
-  data: { handle: string };
+  data: { handle: string; record?: SealedRecord };
   message: string;
 }
 

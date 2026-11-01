@@ -1,4 +1,5 @@
 import type { Result } from '@fiducy/core';
+import type { WidgetSealedRecord } from '@fiducy/widget';
 import type { PROVIDER_BASE_PATHS } from './constants';
 
 export type GatewayProvider = keyof typeof PROVIDER_BASE_PATHS;
@@ -47,7 +48,31 @@ export interface GatewayResponseBody<T> {
 export interface KeyWidgetProps {
   gatewayURL: string;
   appID: string;
-  onHandle: (handle: string) => void;
+  onHandle: (handle: string, record?: WidgetSealedRecord) => void;
   onError?: (message: string) => void;
   className?: string;
+}
+
+export interface UserKeySummaryView {
+  keyID: string;
+  provider: GatewayProvider;
+  createdAt: string;
+}
+
+export interface ConnectKeyWidgetProps {
+  gatewayURL: string;
+  appID: string;
+  provider: GatewayProvider;
+  basePath?: string;
+  onConnected?: (key: UserKeySummaryView) => void;
+  onError?: (message: string) => void;
+  className?: string;
+}
+
+export interface FiducyKeysState {
+  keys: UserKeySummaryView[];
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+  revoke: (keyID: string) => Promise<void>;
 }
