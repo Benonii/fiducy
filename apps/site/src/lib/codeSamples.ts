@@ -16,7 +16,7 @@ import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 import { auth } from '@/lib/auth';
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
-if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
+if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducci env vars');
 
 export async function getUserID(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });

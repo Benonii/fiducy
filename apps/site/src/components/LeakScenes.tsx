@@ -174,10 +174,10 @@ const SCENES: LeakScene[] = [
     scene: <LogsScene />
   },
   {
-    label: "Fiducy's storage",
+    label: "Fiducci's storage",
     hint: 'Half a key is stolen',
     stat: 'useless alone',
-    title: 'If Fiducy is breached,',
+    title: 'If Fiducci is breached,',
     quiet: 'attackers get half a key. Useless alone.',
     description: 'The other half lives only in your handle. Neither half opens anything alone.',
     scene: <StorageScene />

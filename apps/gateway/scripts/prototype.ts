@@ -77,7 +77,7 @@ async function seedDemoApp(secrets: PrototypeSecrets) {
     },
     body: JSON.stringify({
       appID: DEMO_APP_ID,
-      name: 'Fiducy demo',
+      name: 'Fiducci demo',
       accessMode: 'gateway',
       monthlyRequestLimitPerKey: 1000,
       allowedOrigins: [demoURL],
@@ -145,7 +145,7 @@ const demo = startFarmApp('demo', DEMO_PORT, {
 await waitFor(`${demoURL}/api/config`, 'The demo', demo);
 
 console.log(`
-Fiducy prototype is running${useMockProvider ? ' with a fake OpenAI' : ''}
+Fiducci prototype is running${useMockProvider ? ' with a fake OpenAI' : ''}
   Demo chat:      ${demoURL}
   Dashboard:      ${controlURL}
   Gateway:        ${gatewayURL}/health

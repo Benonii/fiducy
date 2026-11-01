@@ -11,7 +11,7 @@ export function SiteNav() {
   return (
     <header className="flex h-16 items-center justify-between px-gutter">
       <a className="text-lg font-bold tracking-[-0.04em]" href="/">
-        Fiducy
+        Fiducci
       </a>
       <nav aria-label="Main" className="flex items-center gap-1">
         <a className={NAV_LINK_CLASS} href="/docs">

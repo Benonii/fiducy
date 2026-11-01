@@ -1,9 +1,9 @@
 import { defineIntegration } from '@farm.js/core';
 
-import type { Fiducy } from '@fiducy/sdk/server';
+import type { Fiducci } from '@fiducy/sdk/server';
 
 export interface FiducyIntegrationInput {
-  instance: Fiducy;
+  instance: Fiducci;
   basePath?: string;
 }
 

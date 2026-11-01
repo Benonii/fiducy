@@ -16,7 +16,7 @@ export function findDemoModel(modelID: string | undefined): DemoModel {
   );
 }
 
-// Fiducy settings are a base URL, the app secret and the key handle header, so every
+// Fiducci settings are a base URL, the app secret and the key handle header, so every
 // AI SDK provider factory takes them as they are.
 export function createLanguageModel(model: DemoModel, settings: ProviderSettings): LanguageModel {
   if (model.provider === 'anthropic') return createAnthropic(settings)(model.id);

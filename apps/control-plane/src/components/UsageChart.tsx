@@ -30,7 +30,7 @@ function UsageBody({ days, metric, isTable }: UsageBodyProps) {
     return (
       <QuietState
         title="No requests in the last 30 days"
-        description="Each call through the gateway adds to this chart. Fiducy counts requests and tokens, never prompts or replies."
+        description="Each call through the gateway adds to this chart. Fiducci counts requests and tokens, never prompts or replies."
       />
     );
   }

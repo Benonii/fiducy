@@ -26,7 +26,7 @@ export function Showcase() {
     <section
       ref={frameRef}
       className="relative grid min-h-[520px] place-items-center overflow-hidden px-gutter py-14 max-md:min-h-0 max-md:px-4 max-md:py-8"
-      aria-label="Fiducy in a chat app"
+      aria-label="Fiducci in a chat app"
     >
       <Dithering
         className="absolute inset-0"

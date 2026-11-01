@@ -31,7 +31,7 @@ Neither side can open a key alone:
 | Who has it | What they hold | Can they decrypt? |
 | --- | --- | --- |
 | Your database | Handle (share A) | No: share B is wrapped by KMS |
-| Fiducy storage | Record (ciphertext, wrapped share B) | No: share A is only in your handle |
+| Fiducci storage | Record (ciphertext, wrapped share B) | No: share A is only in your handle |
 | AWS account owner | KMS key | No: the key policy only allows the attested enclave |
 | The enclave | Code only, no stored state | Only while serving a request that carries both |
 

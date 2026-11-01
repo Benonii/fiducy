@@ -14,7 +14,7 @@ export function SecretReveal({ appSecret }: SecretRevealProps) {
   return (
     <Alert>
       <AlertTitle>
-        Copy your app secret now. Fiducy only stores its hash and cannot show it again.
+        Copy your app secret now. Fiducci only stores its hash and cannot show it again.
       </AlertTitle>
       <AlertDescription className="grid gap-3">
         <code

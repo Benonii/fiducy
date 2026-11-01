@@ -18,7 +18,7 @@ const ACCESS_MODES = [
 ];
 
 const RECORD_STORAGE_OPTIONS = [
-  { label: 'With Fiducy', value: 'fiducy' },
+  { label: 'With Fiducci', value: 'fiducy' },
   { label: 'In your database', value: 'app' }
 ];
 
@@ -78,7 +78,7 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
           </SelectPopup>
         </Select>
         <FieldDescription>
-          Gateway only keeps keys inside Fiducy. Key release lets your server fetch a plain key for
+          Gateway only keeps keys inside Fiducci. Key release lets your server fetch a plain key for
           5 minutes. Leave it off unless a feature needs it.
         </FieldDescription>
       </Field>
@@ -106,7 +106,7 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
             </SelectPopup>
           </Select>
           <FieldDescription>
-            With Fiducy, your app stores only a handle. In your database, your app sends the sealed
+            With Fiducci, your app stores only a handle. In your database, your app sends the sealed
             record with each call. You can't change this after the app is created.
           </FieldDescription>
         </Field>

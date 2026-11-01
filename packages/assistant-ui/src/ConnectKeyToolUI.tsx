@@ -10,7 +10,7 @@ type ConnectKeyToolUIProps = ToolCallMessagePartProps<ConnectKeyArgs, ConnectKey
   FiducyToolkitOptions;
 
 /**
- * Renders the Fiducy key box inside the thread. The box is an iframe served by the gateway,
+ * Renders the Fiducci key box inside the thread. The box is an iframe served by the gateway,
  * so the key goes from the user's keyboard to the enclave and the app only gets a handle.
  */
 export function ConnectKeyToolUI({

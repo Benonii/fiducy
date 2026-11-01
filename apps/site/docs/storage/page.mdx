@@ -9,7 +9,7 @@ description: Where handles and sealed records live, and how to plug in your own 
 There are two things to store:
 
 - the **handle**, always in your app, through the `storage` adapter you pass to `createFiducy`
-- the **sealed record**, either with Fiducy (default) or in your app
+- the **sealed record**, either with Fiducci (default) or in your app
 
 ## Where sealed records live
 
@@ -17,7 +17,7 @@ Set this per app in the dashboard under "Where sealed keys live".
 
 | Setting | Records live | Notes |
 | --- | --- | --- |
-| `fiducy` (default) | Fiducy's storage | Smallest setup. Revoke deletes the record on the gateway |
+| `fiducy` (default) | Fiducci's storage | Smallest setup. Revoke deletes the record on the gateway |
 | `app` | Your storage, next to the handle | You own all the data. The SDK sends the record to the gateway in the `x-key-record` header on each call |
 
 In `app` mode the gateway keeps nothing per key. A record is ciphertext plus a KMS-wrapped share, so your database still cannot open a key on its own. Revoking a key means deleting the row; the SDK does this for you.

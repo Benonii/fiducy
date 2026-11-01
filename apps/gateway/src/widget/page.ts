@@ -44,7 +44,7 @@ export function renderWidgetPage({ appID, appName, parentOrigin, nonce }: Widget
   </div>
   <p class="m-0 text-xs font-light text-muted-foreground">${escapeHTML(appName)} now holds a handle, not your key. You can revoke it at any time.</p>
 </div>
-<p class="mt-3.5 mb-0 border-t border-dashed border-border pt-2.5 text-[11px] text-muted-foreground">Secured by Fiducy</p>
+<p class="mt-3.5 mb-0 border-t border-dashed border-border pt-2.5 text-[11px] text-muted-foreground">Secured by Fiducci</p>
 <script nonce="${nonce}">${buildWidgetScript(appID, parentOrigin)}</script>
 </body>
 </html>`;

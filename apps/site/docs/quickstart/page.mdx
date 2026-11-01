@@ -6,13 +6,13 @@ description: Add bring-your-own-key to a Farm.js app in four steps.
 
 # Quickstart
 
-This guide adds Fiducy to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler.
+This guide adds Fiducci to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler.
 
 > The packages are not on npm yet. Until then, use them from the monorepo workspace.
 
 ## 1. Register your app
 
-Create an app in the Fiducy dashboard. You get:
+Create an app in the Fiducci dashboard. You get:
 
 - an **app ID**, public, used by the widget
 - an **app secret** (`fsk_...`), server only, used for every gateway call
@@ -36,7 +36,7 @@ import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 import { auth } from '@/lib/auth';
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
-if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
+if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducci env vars');
 
 export async function getUserID(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -51,7 +51,7 @@ export const fiducyServer = createFiducy({
 });
 ```
 
-`getUserID` is how Fiducy knows who is asking. Return your own user ID from whatever auth you use, or `null` when nobody is signed in.
+`getUserID` is how Fiducci knows who is asking. Return your own user ID from whatever auth you use, or `null` when nobody is signed in.
 
 ## 3. Add the integration
 

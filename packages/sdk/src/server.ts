@@ -3,7 +3,7 @@ export { keyValueStorage, memoryStorage } from './server/storage';
 
 export type {
   CreateFiducyOptions,
-  Fiducy,
+  Fiducci,
   FiducyStorage,
   KeyValueDriver,
   SaveKeyInput,

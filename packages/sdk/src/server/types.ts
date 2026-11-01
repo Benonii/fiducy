@@ -45,7 +45,7 @@ export interface SaveKeyInput {
   record?: SealedRecord;
 }
 
-export interface Fiducy {
+export interface Fiducci {
   handler: (request: Request) => Promise<Response>;
   providerSettings: (
     provider: GatewayProvider,

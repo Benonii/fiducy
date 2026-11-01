@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Fiducy prototype - one Graviton host running the gateway inside a Nitro enclave
+Description: Fiducci prototype - one Graviton host running the gateway inside a Nitro enclave
 
 Parameters:
   AmiId:

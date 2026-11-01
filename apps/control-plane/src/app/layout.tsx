@@ -7,7 +7,7 @@ import { QueryProvider } from '@/components/QueryProvider';
 import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
-  title: 'Fiducy',
+  title: 'Fiducci',
   description: 'Key custody for apps that let users bring their own AI keys'
 };
 

@@ -31,7 +31,7 @@ export default function HomePage() {
               </h1>
               <div className="grid grid-cols-[minmax(0,1fr)] gap-6 animate-rise-in [animation-delay:240ms]">
                 <p className={`${DESCRIPTION_CLASS} max-w-[46ch] text-[0.9375rem]`}>
-                  With Fiducy, your app uses your users' AI keys without ever storing or seeing
+                  With Fiducci, your app uses your users' AI keys without ever storing or seeing
                   them. Their keys, none of the risk.
                 </p>
                 <div className="grid grid-cols-[minmax(0,1fr)] gap-3">

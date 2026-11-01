@@ -175,7 +175,7 @@ EOF
 
   cat > /etc/systemd/system/fiducy-control-plane.service <<EOF
 [Unit]
-Description=Fiducy control plane
+Description=Fiducci control plane
 After=network-online.target postgresql.service
 [Service]
 EnvironmentFile=/etc/fiducy/control-plane.env
@@ -187,7 +187,7 @@ WantedBy=multi-user.target
 EOF
   cat > /etc/systemd/system/fiducy-demo.service <<EOF
 [Unit]
-Description=Fiducy demo chat app
+Description=Fiducci demo chat app
 After=network-online.target
 [Service]
 EnvironmentFile=/etc/fiducy/demo.env
@@ -199,7 +199,7 @@ WantedBy=multi-user.target
 EOF
   cat > /etc/systemd/system/fiducy-enclave.service <<EOF
 [Unit]
-Description=Fiducy gateway inside a Nitro enclave (via Enclaver)
+Description=Fiducci gateway inside a Nitro enclave (via Enclaver)
 After=docker.service nitro-enclaves-allocator.service
 Requires=docker.service
 [Service]
@@ -228,7 +228,7 @@ ${DEMO_HOST} {
 EOF
   cat > /etc/systemd/system/fiducy-caddy.service <<EOF
 [Unit]
-Description=Caddy TLS front for Fiducy
+Description=Caddy TLS front for Fiducci
 After=network-online.target
 [Service]
 Environment=HOME=/var/lib/fiducy
@@ -255,7 +255,7 @@ seed_demo_app() {
   local secret_hash body
   secret_hash=$(printf '%s' "$DEMO_APP_SECRET" | sha256sum | cut -d' ' -f1)
   body=$(jq -n --arg appID "$DEMO_APP_ID" --arg hash "$secret_hash" --arg origin "https://${DEMO_HOST}" \
-    '{appID: $appID, name: "Fiducy demo", accessMode: "gateway", monthlyRequestLimitPerKey: 1000,
+    '{appID: $appID, name: "Fiducci demo", accessMode: "gateway", monthlyRequestLimitPerKey: 1000,
       allowedOrigins: [$origin], appSecretHash: $hash}')
   curl -fsS -X PUT http://127.0.0.1:3000/api/gateway/seed \
     -H "authorization: Bearer ${FIDUCY_GATEWAY_TOKEN}" -H 'content-type: application/json' \

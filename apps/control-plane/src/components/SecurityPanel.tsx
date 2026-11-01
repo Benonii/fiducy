@@ -22,7 +22,7 @@ function describeStorage(app: AppView): SecurityRow {
   const isAppStorage = app.recordStorage === 'app';
   return {
     label: 'Sealed keys live',
-    value: isAppStorage ? 'In your database' : 'With Fiducy',
+    value: isAppStorage ? 'In your database' : 'With Fiducci',
     detail: isAppStorage
       ? 'You send the sealed record with each call.'
       : 'Your app stores a handle.'

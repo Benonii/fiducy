@@ -64,7 +64,7 @@ async function connect(fiducy: ReturnType<typeof createApp>, app: AppRegistratio
   return { response, sealed };
 }
 
-describe('the app-side Fiducy handler', () => {
+describe('the app-side Fiducci handler', () => {
   it('saves a handle for the signed-in user and lists it without the handle', async () => {
     const fiducy = createApp(CHAT_APP);
     const { response, sealed } = await connect(fiducy, CHAT_APP, 'user_1');

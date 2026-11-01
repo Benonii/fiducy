@@ -1,6 +1,6 @@
 # @fiducy/assistant-ui
 
-Bring-your-own-key for [assistant-ui](https://www.assistant-ui.com) apps. When a user has no key for the model they picked, the assistant asks for one inside the thread. The key box is a Fiducy iframe, so the key goes from the user's keyboard into the enclave and your app only stores a handle.
+Bring-your-own-key for [assistant-ui](https://www.assistant-ui.com) apps. When a user has no key for the model they picked, the assistant asks for one inside the thread. The key box is a Fiducci iframe, so the key goes from the user's keyboard into the enclave and your app only stores a handle.
 
 ## Client
 

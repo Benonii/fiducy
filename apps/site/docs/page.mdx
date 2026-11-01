@@ -6,9 +6,9 @@ description: Let users bring their own AI keys without your app ever holding the
 
 # Introduction
 
-Fiducy is a key custody layer for apps where users bring their own API key (BYOK) for OpenAI, Anthropic, Gemini or OpenRouter.
+Fiducci is a key custody layer for apps where users bring their own API key (BYOK) for OpenAI, Anthropic, Gemini or OpenRouter.
 
-Your users paste their key into a small iframe served by the Fiducy gateway. The gateway encrypts it inside an AWS Nitro enclave and hands your app a **handle**. Your server points its AI SDK at the gateway with that handle. The gateway opens the key inside the enclave, calls the provider, and streams the answer back. Your app, your database and your logs never see the plaintext key.
+Your users paste their key into a small iframe served by the Fiducci gateway. The gateway encrypts it inside an AWS Nitro enclave and hands your app a **handle**. Your server points its AI SDK at the gateway with that handle. The gateway opens the key inside the enclave, calls the provider, and streams the answer back. Your app, your database and your logs never see the plaintext key.
 
 ```ts
 const settings = await fiducy.providerSettings('openai', { userID });
@@ -17,7 +17,7 @@ const openai = createOpenAI(settings); // calls go through the gateway
 
 ## Why
 
-Storing user API keys yourself means one database leak or one bad log line exposes every key you hold. With Fiducy:
+Storing user API keys yourself means one database leak or one bad log line exposes every key you hold. With Fiducci:
 
 - A stolen database only yields handles and ciphertext. Neither opens a key without the enclave.
 - The enclave only runs an image whose hash (PCR0) you can verify, and the KMS key that unwraps keys refuses every other caller, including the AWS account owner.
@@ -25,7 +25,7 @@ Storing user API keys yourself means one database leak or one bad log line expos
 
 ## How you add it
 
-Fiducy fits into your app as four pieces: a server instance, a route handler, a React component, and a storage adapter you choose.
+Fiducci fits into your app as four pieces: a server instance, a route handler, a React component, and a storage adapter you choose.
 
 | Piece | What it does |
 | --- | --- |

@@ -13,7 +13,7 @@ export interface ConnectKeyResult {
 export interface FiducyToolkitOptions {
   gatewayURL: string;
   appID: string;
-  /** Where the app mounted its Fiducy handler. Defaults to /api/fiducy. */
+  /** Where the app mounted its Fiducci handler. Defaults to /api/fiducy. */
   basePath?: string;
   /** Runs after a key is saved, for example to refresh a keys list. */
   onConnected?: (key: UserKeySummaryView) => void;

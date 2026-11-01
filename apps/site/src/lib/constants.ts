@@ -29,7 +29,7 @@ export const SHOWCASE_STEPS = [
 ] as const;
 export const ENCLAVE_STEPS = [
   "Your app keeps one half of the user's key. On its own, it opens nothing.",
-  'Fiducy keeps the other half, locked inside a sealed AWS enclave.',
+  'Fiducci keeps the other half, locked inside a sealed AWS enclave.',
   'For a single request, the two halves meet inside the enclave and call OpenAI.',
   'Then the key is wiped. A leak on either side exposes only half a key, which is useless.'
 ];

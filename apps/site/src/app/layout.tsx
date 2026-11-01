@@ -5,7 +5,7 @@ import './globals.css';
 import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
-  title: 'Fiducy: your users bring the keys, you never hold them',
+  title: 'Fiducci: your users bring the keys, you never hold them',
   description:
     'Let users bring their own AI keys without storing them. A breach of your app leaks no keys.'
 };

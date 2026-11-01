@@ -7,8 +7,8 @@ import { QueryProvider } from '@/components/QueryProvider';
 import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
-  title: 'Acme Chat, a Fiducy demo',
-  description: 'An assistant-ui chat where users bring their own model keys through Fiducy'
+  title: 'Acme Chat, a Fiducci demo',
+  description: 'An assistant-ui chat where users bring their own model keys through Fiducci'
 };
 
 export default function RootLayout({ children }: LayoutProps) {

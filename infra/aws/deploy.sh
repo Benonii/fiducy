@@ -133,7 +133,7 @@ check_endpoint "https://gw.${DASHED_IP}.sslip.io/attestation"
 check_endpoint "https://app.${DASHED_IP}.sslip.io/api/config"
 check_endpoint "https://demo.${DASHED_IP}.sslip.io/api/config"
 
-summary "## Fiducy prototype deployed"
+summary "## Fiducci prototype deployed"
 summary ""
 summary "- Gateway (in the enclave): https://gw.${DASHED_IP}.sslip.io"
 summary "- Dashboard: https://app.${DASHED_IP}.sslip.io"

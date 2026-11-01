@@ -34,7 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
 ## ConnectKeyWidget
 
-Renders the gateway iframe and, once the user saves a key, posts the handle to your server's Fiducy route.
+Renders the gateway iframe and, once the user saves a key, posts the handle to your server's Fiducci route.
 
 ```tsx
 <ConnectKeyWidget
@@ -51,7 +51,7 @@ Renders the gateway iframe and, once the user saves a key, posts the handle to y
 | `gatewayURL` | `string` | Your gateway |
 | `appID` | `string` | Public app ID |
 | `provider` | `'openai' \| 'anthropic' \| 'gemini' \| 'openrouter'` | Which provider this key is for |
-| `basePath` | `string` | Your Fiducy route. Default `/api/fiducy` |
+| `basePath` | `string` | Your Fiducci route. Default `/api/fiducy` |
 | `onConnected` | `(key) => void` | After your server saved the handle |
 | `onError` | `(message) => void` | Widget or save errors |
 | `className` | `string` | Applied to the wrapper |

@@ -8,7 +8,7 @@ const dataDirectory = process.env.FIDUCY_CONTROL_DATA_DIR ?? '.farm';
 export default defineConfig({
   auth: {
     enabled: true,
-    appName: 'Fiducy',
+    appName: 'Fiducci',
     database: { path: `${dataDirectory}/auth.sqlite` }
   },
   storage: {

@@ -5,7 +5,7 @@ import { createGatewayClient } from '../gatewayClient';
 
 import type { SealedRecord } from '@fiducy/core';
 import type { GatewayProvider } from '../types';
-import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from './types';
+import type { CreateFiducyOptions, Fiducci, SaveKeyInput, StoredUserKey } from './types';
 import type { UserKeySummary } from './types';
 
 const DEFAULT_BASE_PATH = '/api/fiducy';
@@ -54,7 +54,7 @@ function readSaveKeyInput(body: unknown): SaveKeyInput {
   return { provider, handle, record };
 }
 
-export function createFiducy(options: CreateFiducyOptions): Fiducy {
+export function createFiducy(options: CreateFiducyOptions): Fiducci {
   const { storage, getUserID } = options;
   const basePath = (options.basePath ?? DEFAULT_BASE_PATH).replace(/\/+$/, '');
   const gateway = createGatewayClient(options);
@@ -96,7 +96,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
 
   const listKeys = async (userID: string) => (await storage.listKeys(userID)).map(toSummary);
 
-  const providerSettings: Fiducy['providerSettings'] = async (provider, { userID }) => {
+  const providerSettings: Fiducci['providerSettings'] = async (provider, { userID }) => {
     const stored = await storage.findKey(userID, provider);
     if (!stored) return null;
     const settings = gateway.providerSettings(provider, stored.handle);

@@ -30,7 +30,7 @@ function HorizontalFlow() {
       aria-labelledby="flow-title"
     >
       <title id="flow-title">
-        Your app sends a handle to the Fiducy enclave, which opens the key and calls the provider
+        Your app sends a handle to the Fiducci enclave, which opens the key and calls the provider
       </title>
       <path className={HANDLE_LINE_CLASS} d="M240 190 H380" />
       {PROVIDER_ROWS.map((rowTop, index) => (
@@ -62,7 +62,7 @@ function HorizontalFlow() {
       <g className={HUB_CLASS}>
         <rect x="380" y="126" width="200" height="128" />
         <text className={NODE_TITLE_CLASS} x="400" y="168">
-          Fiducy enclave
+          Fiducci enclave
         </text>
         <text className={HUB_DETAIL_CLASS} x="400" y="192">
           attested by AWS
@@ -138,7 +138,7 @@ function StackedFlow() {
       aria-labelledby="flow-title-narrow"
     >
       <title id="flow-title-narrow">
-        Your app sends a handle to the Fiducy enclave, which opens the key and calls the provider
+        Your app sends a handle to the Fiducci enclave, which opens the key and calls the provider
       </title>
       <path className={HANDLE_LINE_CLASS} d="M180 84 V164" />
       <path className={LINE_CLASS} stroke={STACKED_LINE_COLOR} d="M180 292 V372" />
@@ -160,7 +160,7 @@ function StackedFlow() {
       <g className={HUB_CLASS}>
         <rect x="70" y="164" width="220" height="128" />
         <text className={NODE_TITLE_CLASS} x="90" y="202">
-          Fiducy enclave
+          Fiducci enclave
         </text>
         <text className={HUB_DETAIL_CLASS} x="90" y="226">
           attested by AWS

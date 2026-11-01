@@ -1,6 +1,6 @@
-# Fiducy
+# Fiducci
 
-Key custody for bring-your-own-key apps. Users paste their AI provider key into an embedded Fiducy widget, the app stores only a handle, and every AI call goes through the Fiducy gateway, which decrypts the key in memory, forwards the request and streams the response back. The app never stores user keys, and neither does Fiducy's database.
+Key custody for bring-your-own-key apps. Users paste their AI provider key into an embedded Fiducci widget, the app stores only a handle, and every AI call goes through the Fiducci gateway, which decrypts the key in memory, forwards the request and streams the response back. The app never stores user keys, and neither does Fiducci's database.
 
 ## Layout
 
