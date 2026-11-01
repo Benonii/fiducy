@@ -7,7 +7,7 @@ import type { LayoutProps } from '@farm.js/core';
 export const metadata = {
   title: 'Fiducy: your users bring the keys, you never hold them',
   description:
-    'Fiducy seals the AI API keys your users bring inside an attested enclave. Your app keeps a handle and never sees a plaintext key.'
+    'Let users bring their own AI keys without storing them. A breach of your app leaks no keys.'
 };
 
 export default function RootLayout({ children }: LayoutProps) {

@@ -22,8 +22,8 @@ export function ShowcaseKeyPanel({ frame }: ShowcaseFrameProps) {
       </div>
       <p className="text-xs font-light text-ink-muted">
         {frame.isKeySaved
-          ? 'Sealed in the enclave. Acme Chat only keeps a handle.'
-          : 'Acme Chat never sees your key. It is sealed in an enclave.'}
+          ? 'Saved. Acme Chat can use your key, but it can never read it.'
+          : 'Your key stays private, even from Acme Chat.'}
       </p>
     </div>
   );

@@ -30,8 +30,8 @@ export default function HomePage() {
               </h1>
               <div className="grid gap-6 animate-rise-in [animation-delay:240ms]">
                 <p className={`${DESCRIPTION_CLASS} max-w-[46ch] text-[0.9375rem]`}>
-                  Fiducy seals the API keys your users paste in, inside an attested AWS Nitro
-                  enclave. Your app keeps a handle and calls models as usual.
+                  Holding your users' OpenAI keys turns every breach into their bill. With Fiducy
+                  your app can use their keys without ever storing or seeing one.
                 </p>
                 <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap">
                   <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
@@ -49,10 +49,10 @@ export default function HomePage() {
 
           <section className={SECTION_CLASS}>
             <div className={SECTION_HEAD_CLASS}>
-              <h2 className={TITLE_CLASS}>The key is only ever open inside the enclave</h2>
+              <h2 className={TITLE_CLASS}>A breach can't leak what you never stored</h2>
               <p className={DESCRIPTION_CLASS}>
-                Your server sends a handle with each model call. The enclave rebuilds the key from
-                two halves, calls the provider, and drops it when the response ends.
+                Your app keeps a handle, not a key. The real key exists for one request inside a
+                sealed enclave, then it is gone.
               </p>
             </div>
             <KeyFlow />
@@ -60,10 +60,10 @@ export default function HomePage() {
 
           <section className={SECTION_CLASS}>
             <div className={SECTION_HEAD_CLASS}>
-              <h2 className={TITLE_CLASS}>Four pieces, all in your codebase</h2>
+              <h2 className={TITLE_CLASS}>Ship bring-your-own-key this week</h2>
               <p className={DESCRIPTION_CLASS}>
-                A server instance, one integration line, the key widget, and provider settings for
-                the AI SDK. Sealed records can live in your own database.
+                No crypto to write and no key vault to run. Four small pieces drop into the app you
+                already have, and your model calls look the same as before.
               </p>
             </div>
             <CodeTabs />
@@ -71,13 +71,13 @@ export default function HomePage() {
 
           <section className={`${SECTION_CLASS} pb-0 max-md:pb-0`}>
             <div className={SECTION_HEAD_CLASS}>
-              <h2 className={TITLE_CLASS}>What a leak gets an attacker</h2>
+              <h2 className={TITLE_CLASS}>When something leaks, your users' keys don't</h2>
               <p className={DESCRIPTION_CLASS}>
-                Anyone can check which code is running:{' '}
-                <code className="font-mono text-[0.95em] text-ink">GET /attestation</code> returns
-                an AWS-signed document with the enclave image hash.{' '}
+                Users don't have to take your word for it.{' '}
+                <code className="font-mono text-[0.95em] text-ink">GET /attestation</code> proves
+                which code holds their key, signed by AWS.{' '}
                 <a className="underline underline-offset-4" href="/docs/security">
-                  How to verify it
+                  How to check it
                 </a>
               </p>
             </div>
@@ -88,14 +88,14 @@ export default function HomePage() {
             <PlanCard
               title="Self-host"
               price="Free and open source"
-              description="Run the enclave, KMS key and storage in your own AWS account with one CloudFormation stack."
+              description="Keep every key in your own AWS account. One CloudFormation stack, and nothing leaves your infrastructure."
               linkLabel="Self-hosting guide"
               linkURL="/docs/self-hosting"
             />
             <PlanCard
               title="Managed"
               price="Coming soon"
-              description="We run the enclave, KMS and dashboard. You add the SDK and choose where records live."
+              description="Skip the infrastructure. We run the enclave and the dashboard, you add the SDK."
               linkLabel={DEMO_URL ? 'Try the demo' : 'Read the quickstart'}
               linkURL={DEMO_URL ?? '/docs/quickstart'}
             />

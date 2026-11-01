@@ -130,8 +130,8 @@ const SCENES: LeakScene[] = [
     label: 'Your database',
     hint: 'Point at the database',
     stat: 'kh_9f2c…',
-    title: 'A dumped database gets',
-    quiet: 'handles that open nothing.',
+    title: 'If your database leaks,',
+    quiet: 'attackers get handles that open nothing.',
     description: 'Each handle needs the enclave and your app secret before it opens anything.',
     scene: <DatabaseScene />
   },
@@ -139,8 +139,8 @@ const SCENES: LeakScene[] = [
     label: 'Your server logs',
     hint: 'Point at the logs',
     stat: '0 keys logged',
-    title: 'Your logs hold',
-    quiet: 'no keys at all.',
+    title: 'If your logs leak,',
+    quiet: 'there is no key in them to find.',
     description: 'Keys go from the widget straight to the enclave and never pass your server.',
     scene: <LogsScene />
   },
@@ -148,8 +148,8 @@ const SCENES: LeakScene[] = [
     label: "Fiducy's storage",
     hint: 'Point at the record',
     stat: '2 halves',
-    title: 'Our storage holds',
-    quiet: 'half of each key.',
+    title: 'If Fiducy is breached,',
+    quiet: 'attackers get half a key. Useless alone.',
     description: 'The other half lives only in your handle. Neither half opens anything alone.',
     scene: <StorageScene />
   },
@@ -157,8 +157,8 @@ const SCENES: LeakScene[] = [
     label: 'An AWS admin',
     hint: 'Point at the enclave',
     stat: 'PCR0 a41e…',
-    title: 'An AWS admin gets',
-    quiet: 'a refusal from KMS.',
+    title: 'Even an AWS admin',
+    quiet: "cannot decrypt your users' keys.",
     description: 'KMS unwraps only for the attested enclave image, and nothing is stored open.',
     scene: <EnclaveScene />
   }
