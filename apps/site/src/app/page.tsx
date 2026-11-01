@@ -21,20 +21,20 @@ export default function HomePage() {
         <SiteNav />
 
         <main className="divide-y divide-dashed divide-frame">
-          <section className="grid items-center gap-8 px-gutter py-16 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:py-20">
-            <div className="grid gap-7">
-              <h1 className="grid text-[clamp(2.5rem,4.6vw,4rem)] leading-none font-bold tracking-[-0.05em] text-balance">
+          <section className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 px-gutter py-16 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:py-20">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
+              <h1 className="grid text-[clamp(2.125rem,4.6vw,4rem)] leading-none font-bold tracking-[-0.05em] text-balance">
                 <span className="animate-rise-in text-ink-quiet">Users bring keys.</span>
                 <span className="animate-rise-in [animation-delay:120ms]">
                   You never hold them.
                 </span>
               </h1>
-              <div className="grid gap-6 animate-rise-in [animation-delay:240ms]">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-6 animate-rise-in [animation-delay:240ms]">
                 <p className={`${DESCRIPTION_CLASS} max-w-[46ch] text-[0.9375rem]`}>
                   With Fiducy, your app uses your users' AI keys without ever storing or seeing
                   them. Their keys, none of the risk.
                 </p>
-                <div className="grid gap-3">
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
                   <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
                     <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
                       Read the docs
