@@ -26,6 +26,13 @@
   --animate-leak-float: leak-float 3.2s ease-in-out infinite;
   --animate-leak-scroll: leak-scroll 18s linear infinite;
   --animate-leak-try: leak-try 1.6s var(--ease-out-expo) infinite;
+  --animate-marquee: marquee 16s linear infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
 
   @keyframes rise-in {
     from {

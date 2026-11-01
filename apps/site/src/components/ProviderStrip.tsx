@@ -1,17 +1,24 @@
+import { ProviderLogo } from '@/components/ProviderLogo';
+import { ProviderMarquee } from '@/components/ProviderMarquee';
 import { PROVIDERS } from '@/lib/constants';
 
 const CELL_CLASS = 'flex min-h-19 items-center px-5';
 const TERM_CLASS = `${CELL_CLASS} text-xs text-ink-muted`;
-const VALUE_CLASS = `${CELL_CLASS} justify-center font-[650]`;
+const VALUE_CLASS = `${CELL_CLASS} justify-center`;
 const COMPACT_TERM_CLASS = 'text-xs text-ink-muted';
 
 function CompactProviderStrip() {
   return (
-    <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2.5 px-5 py-5 text-sm md:hidden">
+    <dl className="grid grid-cols-[4.75rem_minmax(0,1fr)] items-center gap-y-4 px-5 py-5 text-sm md:hidden">
       <dt className={COMPACT_TERM_CLASS}>Works with</dt>
-      <dd className="font-[650]">{PROVIDERS.join(', ')}</dd>
+      <dd>
+        <ProviderMarquee />
+      </dd>
       <dt className={COMPACT_TERM_CLASS}>Runs on</dt>
-      <dd className="font-[650]">AWS Nitro</dd>
+      <dd className="flex items-center gap-1">
+        <ProviderLogo name="AWS" />
+        <span className="font-[650]">Nitro</span>
+      </dd>
     </dl>
   );
 }
@@ -24,11 +31,14 @@ export function ProviderStrip() {
         <dt className={TERM_CLASS}>Works with</dt>
         {PROVIDERS.map((provider) => (
           <dd key={provider} className={VALUE_CLASS}>
-            {provider}
+            <ProviderLogo name={provider} />
           </dd>
         ))}
         <dt className={TERM_CLASS}>Runs on</dt>
-        <dd className={VALUE_CLASS}>AWS Nitro</dd>
+        <dd className={`${VALUE_CLASS} gap-1`}>
+          <ProviderLogo name="AWS" />
+          <span className="font-[650]">Nitro</span>
+        </dd>
       </dl>
     </div>
   );
