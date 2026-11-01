@@ -17,9 +17,11 @@ export function SiteNav() {
         <a className={NAV_LINK_CLASS} href="/docs">
           Docs
         </a>
-        <a className={NAV_LINK_CLASS} href={DEMO_URL}>
-          Demo
-        </a>
+        {DEMO_URL ? (
+          <a className={NAV_LINK_CLASS} href={DEMO_URL}>
+            Demo
+          </a>
+        ) : null}
         <a className={NAV_LINK_CLASS} href={GITHUB_URL}>
           GitHub
         </a>
