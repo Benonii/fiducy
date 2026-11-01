@@ -1,9 +1,8 @@
 import { IsoScene } from '@/components/IsoScene';
 import { Box, Line, Plate, Tag, offset } from '@/components/isometric';
-import { ISO_DETAIL, ISO_GHOST, ISO_LIFT } from '@/lib/isoStyles';
-import { ISO_LINE_STRONG, ISO_MOVE, ISO_REVEAL } from '@/lib/isoStyles';
+import { ISO_DETAIL, ISO_GHOST, ISO_LINE_STRONG } from '@/lib/isoStyles';
 import { ISO_SCREEN, ISO_SCROLL, ISO_SLOT } from '@/lib/isoStyles';
-import { ISO_TRY } from '@/lib/isoStyles';
+import { ISO_STEAL, ISO_TAG_FIRST, ISO_TAG_LAST } from '@/lib/isoStyles';
 import { DESCRIPTION_CLASS, LABEL_CLASS } from '@/lib/styles';
 
 import type { LeakScene } from '@/types';
@@ -38,12 +37,16 @@ function DatabaseScene() {
       {HANDLE_SLOTS.map(([x, y]) => (
         <Box key={`${x}-${y}`} at={[x, y, 4.1]} size={[1.2, 0.8, 0.25]} />
       ))}
-      <g className={`${ISO_MOVE} ${ISO_LIFT}`} style={moves({ '--to': offset(0, 0, 2.6) })}>
+      <Plate at={[2.4, 2.6, 4.1]} size={[1.2, 0.8]} className={ISO_GHOST} />
+      <g className={ISO_STEAL} style={moves({ '--to': offset(0, 0, 3.4) })}>
         <Box at={[2.4, 2.6, 4.1]} size={[1.2, 0.8, 0.25]} tone="solid" />
-        <Tag at={[4.4, 2.6, 4.7]} className={ISO_REVEAL}>
-          kh_9f2c… opens nothing
+        <Tag at={[4.2, 2.6, 4.6]} className={ISO_TAG_FIRST}>
+          stolen: kh_9f2c…
         </Tag>
       </g>
+      <Tag at={[4.2, 2.6, 7.8]} className={ISO_TAG_LAST}>
+        opens nothing
+      </Tag>
     </>
   );
 }
@@ -64,18 +67,19 @@ function LogsScene() {
           {[...LOG_LINE_LENGTHS, ...LOG_LINE_LENGTHS].map((length, index) => {
             const y = 1 + index * 0.55;
             return (
-              <Line
-                key={y}
-                from={[1, y, 0.8]}
-                to={[1 + length, y, 0.8]}
-                className={index === 3 ? ISO_LINE_STRONG : ISO_DETAIL}
-              />
+              <Line key={y} from={[1, y, 0.8]} to={[1 + length, y, 0.8]} className={ISO_DETAIL} />
             );
           })}
         </g>
+        <g className={ISO_STEAL} style={moves({ '--to': offset(0, 3.6, 0) })}>
+          <Line from={[0.5, 0.8, 0.8]} to={[7.5, 0.8, 0.8]} className={ISO_LINE_STRONG} />
+        </g>
       </g>
-      <Tag at={[8.6, 1.8, 0.8]} className={ISO_REVEAL}>
-        POST /api/chat 200
+      <Tag at={[2.2, -1.4, 0.8]} className={ISO_TAG_FIRST}>
+        looking for keys
+      </Tag>
+      <Tag at={[2.2, -1.4, 0.8]} className={ISO_TAG_LAST}>
+        0 keys found
       </Tag>
     </>
   );
@@ -85,22 +89,18 @@ function StorageScene() {
   return (
     <>
       <Plate at={[0, 0, 0]} size={[4.4, 4.4]} className={ISO_GHOST} />
-      <g className={ISO_MOVE} style={moves({ '--to': offset(-1.6, 0, 0) })}>
-        <Box at={[0, 0, 0]} size={[2.2, 4.4, 3]}>
-          <Plate at={[0.7, 1.6, 3]} size={[0.8, 1.2]} className={ISO_SLOT} />
-        </Box>
-        <Tag at={[-0.4, -0.6, 3.6]} className={ISO_REVEAL}>
-          in your handle
+      <Box at={[0, 0, 0]} size={[2.2, 4.4, 3]}>
+        <Plate at={[0.7, 1.6, 3]} size={[0.8, 1.2]} className={ISO_SLOT} />
+      </Box>
+      <g className={ISO_STEAL} style={moves({ '--to': offset(2.6, 0, 1.6) })}>
+        <Box at={[2.2, 0, 0]} size={[2.2, 4.4, 3]} tone="solid" />
+        <Tag at={[6.2, 2.2, 1]} className={ISO_TAG_FIRST}>
+          stolen: half a key
         </Tag>
       </g>
-      <g className={ISO_MOVE} style={moves({ '--to': offset(1.6, 0, 0) })}>
-        <Box at={[2.2, 0, 0]} size={[2.2, 4.4, 3]}>
-          <Plate at={[2.9, 1.6, 3]} size={[0.8, 1.2]} className={ISO_SLOT} />
-        </Box>
-        <Tag at={[7.4, 2.2, 0]} className={ISO_REVEAL}>
-          in Fiducy storage
-        </Tag>
-      </g>
+      <Tag at={[6.2, 2.2, 2.6]} className={ISO_TAG_LAST}>
+        opens nothing
+      </Tag>
     </>
   );
 }
@@ -114,11 +114,14 @@ function EnclaveScene() {
         <Line from={[0.5, 5, 2.6]} to={[2, 5, 2.6]} className={ISO_DETAIL} />
         <Line from={[5, 0.5, 2.6]} to={[5, 1.4, 2.6]} className={ISO_DETAIL} />
       </Box>
-      <g className={ISO_TRY} style={moves({ '--to': offset(3.6, 0, -1.2) })}>
+      <g className={ISO_STEAL} style={moves({ '--to': offset(3.6, 0, -1.2) })}>
         <Box at={[-3.4, 2.25, 4.6]} size={[2.4, 0.5, 0.35]} tone="solid" />
         <Box at={[-4.4, 2, 4.55]} size={[1, 1, 0.45]} />
       </g>
-      <Tag at={[4.4, 0.2, 5.4]} className={ISO_REVEAL}>
+      <Tag at={[4.4, 0.2, 5.4]} className={ISO_TAG_FIRST}>
+        admin: decrypt key
+      </Tag>
+      <Tag at={[4.4, 0.2, 5.4]} className={ISO_TAG_LAST}>
         KMS: unwrap denied
       </Tag>
     </>
@@ -128,8 +131,8 @@ function EnclaveScene() {
 const SCENES: LeakScene[] = [
   {
     label: 'Your database',
-    hint: 'Point at the database',
-    stat: 'kh_9f2c…',
+    hint: 'A handle is stolen',
+    stat: 'opens nothing',
     title: 'If your database leaks,',
     quiet: 'attackers get handles that open nothing.',
     description: 'Each handle needs the enclave and your app secret before it opens anything.',
@@ -137,8 +140,8 @@ const SCENES: LeakScene[] = [
   },
   {
     label: 'Your server logs',
-    hint: 'Point at the logs',
-    stat: '0 keys logged',
+    hint: 'The logs are searched',
+    stat: '0 keys found',
     title: 'If your logs leak,',
     quiet: 'there is no key in them to find.',
     description: 'Keys go from the widget straight to the enclave and never pass your server.',
@@ -146,8 +149,8 @@ const SCENES: LeakScene[] = [
   },
   {
     label: "Fiducy's storage",
-    hint: 'Point at the record',
-    stat: '2 halves',
+    hint: 'Half a key is stolen',
+    stat: 'useless alone',
     title: 'If Fiducy is breached,',
     quiet: 'attackers get half a key. Useless alone.',
     description: 'The other half lives only in your handle. Neither half opens anything alone.',
@@ -155,8 +158,8 @@ const SCENES: LeakScene[] = [
   },
   {
     label: 'An AWS admin',
-    hint: 'Point at the enclave',
-    stat: 'PCR0 a41e…',
+    hint: 'An admin tries to decrypt',
+    stat: 'unwrap denied',
     title: 'Even an AWS admin',
     quiet: "cannot decrypt your users' keys.",
     description: 'KMS unwraps only for the attested enclave image, and nothing is stored open.',
