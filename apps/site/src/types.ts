@@ -87,3 +87,33 @@ export interface PlanCardProps {
   linkLabel: string;
   linkURL: string;
 }
+
+export type ShowcaseStep = 'key' | 'ask' | 'answer';
+
+export interface TypingWindow {
+  text: string;
+  startsAt: number;
+  endsAt: number;
+}
+
+export interface ShowcaseFrame {
+  isFlipped: boolean;
+  code: string;
+  isCodeTyping: boolean;
+  key: string;
+  isKeySaved: boolean;
+  question: string;
+  isQuestionSent: boolean;
+  answer: string;
+  activeStep: ShowcaseStep | null;
+  traceCount: number;
+}
+
+export interface ShowcaseFrameProps {
+  frame: ShowcaseFrame;
+}
+
+export interface ShowcaseClock {
+  elapsed: number;
+  isRunning: boolean;
+}
