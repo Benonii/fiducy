@@ -49,5 +49,7 @@ Errors from the gateway itself:
 | --- | --- |
 | `400` | Missing or malformed handle or record |
 | `401` | Bad app secret |
+| `403` | The handle belongs to another app or cannot open its key, key release is off for this app, or a key was added outside the widget |
 | `404` | No key with this ID for this app |
+| `409` | Revoke through the gateway on an app that stores its own records. Delete the record instead |
 | `429` | The key reached its monthly request limit |

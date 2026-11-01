@@ -65,8 +65,7 @@ function LogsScene() {
             const y = 1 + index * 0.55;
             return (
               <Line
-                // biome-ignore lint/suspicious/noArrayIndexKey: the list is static
-                key={index}
+                key={y}
                 from={[1, y, 0.8]}
                 to={[1 + length, y, 0.8]}
                 className={index === 3 ? ISO_LINE_STRONG : ISO_DETAIL}
@@ -172,8 +171,6 @@ export function LeakScenes() {
         <figure
           key={leak.label}
           className="group m-0 grid content-start gap-3.5 border-b border-dashed border-frame px-gutter pt-8 pb-11 outline-none md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0 max-md:last:border-b-0"
-          // biome-ignore lint/a11y/noNoninteractiveTabindex: focus plays the same motion as hover
-          tabIndex={0}
         >
           <p
             className={`${LABEL_CLASS} flex items-center gap-2.5 before:size-1.5 before:bg-ink group-focus-visible:text-ink group-focus-visible:underline`}

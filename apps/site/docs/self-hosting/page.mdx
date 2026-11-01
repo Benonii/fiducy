@@ -15,9 +15,12 @@ Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about
 - an S3 bucket for releases and logs
 - a KMS key whose policy only allows `kms:Decrypt` from the enclave image you built
 - a `c6g.large` instance with Nitro enclaves on, an Elastic IP, and ports 80 and 443 open
-- an IAM role limited to the bucket and the key
+- a DynamoDB table (`KeysTable`) for sealed key records, on demand billing, with deletion protection and point-in-time recovery
+- an IAM role limited to the bucket, the key and the table
 
-The host runs Postgres, the dashboard and Caddy for TLS. The gateway runs in the enclave.
+The host runs Postgres, the dashboard, the demo and Caddy for TLS. The gateway runs in the enclave and reads and writes sealed records in `KeysTable` directly.
+
+The landing page and these docs are not part of the stack. They deploy to Vercel from `apps/site`.
 
 ## Deploy with GitHub Actions
 
@@ -31,7 +34,6 @@ The workflow builds the enclave on the host, reads its `PCR0`, locks the KMS key
 Gateway (in the enclave): https://gw.<your-ip>.sslip.io
 Dashboard:                https://app.<your-ip>.sslip.io
 Demo chat:                https://demo.<your-ip>.sslip.io
-Site and docs:            https://<your-ip>.sslip.io
 ```
 
 ## Deploy from your machine
@@ -65,7 +67,9 @@ This starts the dashboard on `:3000`, the demo chat on `:3001` and the gateway o
 | `FIDUCY_KMS_KEY_ID` | KMS key ARN. When unset, `FIDUCY_MASTER_KEY` is used instead (local only) |
 | `FIDUCY_MASTER_KEY` | 32 random bytes, base64url. Local development only |
 | `AWS_KMS_ENDPOINT` | KMS proxy inside the enclave. Default `http://127.0.0.1:9999` |
-| `FIDUCY_CONTROL_PLANE_URL` | Dashboard URL for apps, records and usage |
+| `FIDUCY_CONTROL_PLANE_URL` | Dashboard URL for app configs, usage and key events |
+| `FIDUCY_KEYS_TABLE` | DynamoDB table for sealed key records. When unset, records stay in memory (local only) |
+| `AWS_REGION` | Region for KMS and DynamoDB. Default `us-east-1` |
 | `FIDUCY_GATEWAY_TOKEN_CIPHERTEXT` | Control plane token, KMS-encrypted |
 | `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation` |
 | `FIDUCY_APPS_JSON` | Static app list when there is no control plane |

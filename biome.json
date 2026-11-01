@@ -6,6 +6,7 @@
       "dist",
       ".farm",
       ".output",
+      ".vercel",
       "**/farm.d.ts",
       "**/*.generated.ts",
       "apps/site/src/components/ui",

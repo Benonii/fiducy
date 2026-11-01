@@ -8,7 +8,7 @@ description: What Fiducy protects against, how to verify it, and its limits.
 
 ## What runs where
 
-- The gateway runs inside an **AWS Nitro enclave**: no disk, no shell, no network except a fixed egress allowlist (KMS, the provider APIs, the control plane).
+- The gateway runs inside an **AWS Nitro enclave**: no disk, no shell, no network except a fixed egress allowlist (KMS, DynamoDB for sealed records, the instance metadata service for AWS credentials, the provider APIs, the control plane).
 - **Today, TLS for the gateway ends at Caddy on the parent host**, which forwards to the enclave. That means the host could see keys in transit while they are being saved or used. Moving TLS termination inside the enclave is required before real users.
 - The KMS key policy denies `kms:Decrypt` to everyone, account admins included, unless the request carries an attestation document whose image hash (`PCR0`) matches the published build.
 

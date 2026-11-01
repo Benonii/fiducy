@@ -27,20 +27,27 @@ FIDUCY_APP_SECRET=fsk_...
 
 ## 2. Create the server instance
 
+The examples import from `@/`, which points at `src/` through `paths` in your `tsconfig.json`.
+
 ```ts title="src/lib/fiducy.ts"
 import { getStorage } from '@farm.js/core/storage';
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { auth } from './auth';
+import { auth } from '@/lib/auth';
+
+const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
+if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
+
+export async function getUserID(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers });
+  return session?.user.id ?? null;
+}
 
 export const fiducyServer = createFiducy({
-  gatewayURL: process.env.FIDUCY_GATEWAY_URL!,
-  appSecret: process.env.FIDUCY_APP_SECRET!,
+  gatewayURL: FIDUCY_GATEWAY_URL,
+  appSecret: FIDUCY_APP_SECRET,
   storage: keyValueStorage(getStorage('fiducy')),
-  getUserID: async (request) => {
-    const session = await auth.api.getSession({ headers: request.headers });
-    return session?.user.id ?? null;
-  }
+  getUserID
 });
 ```
 
@@ -112,7 +119,7 @@ Then call the model from any server route:
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
-import { fiducyServer } from '../../../lib/fiducy';
+import { fiducyServer, getUserID } from '@/lib/fiducy';
 
 export async function POST(request: Request) {
   const userID = await getUserID(request);
