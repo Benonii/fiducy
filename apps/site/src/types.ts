@@ -121,3 +121,7 @@ export interface ShowcaseClock {
 export interface CodeBlockProps {
   code: string;
 }
+
+export interface ProviderLogoProps {
+  name: string;
+}
