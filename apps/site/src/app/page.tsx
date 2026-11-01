@@ -31,8 +31,8 @@ export default function HomePage() {
               </h1>
               <div className="grid gap-6 animate-rise-in [animation-delay:240ms]">
                 <p className={`${DESCRIPTION_CLASS} max-w-[46ch] text-[0.9375rem]`}>
-                  Holding your users' OpenAI keys turns every breach into their bill. With Fiducy
-                  your app can use their keys without ever storing or seeing one.
+                  With Fiducy, your app uses your users' AI keys without ever storing or seeing
+                  them. Their keys, none of the risk.
                 </p>
                 <div className="grid gap-3">
                   <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
