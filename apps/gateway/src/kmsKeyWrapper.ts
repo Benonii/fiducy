@@ -27,7 +27,7 @@ export function createKmsKeyWrapper({ client, keyID }: KmsKeyWrapperOptions): Ke
       })
     );
     if (!output.CiphertextBlob) throw new Error('KMS returned no ciphertext');
-    return output.CiphertextBlob;
+    return new Uint8Array(output.CiphertextBlob);
   };
 
   const unwrap = async (appID: string, wrapped: Uint8Array) => {
@@ -40,7 +40,7 @@ export function createKmsKeyWrapper({ client, keyID }: KmsKeyWrapperOptions): Ke
         })
       );
       if (!output.Plaintext) return fail('unwrap_failed' as const);
-      return succeed(output.Plaintext);
+      return succeed(new Uint8Array(output.Plaintext));
     } catch (error) {
       console.error(`KMS refused to unwrap: ${error instanceof Error ? error.name : 'unknown'}`);
       return fail('unwrap_failed' as const);
