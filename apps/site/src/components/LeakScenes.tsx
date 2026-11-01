@@ -195,25 +195,21 @@ const SCENES: LeakScene[] = [
 
 function LeakCard({ leak }: LeakCardProps) {
   return (
-    <figure className="group m-0 grid content-start gap-3 border-dashed border-frame px-gutter pt-6 pb-8 outline-none max-md:w-[84%] max-md:shrink-0 max-md:snap-start max-md:border-r max-md:last:border-r-0 md:border-b md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0">
+    <figure className="group m-0 grid content-start gap-4 border-dashed border-frame px-gutter pt-6 pb-10 outline-none max-md:w-[84%] max-md:shrink-0 max-md:snap-start max-md:border-r max-md:last:border-r-0 md:border-b md:odd:border-r md:[&:nth-last-child(-n+2)]:border-b-0">
       <p
         className={`${LABEL_CLASS} flex items-center gap-2.5 before:size-1.5 before:bg-ink group-focus-visible:text-ink group-focus-visible:underline`}
       >
         {leak.label}
       </p>
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-6">
-        <IsoScene>{leak.scene}</IsoScene>
-        <div className="grid gap-3">
-          <div className={`${LABEL_CLASS} flex flex-wrap gap-x-3 gap-y-1`}>
-            <span>{leak.hint}</span>
-            <span className="text-ink normal-case">{leak.stat}</span>
-          </div>
-          <h3 className="text-[clamp(1.25rem,2.2vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.035em] text-balance lg:text-xl">
-            {leak.title} <span className="text-ink-quiet">{leak.quiet}</span>
-          </h3>
-          <p className={DESCRIPTION_CLASS}>{leak.description}</p>
-        </div>
+      <IsoScene>{leak.scene}</IsoScene>
+      <div className={`${LABEL_CLASS} flex flex-wrap justify-between gap-x-3 gap-y-1`}>
+        <span>{leak.hint}</span>
+        <span className="text-ink normal-case">{leak.stat}</span>
       </div>
+      <h3 className="text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.15] font-semibold tracking-[-0.035em] text-balance">
+        {leak.title} <span className="text-ink-quiet">{leak.quiet}</span>
+      </h3>
+      <p className={`${DESCRIPTION_CLASS} max-w-[46ch]`}>{leak.description}</p>
     </figure>
   );
 }
