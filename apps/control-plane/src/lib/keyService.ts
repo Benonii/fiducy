@@ -79,12 +79,9 @@ export async function revokeAppKey(
 
 export async function noteRevokedKey(store: ControlStore, appID: string, keyID: string) {
   const entry = await store.findKeyEntry(appID, keyID);
-  if (entry) await store.saveKeyEntry({ ...entry, status: 'revoked' });
-}
-
-export async function listRevokedKeyIDs(store: ControlStore, appID: string): Promise<string[]> {
-  const entries = await store.listKeyEntries(appID);
-  return entries.filter((entry) => entry.status === 'revoked').map((entry) => entry.keyID);
+  if (!entry) return;
+  await store.saveKeyEntry({ ...entry, status: 'revoked' });
+  await store.addRevokedKeyID(appID, keyID);
 }
 
 export async function noteKeyEvent(store: ControlStore, event: KeyEvent) {
