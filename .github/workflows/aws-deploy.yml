@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      rotate_token:
+        description: Replace the gateway token before building the enclave image
+        type: boolean
+        default: false
 
 concurrency:
   group: aws-prototype
@@ -30,4 +35,4 @@ jobs:
           fi
       - name: Deploy
         if: steps.credentials.outputs.ready == 'true'
-        run: bash infra/aws/deploy.sh
+        run: bash infra/aws/deploy.sh ${{ inputs.rotate_token == true && '--rotate-token' || '' }}

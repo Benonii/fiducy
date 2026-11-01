@@ -6,6 +6,14 @@
 #   4. Start everything and check the public endpoints
 set -euo pipefail
 
+ROTATE_TOKEN=false
+for argument in "$@"; do
+  case "$argument" in
+    --rotate-token) ROTATE_TOKEN=true ;;
+    *) echo "Unknown option $argument (expected --rotate-token)" >&2; exit 2 ;;
+  esac
+done
+
 STACK_NAME="${FIDUCY_STACK_NAME:-fiducy-prototype}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export AWS_DEFAULT_REGION="$AWS_REGION"
@@ -121,6 +129,9 @@ log "Uploading release"
 aws s3 cp --quiet /tmp/fiducy-release.tar.gz "s3://$BUCKET/release.tar.gz"
 
 wait_for_ssm
+if [ "$ROTATE_TOKEN" = true ]; then
+  run_on_host rotate-token
+fi
 run_on_host build
 PCR0=$(aws s3 cp "s3://$BUCKET/pcr0.txt" -)
 log "Locking the KMS key to enclave image $PCR0"
@@ -140,4 +151,7 @@ summary "- Dashboard: https://app.${DASHED_IP}.sslip.io"
 summary "- Demo chat: https://demo.${DASHED_IP}.sslip.io"
 summary "- Site and docs: https://fiducy-nine.vercel.app"
 summary "- Enclave image PCR0: \`${PCR0}\`"
+if [ "$ROTATE_TOKEN" = true ]; then
+  summary "- Gateway token rotated: the previous token no longer authenticates the gateway"
+fi
 log "Done"

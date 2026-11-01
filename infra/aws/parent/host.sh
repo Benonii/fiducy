@@ -2,10 +2,11 @@
 # Runs on the parent EC2 host through SSM. Two steps:
 #   host.sh build  -> install tools, build the apps and the enclave image, print its PCR0
 #   host.sh start  -> (re)start Postgres, the control plane, the demo, the enclave and Caddy
+#   host.sh rotate-token -> replace the gateway token; run build and start afterwards
 # Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP
 set -euo pipefail
 
-STEP="${1:?usage: host.sh build|start}"
+STEP="${1:?usage: host.sh build|start|rotate-token}"
 RELEASE_DIR=/opt/fiducy/release
 STATE_DIR=/var/lib/fiducy
 SECRETS_FILE=/etc/fiducy/secrets.env
@@ -88,6 +89,20 @@ EOF
   fi
   # shellcheck disable=SC1090
   source "$SECRETS_FILE"
+}
+
+rotate_gateway_token() {
+  local previous_token="$FIDUCY_GATEWAY_TOKEN"
+  local rotated_file
+  rotated_file=$(mktemp)
+  umask 077
+  grep -v '^FIDUCY_GATEWAY_TOKEN=' "$SECRETS_FILE" > "$rotated_file"
+  echo "FIDUCY_GATEWAY_TOKEN=$(openssl rand -hex 32)" >> "$rotated_file"
+  mv "$rotated_file" "$SECRETS_FILE"
+  # shellcheck disable=SC1090
+  source "$SECRETS_FILE"
+  [ "$FIDUCY_GATEWAY_TOKEN" != "$previous_token" ] || { log "The gateway token did not change"; return 1; }
+  log "Gateway token rotated; the next build seals it and the next start hands it to the control plane"
 }
 
 build_release() {
@@ -288,5 +303,6 @@ ensure_secrets
 case "$STEP" in
   build) build_release ;;
   start) start_services ;;
+  rotate-token) rotate_gateway_token ;;
   *) echo "Unknown step $STEP" >&2; exit 2 ;;
 esac
