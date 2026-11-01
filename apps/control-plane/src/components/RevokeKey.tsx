@@ -12,7 +12,7 @@ export function RevokeKey({ appID, keyID }: RevokeKeyProps) {
   return (
     <ConfirmAction
       trigger={
-        <Button loading={revokeKey.isPending} size="xs" variant="ghost">
+        <Button className="border-dashed" loading={revokeKey.isPending} size="xs" variant="outline">
           Revoke
         </Button>
       }

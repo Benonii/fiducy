@@ -22,7 +22,7 @@ export function ConfirmAction({
   return (
     <AlertDialog>
       <AlertDialogTrigger render={trigger} />
-      <AlertDialogPopup>
+      <AlertDialogPopup bottomStickOnMobile={false}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
