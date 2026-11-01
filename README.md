@@ -60,7 +60,7 @@ FIDUCY_APPS_JSON='[{"appID":"app_demo","name":"Demo","appSecret":"fsk_demo_local
 bun run start
 
 cd apps/demo
-FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
+FIDUCY_GATEWAY_URL=http://localhost:8787 FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
 ```
 
 The demo is an assistant-ui chat. Pick a model; if you have no key for that provider, the reply opens the key box inside the thread (see `packages/assistant-ui`). Handles are stored server side per demo user.

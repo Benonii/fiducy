@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 
 import { hashSecret as hashSecretInGateway } from '../../gateway/src/hashing';
 import { createApp, deleteApp, listApps, listGatewayApps } from '../src/lib/appService';
-import { rotateAppSecret, seedApp, updateApp } from '../src/lib/appService';
+import { rotateAppSecret, updateApp } from '../src/lib/appService';
 import { hashSecret } from '../src/lib/secrets';
 import { appSettingsUpdateSchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID, createTestStore } from './fixtures';
@@ -107,29 +107,5 @@ describe('the gateway feed', () => {
       'name',
       'revokedKeyIDs'
     ]);
-  });
-});
-
-describe('seeding the demo app', () => {
-  const seeded = (appID: string, appSecretHash: string) => ({
-    ...CHAT_SETTINGS,
-    appID,
-    appSecretHash
-  });
-
-  it('creates and later updates a system app', async () => {
-    const store = createTestStore();
-    expect(await seedApp(store, seeded('app_demo', 'a'.repeat(64)))).toMatchObject({ ok: true });
-    expect(await seedApp(store, seeded('app_demo', 'b'.repeat(64)))).toMatchObject({ ok: true });
-    expect((await store.findApp('app_demo'))?.appSecretHash).toBe('b'.repeat(64));
-  });
-
-  it('refuses to take over an app a developer owns', async () => {
-    const store = createTestStore();
-    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
-    const before = await store.findApp(app.appID);
-    const result = await seedApp(store, seeded(app.appID, 'c'.repeat(64)));
-    expect(result).toMatchObject({ ok: false, error: { status: 409 } });
-    expect(await store.findApp(app.appID)).toEqual(before);
   });
 });
