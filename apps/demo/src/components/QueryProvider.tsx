@@ -3,14 +3,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { DemoRequestError } from '@/lib/client';
-
 import type { ReactNode } from 'react';
 
 const MAX_RETRIES = 2;
 
-function shouldRetry(failureCount: number, error: Error): boolean {
-  if (error instanceof DemoRequestError && error.status < 500) return false;
+function shouldRetry(failureCount: number): boolean {
   return failureCount < MAX_RETRIES;
 }
 
