@@ -25,7 +25,7 @@ export function IsoScene({ children }: IsoSceneProps) {
 
   return (
     <svg
-      className="h-[clamp(160px,20vh,240px)] w-full overflow-visible stroke-ink [stroke-linejoin:round] max-md:h-[220px]"
+      className="h-[clamp(160px,20vh,240px)] w-full overflow-visible stroke-ink [stroke-linejoin:round] max-md:h-[170px]"
       viewBox={viewBox}
       aria-hidden="true"
     >
