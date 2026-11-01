@@ -37,7 +37,7 @@ FIDUCY_GATEWAY_TOKEN=change-me \
 bun run start
 ```
 
-The control plane never handles user keys. It sends the gateway app configs (with only the SHA-256 hash of each app secret) and receives token counts. Locally it stores data in `.farm/`; set `DATABASE_URL` to use Postgres.
+The control plane never handles user keys. It sends the gateway app configs (with only the SHA-256 hash of each app secret) and receives token counts. Every 60 seconds the gateway also posts its status: the image digest from `FIDUCY_MEASUREMENT` and the last time the enclave answered an attestation check. The dashboard shows both on each app's Security panel. Locally it stores data in `.farm/`; set `DATABASE_URL` to use Postgres.
 
 ## Using the SDK
 

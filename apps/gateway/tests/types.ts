@@ -17,3 +17,8 @@ export interface ReceivedUsageEvent {
 export interface ReceivedUsageBatch {
   events: ReceivedUsageEvent[];
 }
+
+export interface ReceivedStatusReport {
+  measurement: string | null;
+  attestedAt: string | null;
+}

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'bun:test';
 
 import { createApp, listGatewayApps } from '../src/lib/appService';
-import { noteGatewayContact, readGatewayStatus } from '../src/lib/gatewayStatusService';
+import { noteGatewayAttestation, noteGatewayContact } from '../src/lib/gatewayStatusService';
+import { readGatewayStatus } from '../src/lib/gatewayStatusService';
 import { listAppKeys, noteKeyEvent, revokeAppKey } from '../src/lib/keyService';
 import { readUsageSeries, recordUsageBatch } from '../src/lib/usageService';
-import { usageSeriesQuerySchema } from '../src/lib/validators';
+import { gatewayAttestationSchema, usageSeriesQuerySchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID } from './fixtures';
 import { createTestStore, createUsageEvent } from './fixtures';
 
@@ -136,7 +137,8 @@ describe('the gateway status', () => {
     expect(await readGatewayStatus(store, NOW)).toMatchObject({
       reachable: false,
       lastSeenAt: null,
-      pcr0: null
+      measurement: null,
+      attestedAt: null
     });
     await noteGatewayContact(store, NOW);
     expect(await readGatewayStatus(store, NOW)).toMatchObject({
@@ -145,5 +147,45 @@ describe('the gateway status', () => {
     });
     const later = new Date(NOW.getTime() + 3 * 60 * 1000);
     expect(await readGatewayStatus(store, later)).toMatchObject({ reachable: false });
+  });
+
+  it('shows the image digest and attestation time the gateway last reported', async () => {
+    const store = createTestStore();
+    const attestation = {
+      measurement: `sha256:${'ab12'.repeat(16)}`,
+      attestedAt: NOW.toISOString()
+    };
+    await noteGatewayAttestation(store, attestation);
+    await noteGatewayContact(store, NOW);
+    expect(await readGatewayStatus(store, NOW)).toMatchObject({ reachable: true, ...attestation });
+  });
+
+  it('keeps the image digest when the gateway reports that attestation failed', async () => {
+    const store = createTestStore();
+    const measurement = `sha256:${'ab12'.repeat(16)}`;
+    await noteGatewayAttestation(store, { measurement, attestedAt: null });
+    expect(await readGatewayStatus(store, NOW)).toMatchObject({ measurement, attestedAt: null });
+  });
+});
+
+describe('the gateway status report', () => {
+  it('accepts an image digest with an attestation time, or nulls', () => {
+    const report = { measurement: `sha256:${'ab12'.repeat(16)}`, attestedAt: NOW.toISOString() };
+    expect(gatewayAttestationSchema.parse(report)).toEqual(report);
+    const empty = { measurement: null, attestedAt: null };
+    expect(gatewayAttestationSchema.parse(empty)).toEqual(empty);
+  });
+
+  it('refuses a digest with spaces or markup and a time that is not ISO 8601', () => {
+    const attestedAt = NOW.toISOString();
+    expect(
+      gatewayAttestationSchema.safeParse({ measurement: '<b>x</b>', attestedAt }).success
+    ).toBe(false);
+    expect(gatewayAttestationSchema.safeParse({ measurement: 'a b', attestedAt }).success).toBe(
+      false
+    );
+    expect(
+      gatewayAttestationSchema.safeParse({ measurement: null, attestedAt: 'yesterday' }).success
+    ).toBe(false);
   });
 });

@@ -56,6 +56,7 @@ export type StoredValue =
   | StoredKeyEntry
   | DailyUsage
   | GatewayHeartbeat
+  | GatewayAttestation
   | true;
 
 export interface KeyValueStore {
@@ -80,6 +81,8 @@ export interface ControlStore {
   saveDailyUsage: (appID: string, usage: DailyUsage) => Promise<void>;
   readGatewayHeartbeat: () => Promise<GatewayHeartbeat | null>;
   saveGatewayHeartbeat: (heartbeat: GatewayHeartbeat) => Promise<void>;
+  readGatewayAttestation: () => Promise<GatewayAttestation | null>;
+  saveGatewayAttestation: (attestation: GatewayAttestation) => Promise<void>;
 }
 
 export interface ControlFailure {
@@ -124,7 +127,7 @@ export interface UsageSeries {
 export interface GatewayStatus {
   reachable: boolean;
   lastSeenAt: string | null;
-  pcr0: string | null;
+  measurement: string | null;
   attestedAt: string | null;
   region: string | null;
 }
@@ -151,6 +154,11 @@ export interface DailyUsage extends TokenTotals {
 
 export interface GatewayHeartbeat {
   lastSeenAt: string;
+}
+
+export interface GatewayAttestation {
+  measurement: string | null;
+  attestedAt: string | null;
 }
 
 export type KeyEventType = 'saved' | 'revoked';

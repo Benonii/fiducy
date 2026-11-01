@@ -14,10 +14,8 @@ function describeGateway(status: GatewayStatus | undefined): string {
 }
 
 function describeAttestation(status: GatewayStatus | undefined): string {
-  if (!status?.pcr0) return 'Enclave not attested yet';
-  return status.attestedAt
-    ? `Enclave attested ${formatRelativeTime(status.attestedAt)}`
-    : 'Enclave attested';
+  if (!status?.measurement || !status.attestedAt) return 'Enclave not attested yet';
+  return `Enclave attested ${formatRelativeTime(status.attestedAt)}`;
 }
 
 export function GatewayStatusLine() {

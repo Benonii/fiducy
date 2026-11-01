@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { MAXIMUM_ALLOWED_ORIGINS, MAXIMUM_MONTHLY_REQUEST_LIMIT } from './constants';
-import { MAXIMUM_USAGE_BATCH_SIZE } from './constants';
+import { MAXIMUM_MEASUREMENT_LENGTH, MAXIMUM_USAGE_BATCH_SIZE } from './constants';
 import { DEFAULT_USAGE_SERIES_DAYS, MAXIMUM_USAGE_SERIES_DAYS } from './constants';
 
 function isBareOrigin(value: string): boolean {
@@ -59,4 +59,14 @@ export const keyEventSchema = z.object({
   type: z.enum(['saved', 'revoked']),
   appID: z.string().min(1).max(80),
   keyID: z.string().regex(/^[A-Za-z0-9_-]{22}$/, 'Use a 22 character key ID')
+});
+
+export const gatewayAttestationSchema = z.object({
+  measurement: z
+    .string()
+    .trim()
+    .max(MAXIMUM_MEASUREMENT_LENGTH)
+    .regex(/^[A-Za-z0-9:._-]+$/, 'Send the image digest, such as sha256:<hex>')
+    .nullable(),
+  attestedAt: z.string().datetime().nullable()
 });

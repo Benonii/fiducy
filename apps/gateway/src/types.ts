@@ -98,6 +98,17 @@ export interface RemoteUsageLedgerOptions extends ControlPlaneConnection {
   flushIntervalMilliseconds: number;
 }
 
+export interface GatewayStatusReporterOptions extends ControlPlaneConnection {
+  measurement: string | null;
+  attest?: AttestationSource;
+  reportIntervalMilliseconds: number;
+}
+
+export interface GatewayStatusReporter {
+  report: () => Promise<boolean>;
+  stop: () => void;
+}
+
 export interface RemoteAppConfig extends RegisteredApp {
   appSecretHash: string;
 }

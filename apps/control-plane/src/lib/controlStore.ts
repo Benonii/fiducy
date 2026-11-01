@@ -1,9 +1,10 @@
 import { APP_NAMESPACE, OWNER_NAMESPACE } from './constants';
 import { DAILY_USAGE_NAMESPACE, GATEWAY_HEARTBEAT_KEY, KEY_ENTRY_NAMESPACE } from './constants';
-import { USAGE_NAMESPACE } from './constants';
+import { GATEWAY_ATTESTATION_KEY, USAGE_NAMESPACE } from './constants';
 
 import type { ControlStore, KeyValueStore, StoredApp, UsageSummary } from './types';
 import type { DailyUsage, GatewayHeartbeat, StoredKeyEntry } from './types';
+import type { GatewayAttestation } from './types';
 
 function createEmptyUsage(month: string): UsageSummary {
   return { month, requestCount: 0, inputTokens: 0, outputTokens: 0, requestsByKey: {} };
@@ -78,6 +79,11 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
       ((await keyValueStore.getItem(GATEWAY_HEARTBEAT_KEY)) as GatewayHeartbeat | null) ?? null,
     saveGatewayHeartbeat: async (heartbeat) => {
       await keyValueStore.setItem(GATEWAY_HEARTBEAT_KEY, heartbeat);
+    },
+    readGatewayAttestation: async () =>
+      ((await keyValueStore.getItem(GATEWAY_ATTESTATION_KEY)) as GatewayAttestation | null) ?? null,
+    saveGatewayAttestation: async (attestation) => {
+      await keyValueStore.setItem(GATEWAY_ATTESTATION_KEY, attestation);
     }
   };
 }

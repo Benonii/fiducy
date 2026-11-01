@@ -1,7 +1,7 @@
 import { hashSecret } from '../src/hashing';
 
 import type { AppRegistration, RemoteAppConfig } from '../src/types';
-import type { ReceivedUsageBatch } from './types';
+import type { ReceivedStatusReport, ReceivedUsageBatch } from './types';
 
 export const GATEWAY_TOKEN = 'gateway_token_4Fq9Lm2Xz7Rt';
 
@@ -15,6 +15,7 @@ export async function toRemoteAppConfig({
 export function startFakeControlPlane() {
   let apps: RemoteAppConfig[] = [];
   const usageBatches: ReceivedUsageBatch[] = [];
+  const statusReports: ReceivedStatusReport[] = [];
   let appListRequestCount = 0;
   let usageStatus = 202;
 
@@ -28,6 +29,10 @@ export function startFakeControlPlane() {
       if (pathname === '/api/gateway/apps') {
         appListRequestCount += 1;
         return Response.json({ data: apps, message: 'App configs loaded' });
+      }
+      if (pathname === '/api/gateway/status') {
+        statusReports.push((await request.json()) as ReceivedStatusReport);
+        return Response.json({ data: null, message: 'Gateway status recorded' }, { status: 202 });
       }
       if (pathname === '/api/gateway/usage' && usageStatus === 202) {
         usageBatches.push((await request.json()) as ReceivedUsageBatch);
@@ -47,6 +52,7 @@ export function startFakeControlPlane() {
     },
     countAppListRequests: () => appListRequestCount,
     usageBatches,
+    statusReports,
     stop: () => server.stop(true)
   };
 }

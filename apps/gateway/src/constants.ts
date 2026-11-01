@@ -9,6 +9,7 @@ export const MAX_RECORD_HEADER_LENGTH = 8192;
 export const GATEWAY_APPS_PATH = '/api/gateway/apps';
 export const GATEWAY_USAGE_PATH = '/api/gateway/usage';
 export const GATEWAY_KEY_EVENTS_PATH = '/api/gateway/key-events';
+export const GATEWAY_STATUS_PATH = '/api/gateway/status';
 export const MINIMUM_REFRESH_GAP_MILLISECONDS = 1000;
 export const MAXIMUM_USAGE_BATCH_SIZE = 1000;
 export const ATTESTATION_PATH = '/v1/attestation';

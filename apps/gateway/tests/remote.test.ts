@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'bun:test';
 
 import { createRemoteAppDirectory } from '../src/remoteAppDirectory';
+import { createRemoteGatewayStatus } from '../src/remoteGatewayStatus';
 import { createRemoteUsageLedger } from '../src/remoteUsageLedger';
 import { GATEWAY_TOKEN, startFakeControlPlane } from './fakeControlPlane';
 import { CHAT_APP, DESK_APP } from './harness';
@@ -100,5 +101,64 @@ describe('sending usage to the control plane', () => {
     controlPlane.failUsageWith(202);
     expect(await ledger.flush()).toBe(1);
     await ledger.stop();
+  });
+});
+
+describe('reporting the gateway status to the control plane', () => {
+  const measurement = `sha256:${'5d3a'.repeat(16)}`;
+
+  it('sends the image digest and the time the enclave last answered attestation', async () => {
+    const reporter = createRemoteGatewayStatus({
+      ...connection,
+      measurement,
+      attest: async () => new TextEncoder().encode('attestation-token'),
+      reportIntervalMilliseconds: 60000
+    });
+    const before = Date.now();
+    expect(await reporter.report()).toBe(true);
+    reporter.stop();
+    const report = controlPlane.statusReports.at(-1);
+    expect(report?.measurement).toBe(measurement);
+    expect(new Date(report?.attestedAt ?? 0).getTime()).toBeGreaterThanOrEqual(before);
+  });
+
+  it('keeps the last attestation time when the enclave stops answering', async () => {
+    let isEnclaveAnswering = true;
+    const reporter = createRemoteGatewayStatus({
+      ...connection,
+      measurement,
+      attest: async () => (isEnclaveAnswering ? new Uint8Array([1]) : null),
+      reportIntervalMilliseconds: 60000
+    });
+    await reporter.report();
+    const firstAttestedAt = controlPlane.statusReports.at(-1)?.attestedAt;
+    isEnclaveAnswering = false;
+    await Bun.sleep(5);
+    await reporter.report();
+    reporter.stop();
+    expect(firstAttestedAt).toBeTruthy();
+    expect(controlPlane.statusReports.at(-1)?.attestedAt).toBe(firstAttestedAt ?? null);
+  });
+
+  it('reports no attestation outside an enclave', async () => {
+    const reporter = createRemoteGatewayStatus({
+      ...connection,
+      measurement: null,
+      reportIntervalMilliseconds: 60000
+    });
+    await reporter.report();
+    reporter.stop();
+    expect(controlPlane.statusReports.at(-1)).toEqual({ measurement: null, attestedAt: null });
+  });
+
+  it('answers false instead of throwing when the control plane refuses the token', async () => {
+    const reporter = createRemoteGatewayStatus({
+      ...connection,
+      gatewayToken: 'wrong_token',
+      measurement,
+      reportIntervalMilliseconds: 60000
+    });
+    expect(await reporter.report()).toBe(false);
+    reporter.stop();
   });
 });

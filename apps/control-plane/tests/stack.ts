@@ -8,6 +8,7 @@ import { startMockProvider } from '@fiducy/testing';
 
 import { createMemoryKeyStore } from '../../gateway/src/memoryStores';
 import { createRemoteAppDirectory } from '../../gateway/src/remoteAppDirectory';
+import { createRemoteGatewayStatus } from '../../gateway/src/remoteGatewayStatus';
 import { createRemoteKeyEvents } from '../../gateway/src/remoteKeyEvents';
 import { createRemoteUsageLedger } from '../../gateway/src/remoteUsageLedger';
 import { createGateway } from '../../gateway/src/router';
@@ -15,6 +16,7 @@ import { createGateway } from '../../gateway/src/router';
 const GATEWAY_TOKEN = 'gateway_token_e2e_7Hn3Qs9Vb2';
 const CONTROL_PLANE_PORT = 4400 + Math.floor(Math.random() * 500);
 const STARTUP_TIMEOUT_MILLISECONDS = 60000;
+export const IMAGE_DIGEST = `sha256:${'7c4e9a1f'.repeat(8)}`;
 
 async function waitForControlPlane(controlPlaneURL: string) {
   const deadline = Date.now() + STARTUP_TIMEOUT_MILLISECONDS;
@@ -37,8 +39,14 @@ function startGateway(controlPlaneURL: string, providerURL: string) {
     usageLedger,
     providerRegistry: createProviderRegistry({ openai: providerURL })
   });
+  const statusReporter = createRemoteGatewayStatus({
+    ...connection,
+    measurement: IMAGE_DIGEST,
+    attest: async () => new TextEncoder().encode('attestation-token'),
+    reportIntervalMilliseconds: 60000
+  });
   const server = Bun.serve({ port: 0, fetch: gateway });
-  return { server, usageLedger, gatewayURL: `http://localhost:${server.port}` };
+  return { server, usageLedger, statusReporter, gatewayURL: `http://localhost:${server.port}` };
 }
 
 export async function startStack() {
@@ -61,6 +69,7 @@ export async function startStack() {
 
   const stop = async () => {
     await gateway.usageLedger.stop();
+    gateway.statusReporter.stop();
     gateway.server.stop(true);
     mockProvider.server.stop(true);
     controlPlane.kill();
@@ -71,6 +80,7 @@ export async function startStack() {
     controlPlaneURL,
     gatewayURL: gateway.gatewayURL,
     usageLedger: gateway.usageLedger,
+    statusReporter: gateway.statusReporter,
     stop
   };
 }

@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 
 import { parseHandle } from '@fiducy/core';
 import { SAMPLE_API_KEY } from '@fiducy/testing';
-import { startStack } from './stack';
+import { IMAGE_DIGEST, startStack } from './stack';
 
 import type { Browser, Page } from 'playwright';
 
@@ -110,6 +110,14 @@ describe('a developer onboarding through the dashboard', () => {
     await page.getByTestId('request-count').filter({ hasText: '1' }).waitFor({ timeout: 30000 });
   });
 
+  it('shows the image digest the gateway attested', async () => {
+    expect(await stack.statusReporter.report()).toBe(true);
+    await page.reload();
+    await page.getByText(IMAGE_DIGEST.slice(0, 16)).waitFor({ timeout: 30000 });
+    await page.getByText('Image digest, attested just now').waitFor();
+    await page.getByText('Enclave attested just now').waitFor();
+  });
+
   it('lists the user key and revokes it so the gateway refuses it', async () => {
     const callDashboard = (path: string, method = 'GET') =>
       page.evaluate(
@@ -169,6 +177,15 @@ describe('control plane access rules', () => {
   it('refuses the gateway feed without the gateway token', async () => {
     const response = await fetch(`${stack.controlPlaneURL}/api/gateway/apps`, {
       headers: { authorization: 'Bearer wrong_token' }
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it('refuses a gateway status without the gateway token', async () => {
+    const response = await fetch(`${stack.controlPlaneURL}/api/gateway/status`, {
+      method: 'POST',
+      headers: { authorization: 'Bearer wrong_token', 'content-type': 'application/json' },
+      body: JSON.stringify({ measurement: IMAGE_DIGEST, attestedAt: null })
     });
     expect(response.status).toBe(401);
   });

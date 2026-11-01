@@ -8,6 +8,7 @@ import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKe
 import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
 import { createMemoryUsageLedger } from './memoryStores';
 import { createRemoteAppDirectory } from './remoteAppDirectory';
+import { createRemoteGatewayStatus } from './remoteGatewayStatus';
 import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
@@ -55,6 +56,11 @@ async function readControlPlaneConnection(
   return { controlPlaneURL, gatewayToken };
 }
 
+function readMeasurement(): string | null {
+  const measurement = process.env.FIDUCY_MEASUREMENT?.trim();
+  return measurement ? measurement : null;
+}
+
 function selectKeyStore(): KeyStore {
   const tableName = process.env.FIDUCY_KEYS_TABLE;
   if (!tableName) return createMemoryKeyStore();
@@ -69,6 +75,7 @@ function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
 const kms = readKmsSettings();
 const connection = await readControlPlaneConnection(kms);
 const enclaveAPIURL = process.env.FIDUCY_ENCLAVE_API_URL;
+const attest = enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined;
 
 const gateway = createGateway({
   keyWrapper: selectKeyWrapper(kms),
@@ -81,8 +88,18 @@ const gateway = createGateway({
     ? createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 })
     : createMemoryUsageLedger(),
   providerRegistry: createProviderRegistry(),
-  attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined
+  attest
 });
+
+if (connection) {
+  const statusReporter = createRemoteGatewayStatus({
+    ...connection,
+    measurement: readMeasurement(),
+    attest,
+    reportIntervalMilliseconds: 60000
+  });
+  statusReporter.report();
+}
 
 const server = Bun.serve({
   port: Number(process.env.PORT ?? 8787),

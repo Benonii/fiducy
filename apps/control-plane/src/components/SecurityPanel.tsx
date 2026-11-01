@@ -30,17 +30,19 @@ function describeStorage(app: AppView): SecurityRow {
 }
 
 function describeAttestation(status: GatewayStatus | undefined): SecurityRow {
-  if (!status?.pcr0) {
+  if (!status?.measurement) {
     return {
       label: 'Enclave',
       value: 'Not attested yet',
-      detail: 'Shows the PCR0 hash once the gateway runs in a Nitro enclave.'
+      detail: 'Shows the image digest once the gateway runs in a confidential VM.'
     };
   }
   return {
     label: 'Enclave',
-    value: shortenIdentifier(status.pcr0, 16),
-    detail: status.attestedAt ? `PCR0, attested ${formatRelativeTime(status.attestedAt)}` : 'PCR0',
+    value: shortenIdentifier(status.measurement, 16),
+    detail: status.attestedAt
+      ? `Image digest, attested ${formatRelativeTime(status.attestedAt)}`
+      : 'Image digest, not attested yet',
     isMono: true
   };
 }
