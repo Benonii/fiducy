@@ -2,7 +2,8 @@ import { createLocalKeyWrapper } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 
 import { createEnclaverAttestation } from './attestation';
-import { GATEWAY_TOKEN_PURPOSE } from './constants';
+import { GATEWAY_TOKEN_PURPOSE, KEY_UPLOAD_BUCKET_CAPACITY } from './constants';
+import { KEY_UPLOAD_MAXIMUM_TRACKED_CLIENTS, KEY_UPLOAD_REFILL_PER_SECOND } from './constants';
 import { createDynamoClient, createDynamoKeyStore } from './dynamoKeyStore';
 import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKeyWrapper';
 import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
@@ -11,6 +12,7 @@ import { createRemoteAppDirectory } from './remoteAppDirectory';
 import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
+import { createTokenBucketRateLimiter } from './tokenBucketRateLimiter';
 
 import type { Bytes, KeyWrapper } from '@fiducy/core';
 import type { AppRegistration, ControlPlaneConnection, KeyStore, KmsSender } from './types';
@@ -81,7 +83,12 @@ const gateway = createGateway({
     ? createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 })
     : createMemoryUsageLedger(),
   providerRegistry: createProviderRegistry(),
-  attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined
+  attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined,
+  rateLimiter: createTokenBucketRateLimiter({
+    capacity: KEY_UPLOAD_BUCKET_CAPACITY,
+    refillPerSecond: KEY_UPLOAD_REFILL_PER_SECOND,
+    maximumTrackedClients: KEY_UPLOAD_MAXIMUM_TRACKED_CLIENTS
+  })
 });
 
 const server = Bun.serve({

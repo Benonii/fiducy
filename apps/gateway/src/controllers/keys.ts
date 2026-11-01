@@ -3,7 +3,8 @@ import { sealSecret } from '@fiducy/core';
 import { authenticateApp } from '../authentication';
 import { RELEASE_TIME_TO_LIVE_SECONDS } from '../constants';
 import { resolveApiKey } from '../resolveKey';
-import { respondWith, respondWithFailure } from '../responses';
+import { respondWith, respondWithFailure, respondWithRateLimit } from '../responses';
+import { identifyClient } from '../tokenBucketRateLimiter';
 import { readJSONBody, validateStoreKeyBody } from '../validators';
 
 import type { GatewayDependencies } from '../types';
@@ -16,6 +17,8 @@ function isFromForeignOrigin(request: Request): boolean {
 }
 
 export async function storeKey(request: Request, dependencies: GatewayDependencies) {
+  const rateLimit = dependencies.rateLimiter?.consumeToken(identifyClient(request));
+  if (rateLimit?.isAllowed === false) return respondWithRateLimit(rateLimit.retryAfterSeconds);
   if (isFromForeignOrigin(request))
     return respondWith(403, null, 'Keys can only be added through the key widget');
   const body = validateStoreKeyBody(await readJSONBody(request));

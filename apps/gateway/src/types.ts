@@ -57,6 +57,7 @@ export interface GatewayDependencies {
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
   keyEvents?: KeyEventReporter;
+  rateLimiter?: RateLimiter;
 }
 
 export interface StoreKeyBody {
@@ -147,4 +148,25 @@ export interface KeyEvent {
 
 export interface KeyEventReporter {
   report: (event: KeyEvent) => Promise<void>;
+}
+
+export interface RateLimitDecision {
+  isAllowed: boolean;
+  retryAfterSeconds: number;
+}
+
+export interface RateLimiter {
+  consumeToken: (clientID: string) => RateLimitDecision;
+}
+
+export interface TokenBucketOptions {
+  capacity: number;
+  refillPerSecond: number;
+  maximumTrackedClients: number;
+  readCurrentTime?: () => number;
+}
+
+export interface TokenBucket {
+  tokens: number;
+  refilledAt: number;
 }

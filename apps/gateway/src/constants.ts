@@ -22,3 +22,6 @@ export const IMDS_URL = 'http://169.254.169.254';
 export const IMDS_TOKEN_PATH = '/latest/api/token';
 export const IMDS_ROLE_PATH = '/latest/meta-data/iam/security-credentials/';
 export const IMDS_TOKEN_TTL_SECONDS = 300;
+export const KEY_UPLOAD_BUCKET_CAPACITY = 10;
+export const KEY_UPLOAD_REFILL_PER_SECOND = 10 / 60;
+export const KEY_UPLOAD_MAXIMUM_TRACKED_CLIENTS = 10000;
