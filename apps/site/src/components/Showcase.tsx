@@ -45,11 +45,11 @@ export function Showcase() {
             frame.isFlipped && '[transform:rotateY(180deg)]'
           )}
         >
-          <div className={FACE_CLASS} aria-hidden={frame.isFlipped}>
+          <div className={cn(FACE_CLASS, 'grid')} aria-hidden={frame.isFlipped}>
             <ShowcaseCode frame={frame} />
           </div>
           <div
-            className={cn(FACE_CLASS, '[transform:rotateY(180deg)]')}
+            className={cn(FACE_CLASS, 'grid grid-rows-[auto_1fr] [transform:rotateY(180deg)]')}
             aria-hidden={!frame.isFlipped}
           >
             <ShowcaseSteps frame={frame} />

@@ -117,7 +117,7 @@ function StackedFlow() {
   return (
     <svg
       className="mx-auto hidden h-auto w-full max-w-[360px] overflow-visible max-md:block"
-      viewBox="0 0 360 520"
+      viewBox="0 0 360 476"
       role="img"
       aria-labelledby="flow-title-narrow"
     >
@@ -157,12 +157,15 @@ function StackedFlow() {
         </text>
       </g>
       <g className={NODE_CLASS}>
-        <rect x="70" y="372" width="220" height="64" />
+        <rect x="70" y="372" width="220" height="84" />
         <text className={NODE_TITLE_CLASS} x="90" y="402">
           Your user's provider
         </text>
         <text className={DETAIL_CLASS} x="90" y="424">
-          {PROVIDERS.join(', ')}
+          {PROVIDERS.slice(0, 2).join(', ')},
+        </text>
+        <text className={DETAIL_CLASS} x="90" y="442">
+          {PROVIDERS.slice(2).join(', ')}
         </text>
       </g>
       <circle className={PULSE_CLASS} r="4">

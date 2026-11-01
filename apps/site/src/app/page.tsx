@@ -33,7 +33,7 @@ export default function HomePage() {
                   Holding your users' OpenAI keys turns every breach into their bill. With Fiducy
                   your app can use their keys without ever storing or seeing one.
                 </p>
-                <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap">
+                <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
                   <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
                     Read the docs
                   </a>
