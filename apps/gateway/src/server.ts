@@ -3,17 +3,20 @@ import { createProviderRegistry } from '@fiducy/providers';
 
 import { createEnclaverAttestation } from './attestation';
 import { GATEWAY_TOKEN_PURPOSE } from './constants';
+import { createDynamoBlobStore } from './dynamoBlobStore';
 import { createDynamoClient, createDynamoKeyStore } from './dynamoKeyStore';
 import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKeyWrapper';
-import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
-import { createMemoryUsageLedger } from './memoryStores';
+import { createMemoryAppDirectory, createMemoryBlobStore } from './memoryStores';
+import { createMemoryKeyStore, createMemoryUsageLedger } from './memoryStores';
 import { createRemoteAppDirectory } from './remoteAppDirectory';
 import { createRemoteKeyEvents } from './remoteKeyEvents';
 import { createRemoteUsageLedger } from './remoteUsageLedger';
 import { createGateway } from './router';
+import { startTlsFront } from './tlsFront';
 
 import type { Bytes, KeyWrapper } from '@fiducy/core';
-import type { AppRegistration, ControlPlaneConnection, KeyStore, KmsSender } from './types';
+import type { AppRegistration, BlobStore, ControlPlaneConnection, KeyStore } from './types';
+import type { KmsSender } from './types';
 
 interface KmsSettings {
   client: KmsSender;
@@ -62,6 +65,13 @@ function selectKeyStore(): KeyStore {
   return createDynamoKeyStore({ client, tableName });
 }
 
+function selectBlobStore(): BlobStore {
+  const tableName = process.env.FIDUCY_KEYS_TABLE;
+  if (!tableName) return createMemoryBlobStore();
+  const client = createDynamoClient(process.env.AWS_REGION ?? 'us-east-1');
+  return createDynamoBlobStore({ client, tableName });
+}
+
 function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
   return kms ? createKmsKeyWrapper(kms) : createLocalKeyWrapper(readMasterKey());
 }
@@ -69,9 +79,10 @@ function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
 const kms = readKmsSettings();
 const connection = await readControlPlaneConnection(kms);
 const enclaveAPIURL = process.env.FIDUCY_ENCLAVE_API_URL;
+const keyWrapper = selectKeyWrapper(kms);
 
 const gateway = createGateway({
-  keyWrapper: selectKeyWrapper(kms),
+  keyWrapper,
   keyStore: selectKeyStore(),
   keyEvents: connection ? createRemoteKeyEvents(connection) : undefined,
   appDirectory: connection
@@ -92,3 +103,14 @@ const server = Bun.serve({
 console.log(
   `Gateway listening on ${server.url} (keys wrapped by ${kms ? 'KMS' : 'a local master key'})`
 );
+
+const tlsStateDirectory = process.env.FIDUCY_TLS_STATE_DIR;
+const caddyConfigPath = process.env.FIDUCY_CADDY_CONFIG;
+if (tlsStateDirectory && caddyConfigPath) {
+  await startTlsFront({
+    directory: tlsStateDirectory,
+    caddyConfigPath,
+    blobStore: selectBlobStore(),
+    keyWrapper
+  });
+}

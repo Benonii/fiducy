@@ -18,7 +18,7 @@ Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about
 - a DynamoDB table (`KeysTable`) for sealed key records, on demand billing, with deletion protection and point-in-time recovery
 - an IAM role limited to the bucket, the key, the table and the `/fiducy/*` parameters
 
-The host runs only the gateway enclave and Caddy for TLS. The gateway reads and writes sealed records in `KeysTable` directly and talks to the dashboard over HTTPS with a token that lives in Parameter Store (`/fiducy/gateway-token`).
+The host runs only the gateway enclave. TLS ends inside the enclave: Caddy runs in the enclave image next to the gateway, requests the certificate from Let's Encrypt, and keeps its certificate and account state sealed with the KMS key in `KeysTable`, so a restarted enclave reuses the certificate and the parent host never holds a private key or sees plaintext traffic. The gateway reads and writes sealed records in `KeysTable` directly and talks to the dashboard over HTTPS with a token that lives in Parameter Store (`/fiducy/gateway-token`).
 
 The dashboard (`apps/control-plane`), the demo (`apps/demo`) and the landing page with these docs (`apps/site`) are Vercel projects, not part of the stack.
 
@@ -87,5 +87,8 @@ This starts the dashboard on `:3000`, the demo chat on `:3001` and the gateway o
 | `AWS_REGION` | Region for KMS and DynamoDB. Default `us-east-1` |
 | `FIDUCY_GATEWAY_TOKEN_CIPHERTEXT` | Control plane token, KMS-encrypted |
 | `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation` |
+| `FIDUCY_CADDY_CONFIG` | Caddyfile for the TLS front inside the enclave. When unset, the gateway serves plain HTTP on `PORT` |
+| `FIDUCY_TLS_STATE_DIR` | Caddy's data directory, sealed into `KeysTable` once a minute and restored on start |
+| `FIDUCY_PUBLIC_HOST` | The hostname Caddy serves and requests a certificate for |
 | `FIDUCY_APPS_JSON` | Static app list when there is no control plane |
 | `PORT` | Default `8787` |

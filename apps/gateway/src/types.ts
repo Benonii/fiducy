@@ -2,7 +2,7 @@ import type { DeleteItemCommand, GetItemCommand, PutItemCommand } from '@aws-sdk
 import type { DeleteItemCommandOutput, GetItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
-import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
+import type { Bytes, KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
 
 export type KeyAccessMode = 'gateway' | 'gateway_and_release';
@@ -130,6 +130,29 @@ export interface DynamoSender {
 export interface DynamoKeyStoreOptions {
   client: DynamoSender;
   tableName: string;
+}
+
+export interface BlobStore {
+  readBlob: (name: string) => Promise<Bytes | null>;
+  writeBlob: (name: string, bytes: Bytes) => Promise<void>;
+}
+
+export type DirectorySnapshot = Record<string, string>;
+
+export interface TlsStateOptions {
+  directory: string;
+  blobStore: BlobStore;
+  keyWrapper: KeyWrapper;
+}
+
+export interface TlsStateKeeper {
+  restore: () => Promise<boolean>;
+  persist: () => Promise<boolean>;
+  start: (intervalMilliseconds: number) => () => void;
+}
+
+export interface TlsFrontOptions extends TlsStateOptions {
+  caddyConfigPath: string;
 }
 
 export interface InstanceRoleCredentials {

@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Runs on the parent EC2 host through SSM. Two steps:
 #   host.sh build  -> install tools, bundle the gateway, build the enclave image, print its PCR0
-#   host.sh start  -> (re)start the enclave and the Caddy TLS front
+#   host.sh start  -> (re)start the enclave, which terminates TLS itself
 # Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP,
 #               FIDUCY_CONTROL_PLANE_URL
-# The dashboard and the demo run on Vercel, so the host only runs the gateway enclave.
+# The dashboard and the demo run on Vercel, so the host only runs the gateway enclave. TLS ends
+# inside the enclave, so the parent never holds a certificate key or sees plaintext traffic.
 set -euo pipefail
 
 STEP="${1:?usage: host.sh build|start}"
 RELEASE_DIR=/opt/fiducy/release
 STATE_DIR=/var/lib/fiducy
 BUN_VERSION=1.4.2
-CADDY_VERSION=2.10.2
 ENCLAVER_VERSION=0.6.1
 ENCLAVER_SHA256=aac505a98438e399e042d0be9dc1bc8bff4b02beee3eb149e5301af6a289730f
 ENCLAVE_CPU_COUNT=1
@@ -48,13 +48,6 @@ install_tools() {
     unzip -oq /tmp/bun.zip -d /tmp/bun
     install -m 755 /tmp/bun/bun-linux-aarch64/bun /usr/local/bin/bun
     ln -sf /usr/local/bin/bun /usr/local/bin/bunx
-  fi
-
-  if [ ! -x /usr/local/bin/caddy ]; then
-    log "Installing Caddy $CADDY_VERSION"
-    curl -fsSL -o /tmp/caddy.tgz "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_arm64.tar.gz"
-    tar -xzf /tmp/caddy.tgz -C /tmp caddy
-    install -m 755 /tmp/caddy /usr/local/bin/caddy
   fi
 
   if [ ! -x /usr/local/bin/enclaver ]; then
@@ -109,6 +102,7 @@ build_release() {
     --build-arg FIDUCY_KEYS_TABLE="$FIDUCY_KEYS_TABLE" \
     --build-arg FIDUCY_CONTROL_PLANE_URL="$CONTROL_PLANE_URL" \
     --build-arg FIDUCY_GATEWAY_TOKEN_CIPHERTEXT="$token_ciphertext" \
+    --build-arg FIDUCY_PUBLIC_HOST="$GATEWAY_HOST" \
     --build-arg AWS_REGION="$AWS_REGION" \
     enclave >/dev/null
 
@@ -133,29 +127,10 @@ After=docker.service nitro-enclaves-allocator.service
 Requires=docker.service
 [Service]
 ExecStartPre=-/usr/bin/docker rm -f fiducy-enclave
-ExecStart=/usr/bin/docker run --rm --name fiducy-enclave --privileged --device /dev/nitro_enclaves -p 127.0.0.1:8787:8787 fiducy-enclave:latest
+ExecStart=/usr/bin/docker run --rm --name fiducy-enclave --privileged --device /dev/nitro_enclaves -p 443:443 -p 80:80 fiducy-enclave:latest
 ExecStop=/usr/bin/docker stop fiducy-enclave
 Restart=always
 RestartSec=5
-[Install]
-WantedBy=multi-user.target
-EOF
-  cat > /etc/fiducy/Caddyfile <<EOF
-${GATEWAY_HOST} {
-  reverse_proxy 127.0.0.1:8787 {
-    flush_interval -1
-  }
-}
-EOF
-  cat > /etc/systemd/system/fiducy-caddy.service <<EOF
-[Unit]
-Description=Caddy TLS front for the Fiducy gateway
-After=network-online.target
-[Service]
-Environment=HOME=/var/lib/fiducy
-ExecStart=/usr/local/bin/caddy run --config /etc/fiducy/Caddyfile --adapter caddyfile
-ExecReload=/usr/local/bin/caddy reload --config /etc/fiducy/Caddyfile --adapter caddyfile
-Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -164,30 +139,30 @@ EOF
 
 retire_host_apps() {
   local unit
-  for unit in fiducy-control-plane fiducy-demo postgresql; do
+  for unit in fiducy-control-plane fiducy-demo fiducy-caddy postgresql; do
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
   done
   rm -f /etc/systemd/system/fiducy-control-plane.service /etc/systemd/system/fiducy-demo.service
+  rm -f /etc/systemd/system/fiducy-caddy.service /etc/fiducy/Caddyfile
   rm -f /etc/fiducy/control-plane.env /etc/fiducy/demo.env
 }
 
-wait_for() {
-  local url="$1" name="$2"
-  for _ in $(seq 1 90); do
-    curl -fsS -o /dev/null "$url" && return 0
+wait_for_gateway() {
+  local url="https://${GATEWAY_HOST}/health"
+  for _ in $(seq 1 150); do
+    curl -fsS -o /dev/null --resolve "${GATEWAY_HOST}:443:127.0.0.1" "$url" && return 0
     sleep 2
   done
-  log "$name did not come up at $url"
+  log "The enclave gateway did not come up at $url"
   return 1
 }
 
 start_services() {
   retire_host_apps
   write_units
-  systemctl enable fiducy-enclave fiducy-caddy >/dev/null
-  systemctl restart fiducy-caddy
+  systemctl enable fiducy-enclave >/dev/null
   systemctl restart fiducy-enclave
-  wait_for http://127.0.0.1:8787/health "Enclave gateway"
+  wait_for_gateway
   log "Gateway:  https://${GATEWAY_HOST}"
   log "Console:  ${CONTROL_PLANE_URL}"
 }
