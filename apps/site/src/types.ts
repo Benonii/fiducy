@@ -136,3 +136,12 @@ export interface TypedTagProps {
 export interface LeakCardProps {
   leak: LeakScene;
 }
+
+export interface ShaderBoxProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  viewWidth: number;
+  viewHeight: number;
+}
