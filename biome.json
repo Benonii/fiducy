@@ -1,7 +1,17 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
-    "ignore": ["node_modules", "dist", ".farm", ".output", "**/farm.d.ts", "**/*.generated.ts"]
+    "ignore": [
+      "node_modules",
+      "dist",
+      ".farm",
+      ".output",
+      ".vercel",
+      "**/farm.d.ts",
+      "**/*.generated.ts",
+      "apps/site/src/components/ui",
+      "apps/site/src/lib/utils.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -30,7 +40,7 @@
   },
   "overrides": [
     {
-      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts"],
+      "include": ["apps/*/src/app/**", "apps/*/farm.config.ts", "apps/*/docs.config.ts"],
       "linter": {
         "rules": {
           "style": {

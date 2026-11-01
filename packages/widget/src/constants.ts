@@ -4,4 +4,4 @@ export const WIDGET_MESSAGE_TYPES = {
   error: 'fiducy:error'
 } as const;
 
-export const WIDGET_DEFAULT_HEIGHT = '196px';
+export const WIDGET_DEFAULT_HEIGHT = '210px';

@@ -1,0 +1,43 @@
+---
+title: Security
+order: 8
+description: What Fiducy protects against, how to verify it, and its limits.
+---
+
+# Security
+
+## What runs where
+
+- The gateway runs inside an **AWS Nitro enclave**: no disk, no shell, no network except a fixed egress allowlist (KMS, DynamoDB for sealed records, the instance metadata service for AWS credentials, the provider APIs, the control plane).
+- **Today, TLS for the gateway ends at Caddy on the parent host**, which forwards to the enclave. That means the host could see keys in transit while they are being saved or used. Moving TLS termination inside the enclave is required before real users.
+- The KMS key policy denies `kms:Decrypt` to everyone, account admins included, unless the request carries an attestation document whose image hash (`PCR0`) matches the published build.
+
+## Verify the enclave
+
+```bash
+curl "https://gw.fiducy.dev/attestation?nonce=$(openssl rand -hex 16)"
+```
+
+The response holds a CBOR attestation document signed by AWS. Check that:
+
+1. the certificate chain ends at the AWS Nitro root certificate,
+2. your nonce is in the document,
+3. `PCR0` equals the hash produced by building the published enclave image yourself.
+
+Rebuilding the image from the tagged source gives the same `PCR0`. A different hash means different code.
+
+## What it protects against
+
+| Threat | Result |
+| --- | --- |
+| Your database leaks | Attacker gets handles. Useless without the enclave and your app secret |
+| Fiducy's storage leaks | Attacker gets records. Useless without the handles |
+| Your server logs leak | Only handles and the app secret appear; rotate the secret |
+| Someone with AWS admin on the gateway account | Cannot decrypt stored keys: KMS refuses without the enclave's attestation (keys in transit are exposed until TLS moves into the enclave) |
+
+## Limits
+
+- **Your app secret plus a handle can use a key** through the gateway. Monthly limits per key cap the damage; rotate the secret if it leaks.
+- **Key release** gives your server the plaintext key. It is off by default.
+- **The provider sees the key**, as it always does.
+- **Hosting**: a flaw in Nitro or KMS would break the guarantees. Self-hosting moves that trust to your own account.

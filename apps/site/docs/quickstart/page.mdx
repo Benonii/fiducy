@@ -1,0 +1,135 @@
+---
+title: Quickstart
+order: 2
+description: Add bring-your-own-key to a Farm.js app in four steps.
+---
+
+# Quickstart
+
+This guide adds Fiducy to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler.
+
+> The packages are not on npm yet. Until then, use them from the monorepo workspace.
+
+## 1. Register your app
+
+Create an app in the Fiducy dashboard. You get:
+
+- an **app ID**, public, used by the widget
+- an **app secret** (`fsk_...`), server only, used for every gateway call
+
+Add your site's origin (for example `https://myapp.com`) to the app's allowed origins, so the widget can be embedded there.
+
+```bash
+FIDUCY_GATEWAY_URL=https://gw.fiducy.dev
+FIDUCY_APP_ID=app_...
+FIDUCY_APP_SECRET=fsk_...
+```
+
+## 2. Create the server instance
+
+The examples import from `@/`, which points at `src/` through `paths` in your `tsconfig.json`.
+
+```ts title="src/lib/fiducy.ts"
+import { getStorage } from '@farm.js/core/storage';
+import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
+
+import { auth } from '@/lib/auth';
+
+const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
+if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
+
+export async function getUserID(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers });
+  return session?.user.id ?? null;
+}
+
+export const fiducyServer = createFiducy({
+  gatewayURL: FIDUCY_GATEWAY_URL,
+  appSecret: FIDUCY_APP_SECRET,
+  storage: keyValueStorage(getStorage('fiducy')),
+  getUserID
+});
+```
+
+`getUserID` is how Fiducy knows who is asking. Return your own user ID from whatever auth you use, or `null` when nobody is signed in.
+
+## 3. Add the integration
+
+```ts title="farm.config.ts"
+import { defineConfig } from '@farm.js/core';
+import { localStorage } from '@farm.js/core/storage';
+import { fiducy } from '@fiducy/farm';
+
+import { fiducyServer } from './src/lib/fiducy';
+
+export default defineConfig({
+  storage: {
+    mounts: { fiducy: localStorage({ base: '.data/fiducy' }) }
+  },
+  integrations: {
+    byok: fiducy({ instance: fiducyServer })
+  }
+});
+```
+
+This mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`.
+
+## 4. Drop in the widget and use the key
+
+The React parts run on TanStack Query, so install it and wrap your app in a `QueryClientProvider` (see [React](/docs/react#setup)):
+
+```bash
+bun add @tanstack/react-query
+```
+
+```tsx title="src/app/layout.tsx"
+import { Providers } from './providers';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return <Providers>{children}</Providers>;
+}
+```
+
+```tsx title="src/app/settings/page.tsx"
+'use client';
+
+import { ConnectKeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+
+export default function SettingsPage() {
+  const { keys, refresh, revoke } = useFiducyKeys();
+  const openAIKey = keys.find((key) => key.provider === 'openai');
+
+  if (openAIKey) {
+    return <button onClick={() => revoke(openAIKey.keyID)}>Remove my OpenAI key</button>;
+  }
+  return (
+    <ConnectKeyWidget
+      gatewayURL="https://gw.fiducy.dev"
+      appID="app_..."
+      provider="openai"
+      onConnected={refresh}
+    />
+  );
+}
+```
+
+Then call the model from any server route:
+
+```ts title="src/app/api/chat/route.ts"
+import { createOpenAI } from '@ai-sdk/openai';
+import { streamText } from 'ai';
+
+import { fiducyServer, getUserID } from '@/lib/fiducy';
+
+export async function POST(request: Request) {
+  const userID = await getUserID(request);
+  const settings = userID ? await fiducyServer.providerSettings('openai', { userID }) : null;
+  if (!settings) return new Response('Connect your API key first', { status: 400 });
+
+  const { messages } = await request.json();
+  const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });
+  return result.toUIMessageStreamResponse();
+}
+```
+
+That is the whole integration. The plaintext key only ever exists inside the gateway's enclave.

@@ -1,0 +1,91 @@
+---
+title: React
+order: 5
+description: ConnectKeyWidget and useFiducyKeys.
+---
+
+# React
+
+```ts
+import { ConnectKeyWidget, KeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+```
+
+## Setup
+
+`useFiducyKeys` and `ConnectKeyWidget` run on TanStack Query. Install it next to the SDK and put a `QueryClientProvider` above any component that uses them.
+
+```bash
+bun add @tanstack/react-query
+```
+
+```tsx title="src/app/providers.tsx"
+'use client';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+}
+```
+
+`KeyWidget` does not need the provider.
+
+## ConnectKeyWidget
+
+Renders the gateway iframe and, once the user saves a key, posts the handle to your server's Fiducy route.
+
+```tsx
+<ConnectKeyWidget
+  gatewayURL="https://gw.fiducy.dev"
+  appID="app_..."
+  provider="openai"
+  onConnected={(key) => console.log('connected', key.keyID)}
+  onError={(message) => setError(message)}
+/>
+```
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `gatewayURL` | `string` | Your gateway |
+| `appID` | `string` | Public app ID |
+| `provider` | `'openai' \| 'anthropic' \| 'gemini' \| 'openrouter'` | Which provider this key is for |
+| `basePath` | `string` | Your Fiducy route. Default `/api/fiducy` |
+| `onConnected` | `(key) => void` | After your server saved the handle |
+| `onError` | `(message) => void` | Widget or save errors |
+| `className` | `string` | Applied to the wrapper |
+
+The iframe only loads on origins listed in your app's allowed origins.
+
+## useFiducyKeys(basePath?)
+
+```tsx
+const { keys, isLoading, error, refresh, revoke } = useFiducyKeys();
+```
+
+| Field | Type |
+| --- | --- |
+| `keys` | `{ keyID, provider, createdAt }[]` |
+| `isLoading` | `boolean` |
+| `error` | `string \| null` |
+| `refresh` | `() => Promise<void>` |
+| `revoke` | `(keyID) => Promise<void>` |
+
+The list is cached under `fiducyKeysQueryKey(basePath)`, so you can invalidate it from your own mutations:
+
+```tsx
+import { fiducyKeysQueryKey } from '@fiducy/sdk/react';
+
+queryClient.invalidateQueries({ queryKey: fiducyKeysQueryKey() });
+```
+
+## KeyWidget
+
+The bare widget without the server save. Use it when you store handles your own way.
+
+```tsx
+<KeyWidget gatewayURL="..." appID="..." onHandle={(handle, record) => save(handle, record)} />
+```
+
+Outside React, `@fiducy/widget` exports `mountKeyWidget({ gatewayURL, appID, container, onHandle, onError })`.

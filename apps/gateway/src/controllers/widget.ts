@@ -1,3 +1,4 @@
+import { WIDGET_FONT } from '../widget/font';
 import { buildWidgetSecurityHeaders, renderWidgetPage } from '../widget/page';
 
 import type { GatewayDependencies } from '../types';
@@ -17,4 +18,14 @@ export async function serveWidget(request: Request, { appDirectory }: GatewayDep
   const nonce = createNonce();
   const page = renderWidgetPage({ appID: app.appID, appName: app.name, parentOrigin, nonce });
   return new Response(page, { headers: buildWidgetSecurityHeaders(nonce, parentOrigin) });
+}
+
+export function serveWidgetFont() {
+  return new Response(WIDGET_FONT, {
+    headers: {
+      'content-type': 'font/woff2',
+      'cache-control': 'public, max-age=31536000, immutable',
+      'x-content-type-options': 'nosniff'
+    }
+  });
 }

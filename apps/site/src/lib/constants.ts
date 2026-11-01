@@ -1,0 +1,35 @@
+export const GITHUB_URL = 'https://github.com/Benonii/fiducy';
+export const DEMO_URL: string | null = import.meta.env.VITE_FIDUCY_DEMO_URL ?? null;
+export const INSTALL_COMMAND = 'bun add @fiducy/sdk @fiducy/farm';
+export const PROVIDERS = ['OpenAI', 'Anthropic', 'Gemini', 'OpenRouter'] as const;
+export const REQUEST_TRACE = [
+  { step: 'handle received', detail: 'kh_9f2c…' },
+  { step: 'enclave attested', detail: 'PCR0 a41e…' },
+  { step: 'key opened', detail: 'in memory' },
+  { step: 'openai', detail: '200 · streamed' },
+  { step: 'key dropped', detail: 'request ended' }
+];
+
+export const SHOWCASE_CODE = `import { createFiducy } from '@fiducy/sdk/server';
+
+export const fiducy = createFiducy({
+  gatewayURL: env.FIDUCY_GATEWAY_URL,
+  appSecret: env.FIDUCY_APP_SECRET,
+  storage,
+  getUserID
+});`;
+export const SHOWCASE_KEY = 'sk-proj-7Tq2m9Lx4bVn8cRk0wXWYZ';
+export const SHOWCASE_QUESTION = 'Summarize this contract in three lines.';
+export const SHOWCASE_ANSWER =
+  'The vendor licenses the software for 12 months, renews automatically, and either side can end it with 30 days notice.';
+export const SHOWCASE_STEPS = [
+  { value: 'key', label: 'Connect key' },
+  { value: 'ask', label: 'Ask' },
+  { value: 'answer', label: 'Answer' }
+] as const;
+export const ENCLAVE_STEPS = [
+  "Your app keeps one half of the user's key. On its own, it opens nothing.",
+  'Fiducy keeps the other half, locked inside a sealed AWS enclave.',
+  'For a single request, the two halves meet inside the enclave and call OpenAI.',
+  'Then the key is wiped. A leak on either side exposes only half a key, which is useless.'
+];
