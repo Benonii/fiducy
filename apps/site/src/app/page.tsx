@@ -1,4 +1,5 @@
 import { CodeTabs } from '@/components/CodeTabs';
+import { CopyAgentPrompt } from '@/components/CopyAgentPrompt';
 import { HeroStage } from '@/components/HeroStage';
 import { InstallCommand } from '@/components/InstallCommand';
 import { KeyFlow } from '@/components/KeyFlow';
@@ -33,11 +34,19 @@ export default function HomePage() {
                   Holding your users' OpenAI keys turns every breach into their bill. With Fiducy
                   your app can use their keys without ever storing or seeing one.
                 </p>
-                <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
-                  <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
-                    Read the docs
-                  </a>
-                  <InstallCommand />
+                <div className="grid gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
+                    <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
+                      Read the docs
+                    </a>
+                    <InstallCommand />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 max-sm:[&>button]:w-full">
+                    <CopyAgentPrompt />
+                    <span className="text-xs text-ink-muted">
+                      Your coding agent sets it up. Secrets stay with you.
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -65,6 +74,9 @@ export default function HomePage() {
                 No crypto to write and no key vault to run. Four small pieces drop into the app you
                 already have, and your model calls look the same as before.
               </p>
+              <div className="pt-1 max-sm:[&>button]:w-full">
+                <CopyAgentPrompt />
+              </div>
             </div>
             <CodeTabs />
           </section>
