@@ -1,7 +1,10 @@
 import { PROVIDERS } from '@/lib/constants';
 
+import { EnclaveShader } from './EnclaveShader';
+
 const NODE_CLASS = '[&_rect]:fill-white [&_rect]:stroke-control [&_rect]:[stroke-dasharray:3_3]';
-const HUB_CLASS = '[&_rect]:fill-wash [&_rect]:stroke-ink-quiet';
+const HUB_CLASS = '[&_rect]:fill-none [&_rect]:stroke-ink-quiet';
+const HUB_DETAIL_CLASS = 'fill-ink-body text-xs';
 const LINE_CLASS = 'fill-none stroke-[1.25]';
 const HANDLE_LINE_CLASS = 'fill-none stroke-ink-quiet stroke-[1.25] [stroke-dasharray:4_5]';
 const NODE_TITLE_CLASS = 'fill-ink text-[15px] font-[650]';
@@ -21,7 +24,7 @@ function providerPath(rowTop: number) {
 function HorizontalFlow() {
   return (
     <svg
-      className="h-auto w-full overflow-visible max-md:hidden"
+      className="relative block h-auto w-full overflow-visible"
       viewBox="0 0 960 360"
       role="img"
       aria-labelledby="flow-title"
@@ -61,13 +64,13 @@ function HorizontalFlow() {
         <text className={NODE_TITLE_CLASS} x="400" y="168">
           Fiducy enclave
         </text>
-        <text className={DETAIL_CLASS} x="400" y="192">
+        <text className={HUB_DETAIL_CLASS} x="400" y="192">
           attested by AWS
         </text>
-        <text className={DETAIL_CLASS} x="400" y="212">
+        <text className={HUB_DETAIL_CLASS} x="400" y="212">
           keeps nothing after
         </text>
-        <text className={DETAIL_CLASS} x="400" y="232">
+        <text className={HUB_DETAIL_CLASS} x="400" y="232">
           the call ends
         </text>
       </g>
@@ -129,7 +132,7 @@ function HorizontalFlow() {
 function StackedFlow() {
   return (
     <svg
-      className="mx-auto hidden h-auto w-full max-w-[360px] overflow-visible max-md:block"
+      className="relative block h-auto w-full overflow-visible"
       viewBox="0 0 360 476"
       role="img"
       aria-labelledby="flow-title-narrow"
@@ -159,13 +162,13 @@ function StackedFlow() {
         <text className={NODE_TITLE_CLASS} x="90" y="202">
           Fiducy enclave
         </text>
-        <text className={DETAIL_CLASS} x="90" y="226">
+        <text className={HUB_DETAIL_CLASS} x="90" y="226">
           attested by AWS
         </text>
-        <text className={DETAIL_CLASS} x="90" y="246">
+        <text className={HUB_DETAIL_CLASS} x="90" y="246">
           keeps nothing after
         </text>
-        <text className={DETAIL_CLASS} x="90" y="266">
+        <text className={HUB_DETAIL_CLASS} x="90" y="266">
           the call ends
         </text>
       </g>
@@ -191,8 +194,14 @@ function StackedFlow() {
 export function KeyFlow() {
   return (
     <figure className="py-2">
-      <HorizontalFlow />
-      <StackedFlow />
+      <div className="relative max-md:hidden">
+        <EnclaveShader x={380} y={126} width={200} height={128} viewWidth={960} viewHeight={360} />
+        <HorizontalFlow />
+      </div>
+      <div className="relative mx-auto hidden max-w-[360px] max-md:block">
+        <EnclaveShader x={70} y={164} width={220} height={128} viewWidth={360} viewHeight={476} />
+        <StackedFlow />
+      </div>
     </figure>
   );
 }
