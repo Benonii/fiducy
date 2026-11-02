@@ -86,13 +86,35 @@ export interface SceneLabelElements {
   request: HTMLElement;
 }
 
+export interface InfoSection {
+  title: string;
+  body: ReactNode;
+}
+
+export interface InfoPageProps {
+  title: string;
+  intro: string;
+  sections: InfoSection[];
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface PlanCardProps {
+  id?: string;
   title: string;
   price: string;
   description: string;
   linkLabel?: string;
   linkURL?: string;
   action?: ReactNode;
+}
+
+export interface WaitlistJoinInput {
+  email: string;
+  source: string;
 }
 
 export type WaitlistStatus = 'idle' | 'sending' | 'joined' | 'already_joined' | 'error';

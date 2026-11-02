@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
-    "@farm.js/core": "0.1.40",
+    "@farm.js/core": "0.1.49",
     "@farming-labs/docs": "0.2.132",
     "@farming-labs/farmjs": "0.2.132",
     "@farming-labs/theme": "0.2.132",
@@ -21,6 +21,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "convex": "1.49.0",
+    "zod": "4.6.7",
     "lucide-react": "1.57.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -30,7 +31,7 @@
     "three": "0.186.0"
   },
   "devDependencies": {
-    "@farm.js/cli": "0.1.40",
+    "@farm.js/cli": "0.1.49",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@types/three": "0.186.0",

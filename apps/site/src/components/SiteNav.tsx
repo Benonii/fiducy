@@ -1,5 +1,6 @@
 import { buttonVariants } from '@/components/ui/button';
 import { DEMO_URL, GITHUB_URL } from '@/lib/constants';
+import { NEW_TAB } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
 const NAV_LINK_CLASS = cn(
@@ -14,15 +15,15 @@ export function SiteNav() {
         Fiducy
       </a>
       <nav aria-label="Main" className="flex items-center gap-1">
-        <a className={NAV_LINK_CLASS} href="/docs">
+        <a className={NAV_LINK_CLASS} href="/docs" {...NEW_TAB}>
           Docs
         </a>
         {DEMO_URL ? (
-          <a className={NAV_LINK_CLASS} href={DEMO_URL}>
+          <a className={NAV_LINK_CLASS} href={DEMO_URL} {...NEW_TAB}>
             Demo
           </a>
         ) : null}
-        <a className={NAV_LINK_CLASS} href={GITHUB_URL}>
+        <a className={NAV_LINK_CLASS} href={GITHUB_URL} {...NEW_TAB}>
           GitHub
         </a>
       </nav>
