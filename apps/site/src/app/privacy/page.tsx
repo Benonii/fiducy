@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <InfoPage
       title="Privacy"
       intro="This page covers fiducy.dev, the website. It is short because the site collects very little. Last updated 2 November 2026."
-      visual={{ caption: 'what we never see' }}
+      visual={{ caption: 'never whole outside the enclave' }}
       sections={[
         {
           title: 'What the website collects',

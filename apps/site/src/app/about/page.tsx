@@ -16,7 +16,7 @@ export default function AboutPage() {
     <InfoPage
       title="About Fiducy"
       intro="Fiducy is a key custody layer for apps where users bring their own AI provider key. Your app keeps a handle, the real key lives sealed inside an enclave, and a breach of your database or logs exposes nothing a thief can use."
-      visual={{ caption: 'one key, sealed whole' }}
+      visual={{ caption: 'one key, two halves' }}
       sections={[
         {
           title: 'Who runs it',

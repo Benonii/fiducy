@@ -15,7 +15,7 @@ export default function ContactPage() {
     <InfoPage
       title="Contact"
       intro={`Fiducy is run by ${MAINTAINER_NAME} from ${MAINTAINER_CITY}. Every channel below is read by a person, usually within a working day.`}
-      visual={{ caption: 'a person reads every message' }}
+      visual={{ caption: 'half with you, half with us' }}
       sections={[
         {
           title: 'Bugs, questions and feature requests',

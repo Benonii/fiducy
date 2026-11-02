@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Group, LineSegments, MeshBasicMaterial } from 'three';
-import type { Object3D, Scene } from 'three';
+import type { Object3D, OrthographicCamera, PerspectiveCamera, Scene } from 'three';
+import type { Vector2, WebGLRenderTarget } from 'three';
 
 export type Point = readonly [number, number, number];
 
@@ -61,6 +62,18 @@ export interface EnclaveParts {
   attestationFrame: LineSegments;
   request: Group;
   halves: KeyHalves;
+}
+
+export interface DitherKeyParts {
+  scene: Scene;
+  camera: PerspectiveCamera;
+  turntable: Group;
+  handleHalf: Group;
+  storedHalf: Group;
+  target: WebGLRenderTarget;
+  cells: Vector2;
+  quad: Scene;
+  quadCamera: OrthographicCamera;
 }
 
 export interface PointerState {
