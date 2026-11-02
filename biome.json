@@ -45,7 +45,8 @@
         "apps/*/src/app/**",
         "apps/*/farm.config.ts",
         "apps/*/docs.config.ts",
-        "apps/site/convex/schema.ts"
+        "apps/site/convex/schema.ts",
+        "apps/site/convex/convex.config.ts"
       ],
       "linter": {
         "rules": {
