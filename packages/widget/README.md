@@ -19,4 +19,4 @@ const widget = mountKeyWidget({
 widget.unmount();
 ```
 
-See [React](https://fiducy-nine.vercel.app/docs/react) for the component version.
+See [React](https://fiducy.dev/docs/react) for the component version.
