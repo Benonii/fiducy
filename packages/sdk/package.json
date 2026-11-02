@@ -8,7 +8,7 @@
     "url": "git+https://github.com/Benonii/fiducy.git",
     "directory": "packages/sdk"
   },
-  "homepage": "https://fiducy-nine.vercel.app/docs/server",
+  "homepage": "https://fiducy.dev/docs/server",
   "type": "module",
   "sideEffects": false,
   "engines": {

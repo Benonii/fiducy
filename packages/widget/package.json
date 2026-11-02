@@ -8,7 +8,7 @@
     "url": "git+https://github.com/Benonii/fiducy.git",
     "directory": "packages/widget"
   },
-  "homepage": "https://fiducy-nine.vercel.app/docs/react",
+  "homepage": "https://fiducy.dev/docs/react",
   "type": "module",
   "sideEffects": false,
   "exports": {

@@ -12,4 +12,4 @@ import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 export const fiducy = createFiducy({ gatewayURL, appSecret, storage: keyValueStorage(driver), getUserID });
 ```
 
-Docs: [Server SDK](https://fiducy-nine.vercel.app/docs/server), [React](https://fiducy-nine.vercel.app/docs/react), [Storage](https://fiducy-nine.vercel.app/docs/storage).
+Docs: [Server SDK](https://fiducy.dev/docs/server), [React](https://fiducy.dev/docs/react), [Storage](https://fiducy.dev/docs/storage).

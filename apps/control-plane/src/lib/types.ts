@@ -1,3 +1,6 @@
+import type { Group, OrthographicCamera, PerspectiveCamera, Scene } from 'three';
+import type { Vector2, WebGLRenderTarget } from 'three';
+
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface AppSettings {
@@ -155,4 +158,16 @@ export interface KeyEvent {
   type: KeyEventType;
   appID: string;
   keyID: string;
+}
+
+export interface DitherKeyParts {
+  scene: Scene;
+  camera: PerspectiveCamera;
+  turntable: Group;
+  handleHalf: Group;
+  storedHalf: Group;
+  target: WebGLRenderTarget;
+  cells: Vector2;
+  quad: Scene;
+  quadCamera: OrthographicCamera;
 }

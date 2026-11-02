@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "bun install",
-  "buildCommand": "bunx farm build"
+  "installCommand": "bun install --linker hoisted",
+  "buildCommand": "bash scripts/vercel-build.sh"
 }

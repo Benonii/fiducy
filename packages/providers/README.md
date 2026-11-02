@@ -10,4 +10,4 @@ bun add @fiducy/providers
 import { buildUpstreamRequest, createProviderRegistry, relayResponse } from '@fiducy/providers';
 ```
 
-Used by the gateway in `apps/gateway`. See the [Gateway API](https://fiducy-nine.vercel.app/docs/gateway-api).
+Used by the gateway in `apps/gateway`. See the [Gateway API](https://fiducy.dev/docs/gateway-api).
