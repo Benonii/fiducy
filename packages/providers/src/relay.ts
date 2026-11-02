@@ -1,10 +1,10 @@
-import { EVENT_STREAM_TYPE, STRIPPED_RESPONSE_HEADERS } from './constants';
-import { redactSecrets } from './redaction';
-import { copyHeadersWithout } from './request';
-import { observeUsageInBody } from './stream';
-import { parseJSON, readUsage } from './usage';
+import { EVENT_STREAM_TYPE, STRIPPED_RESPONSE_HEADERS } from './constants.ts';
+import { redactSecrets } from './redaction.ts';
+import { copyHeadersWithout } from './request.ts';
+import { observeUsageInBody } from './stream.ts';
+import { parseJSON, readUsage } from './usage.ts';
 
-import type { RelayResponseInput } from './types';
+import type { RelayResponseInput } from './types.ts';
 
 export async function relayResponse({
   upstreamResponse,

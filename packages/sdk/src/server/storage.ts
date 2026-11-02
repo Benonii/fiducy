@@ -1,5 +1,5 @@
-import type { GatewayProvider } from '../types';
-import type { FiducyStorage, KeyValueDriver, StoredUserKey } from './types';
+import type { GatewayProvider } from '../types.ts';
+import type { FiducyStorage, KeyValueDriver, StoredUserKey } from './types.ts';
 
 const KEY_PREFIX = 'fiducy';
 

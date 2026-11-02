@@ -1,4 +1,4 @@
-import type { TokenUsage } from './types';
+import type { TokenUsage } from './types.ts';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
