@@ -124,6 +124,33 @@ export interface DynamoSender {
   send(command: DeleteItemCommand): Promise<DeleteItemCommandOutput>;
 }
 
+export interface KmsSettings {
+  client: KmsSender;
+  keyID: string;
+}
+
+export interface GatewayRuntime {
+  handleRequest: RequestHandler;
+  usageLedger: FlushableUsageLedger | null;
+  keyWrapperName: string;
+}
+
+export interface VercelRequestContext {
+  waitUntil?: (promise: Promise<unknown>) => void;
+}
+
+export interface PostgresKeyStoreOptions {
+  databaseURL: string;
+}
+
+export interface SealedRecordRow {
+  key_id: string;
+  app_id: string;
+  ciphertext: string;
+  iv: string;
+  wrapped_share_b: string;
+}
+
 export interface DynamoKeyStoreOptions {
   client: DynamoSender;
   tableName: string;

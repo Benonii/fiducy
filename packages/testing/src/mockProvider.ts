@@ -50,6 +50,13 @@ function answerInvalidKey(): Response {
   return Response.json({ error: { message } }, { status: 401 });
 }
 
+export function answerMockProviderRequest(path: string, body: string): Response {
+  if (path.endsWith('/v1/chat/completions')) return answerChatCompletion(body);
+  if (path.endsWith('/v1/messages')) return streamChunks(ANTHROPIC_STREAM_CHUNKS);
+  if (path.endsWith('/v1/invalid-key')) return answerInvalidKey();
+  return new Response('not found', { status: 404 });
+}
+
 export function startMockProvider() {
   const recordedRequests: RecordedRequest[] = [];
   const server = Bun.serve({
@@ -58,10 +65,7 @@ export function startMockProvider() {
       const path = new URL(request.url).pathname;
       const body = await request.text();
       recordedRequests.push({ path, headers: request.headers, body });
-      if (path === '/v1/chat/completions') return answerChatCompletion(body);
-      if (path === '/v1/messages') return streamChunks(ANTHROPIC_STREAM_CHUNKS);
-      if (path === '/v1/invalid-key') return answerInvalidKey();
-      return new Response('not found', { status: 404 });
+      return answerMockProviderRequest(path, body);
     }
   });
   return { server, recordedRequests, baseURL: `http://localhost:${server.port}` };
