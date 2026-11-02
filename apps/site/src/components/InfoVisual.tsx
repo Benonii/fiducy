@@ -23,7 +23,7 @@ export function InfoVisual({ caption }: InfoVisualProps) {
       aria-hidden="true"
       className="sticky top-16 hidden w-full max-w-[400px] justify-self-end lg:grid lg:gap-3"
     >
-      <div ref={hostRef} className="aspect-[4/5] w-full overflow-hidden border border-frame">
+      <div ref={hostRef} className="aspect-[4/5] w-full overflow-hidden">
         <canvas ref={canvasRef} className="block size-full" />
       </div>
       <p className={LABEL_CLASS}>{caption}</p>
