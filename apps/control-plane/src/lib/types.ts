@@ -43,11 +43,6 @@ export interface UsageSummary {
   requestsByKey: Record<string, number>;
 }
 
-export interface SeededApp extends AppSettings {
-  appID: string;
-  appSecretHash: string;
-}
-
 export type StoredValue =
   | StoredApp
   | UsageSummary

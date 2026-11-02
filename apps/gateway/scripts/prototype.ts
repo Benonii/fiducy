@@ -5,7 +5,6 @@ import { createLocalKeyWrapper } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 import { startMockProvider } from '@fiducy/testing';
 
-import { hashSecret } from '../src/hashing';
 import { createMemoryKeyStore } from '../src/memoryStores';
 import { createRemoteAppDirectory } from '../src/remoteAppDirectory';
 import { createRemoteKeyEvents } from '../src/remoteKeyEvents';
@@ -15,7 +14,8 @@ import { createGateway } from '../src/router';
 interface PrototypeSecrets {
   gatewayToken: string;
   masterKey: string;
-  demoAppSecret: string;
+  demoAppID?: string;
+  demoAppSecret?: string;
 }
 
 const ROOT = join(import.meta.dir, '../../..');
@@ -24,7 +24,6 @@ const SECRETS_PATH = join(STATE_DIR, 'secrets.json');
 const CONTROL_PORT = 3000;
 const DEMO_PORT = 3001;
 const GATEWAY_PORT = 8787;
-const DEMO_APP_ID = 'app_demo';
 const STARTUP_TIMEOUT_MILLISECONDS = 120000;
 
 const useMockProvider = process.argv.includes('--mock');
@@ -39,11 +38,7 @@ function randomToken(byteLength: number): string {
 function loadSecrets(): PrototypeSecrets {
   mkdirSync(STATE_DIR, { recursive: true });
   if (existsSync(SECRETS_PATH)) return JSON.parse(readFileSync(SECRETS_PATH, 'utf8'));
-  const secrets = {
-    gatewayToken: randomToken(32),
-    masterKey: randomToken(32),
-    demoAppSecret: `fsk_${randomToken(32)}`
-  };
+  const secrets = { gatewayToken: randomToken(32), masterKey: randomToken(32) };
   writeFileSync(SECRETS_PATH, JSON.stringify(secrets, null, 2), { mode: 0o600 });
   return secrets;
 }
@@ -68,22 +63,18 @@ function startFarmApp(directory: string, port: number, env: Record<string, strin
   });
 }
 
-async function seedDemoApp(secrets: PrototypeSecrets) {
-  const response = await fetch(`${controlURL}/api/gateway/seed`, {
-    method: 'PUT',
-    headers: {
-      authorization: `Bearer ${secrets.gatewayToken}`,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      appID: DEMO_APP_ID,
-      name: 'Fiducy demo',
-      monthlyRequestLimitPerKey: 1000,
-      allowedOrigins: [demoURL],
-      appSecretHash: await hashSecret(secrets.demoAppSecret)
-    })
+function startDemo(secrets: PrototypeSecrets) {
+  if (!secrets.demoAppID || !secrets.demoAppSecret) {
+    console.log(`
+No demo app yet. Create one in the dashboard at ${controlURL} with ${demoURL} as an allowed
+origin, then add its ID and secret to ${SECRETS_PATH} as demoAppID and demoAppSecret and run again.`);
+    return null;
+  }
+  return startFarmApp('demo', DEMO_PORT, {
+    FIDUCY_APP_ID: secrets.demoAppID,
+    FIDUCY_APP_SECRET: secrets.demoAppSecret,
+    FIDUCY_GATEWAY_URL: gatewayURL
   });
-  if (!response.ok) throw new Error(`Seeding the demo app failed with ${response.status}`);
 }
 
 if (!Bun.which('node')) {
@@ -101,7 +92,6 @@ const controlPlane = startFarmApp('control-plane', CONTROL_PORT, {
   FIDUCY_GATEWAY_URL: gatewayURL
 });
 await waitFor(`${controlURL}/api/config`, 'The control plane', controlPlane);
-await seedDemoApp(secrets);
 
 const mockProvider = useMockProvider ? startMockProvider() : null;
 
@@ -136,16 +126,12 @@ const gateway = Bun.serve({
 
 const buildSDK = Bun.spawnSync(['bun', 'run', 'build'], { cwd: join(ROOT, 'packages/sdk') });
 if (buildSDK.exitCode !== 0) throw new Error(`SDK build failed: ${buildSDK.stderr.toString()}`);
-const demo = startFarmApp('demo', DEMO_PORT, {
-  FIDUCY_APP_ID: DEMO_APP_ID,
-  FIDUCY_APP_SECRET: secrets.demoAppSecret,
-  FIDUCY_GATEWAY_URL: gatewayURL
-});
-await waitFor(`${demoURL}/api/config`, 'The demo', demo);
+const demo = startDemo(secrets);
+if (demo) await waitFor(demoURL, 'The demo', demo);
 
 console.log(`
 Fiducy prototype is running${useMockProvider ? ' with a fake OpenAI' : ''}
-  Demo chat:      ${demoURL}
+  Demo chat:      ${demo ? demoURL : 'not started'}
   Dashboard:      ${controlURL}
   Gateway:        ${gatewayURL}/health
 State lives in .prototype/ (delete it to start fresh). Ctrl+C to stop.`);
@@ -155,7 +141,7 @@ const stop = async () => {
   gateway.stop(true);
   mockProvider?.server.stop(true);
   controlPlane.kill();
-  demo.kill();
+  demo?.kill();
   process.exit(0);
 };
 process.on('SIGINT', stop);

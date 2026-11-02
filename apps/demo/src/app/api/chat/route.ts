@@ -3,7 +3,6 @@ import { requestKey, withoutKeyRequests } from '@fiducy/assistant-ui/server';
 import { convertToModelMessages, streamText } from 'ai';
 
 import { describeChatError } from '@/lib/chatErrors';
-import { readServerDemoConfig } from '@/lib/config';
 import { fiducyServer, readDemoUser } from '@/lib/fiducy';
 import { createLanguageModel, findDemoModel } from '@/lib/models';
 import { respondWith } from '@/lib/responses';
@@ -12,8 +11,6 @@ import { chatRequestSchema } from '@/lib/validators';
 import type { ChatRequestBody } from '@/lib/types';
 
 export async function POST(request: Request) {
-  if (!readServerDemoConfig())
-    return respondWith(503, null, 'Set FIDUCY_APP_ID and FIDUCY_APP_SECRET');
   const parsed = chatRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return respondWith(400, null, parsed.error.issues[0]?.message ?? 'Invalid chat request');

@@ -3,6 +3,7 @@
 #   host.sh build  -> install tools, build the apps and the enclave image, print its PCR0
 #   host.sh start  -> (re)start Postgres, the control plane, the demo, the enclave and Caddy
 # Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP
+# The demo runs only when the dashboard-created demo app's ID and secret sit in Parameter Store.
 set -euo pipefail
 
 STEP="${1:?usage: host.sh build|start}"
@@ -19,7 +20,8 @@ DASHED_IP="${FIDUCY_PUBLIC_IP//./-}"
 GATEWAY_HOST="gw.${DASHED_IP}.sslip.io"
 CONTROL_HOST="app.${DASHED_IP}.sslip.io"
 DEMO_HOST="demo.${DASHED_IP}.sslip.io"
-DEMO_APP_ID=app_demo
+DEMO_APP_ID_PARAMETER=/fiducy/demo/app-id
+DEMO_APP_SECRET_PARAMETER=/fiducy/demo/app-secret
 
 export PATH="/usr/local/bin:$PATH"
 export HOME=/root
@@ -83,11 +85,26 @@ ensure_secrets() {
 FIDUCY_GATEWAY_TOKEN=$(openssl rand -hex 32)
 FARM_AUTH_SECRET=$(openssl rand -hex 32)
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
-DEMO_APP_SECRET=fsk_$(openssl rand -hex 32)
 EOF
   fi
   # shellcheck disable=SC1090
   source "$SECRETS_FILE"
+}
+
+read_parameter() {
+  aws ssm get-parameter --region "$AWS_REGION" --name "$1" --with-decryption \
+    --query Parameter.Value --output text 2>/dev/null || true
+}
+
+read_demo_app() {
+  DEMO_APP_ID=$(read_parameter "$DEMO_APP_ID_PARAMETER")
+  DEMO_APP_SECRET=$(read_parameter "$DEMO_APP_SECRET_PARAMETER")
+  if [ -n "$DEMO_APP_ID" ] && [ -n "$DEMO_APP_SECRET" ]; then
+    return 0
+  fi
+  log "No demo app configured. Create one in the dashboard with https://${DEMO_HOST} as an allowed origin,"
+  log "then store its ID in ${DEMO_APP_ID_PARAMETER} and its secret in ${DEMO_APP_SECRET_PARAMETER} (SecureString)."
+  return 1
 }
 
 build_release() {
@@ -95,9 +112,13 @@ build_release() {
   cd "$RELEASE_DIR"
   bun install --frozen-lockfile >/dev/null
 
-  log "Building the control plane and the demo"
+  log "Building the control plane"
   (cd apps/control-plane && bunx farm build >/dev/null)
-  (cd apps/demo && bun run build >/dev/null)
+  if read_demo_app; then
+    log "Building the demo"
+    (cd apps/demo && FIDUCY_APP_ID="$DEMO_APP_ID" FIDUCY_APP_SECRET="$DEMO_APP_SECRET" \
+      FIDUCY_GATEWAY_URL="https://${GATEWAY_HOST}" bun run build >/dev/null)
+  fi
 
   log "Bundling the gateway"
   bun build apps/gateway/src/server.ts --target=bun --outfile=enclave/gateway.js >/dev/null
@@ -167,8 +188,8 @@ EOF
 PORT=3001
 HOST=127.0.0.1
 NODE_ENV=production
-FIDUCY_APP_ID=${DEMO_APP_ID}
-FIDUCY_APP_SECRET=${DEMO_APP_SECRET}
+FIDUCY_APP_ID=${DEMO_APP_ID:-}
+FIDUCY_APP_SECRET=${DEMO_APP_SECRET:-}
 FIDUCY_GATEWAY_URL=https://${GATEWAY_HOST}
 EOF
   umask 022
@@ -251,16 +272,13 @@ wait_for() {
   return 1
 }
 
-seed_demo_app() {
-  local secret_hash body
-  secret_hash=$(printf '%s' "$DEMO_APP_SECRET" | sha256sum | cut -d' ' -f1)
-  body=$(jq -n --arg appID "$DEMO_APP_ID" --arg hash "$secret_hash" --arg origin "https://${DEMO_HOST}" \
-    '{appID: $appID, name: "Fiducy demo", monthlyRequestLimitPerKey: 1000,
-      allowedOrigins: [$origin], appSecretHash: $hash}')
-  curl -fsS -X PUT http://127.0.0.1:3000/api/gateway/seed \
-    -H "authorization: Bearer ${FIDUCY_GATEWAY_TOKEN}" -H 'content-type: application/json' \
-    -d "$body" >/dev/null
-  log "Seeded $DEMO_APP_ID for https://${DEMO_HOST}"
+start_demo() {
+  if read_demo_app; then
+    systemctl enable fiducy-demo >/dev/null
+    systemctl restart fiducy-demo
+    return 0
+  fi
+  systemctl disable --now fiducy-demo >/dev/null 2>&1 || true
 }
 
 start_services() {
@@ -271,16 +289,16 @@ start_services() {
   (cd "$RELEASE_DIR/apps/control-plane" && set -a && source /etc/fiducy/control-plane.env && set +a &&
     bunx farm auth migrate >/dev/null)
 
-  systemctl enable fiducy-control-plane fiducy-demo fiducy-enclave fiducy-caddy >/dev/null
-  systemctl restart fiducy-control-plane fiducy-demo
+  systemctl enable fiducy-control-plane fiducy-enclave fiducy-caddy >/dev/null
+  systemctl restart fiducy-control-plane
   wait_for http://127.0.0.1:3000/api/config "Control plane"
-  seed_demo_app
+  start_demo
   systemctl restart fiducy-caddy
   systemctl restart fiducy-enclave
   wait_for http://127.0.0.1:8787/health "Enclave gateway"
   log "Gateway:  https://${GATEWAY_HOST}"
   log "Console:  https://${CONTROL_HOST}"
-  log "Demo:     https://${DEMO_HOST}"
+  [ -n "${DEMO_APP_ID:-}" ] && log "Demo:     https://${DEMO_HOST}"
 }
 
 install_tools

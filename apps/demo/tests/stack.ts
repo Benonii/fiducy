@@ -22,7 +22,7 @@ export const DEMO_APP_SECRET = 'fsk_demo_e2e_5Kq8Wn2Rv7Ty3Lp';
 async function waitForDemo(demoURL: string) {
   const deadline = Date.now() + STARTUP_TIMEOUT_MILLISECONDS;
   while (Date.now() < deadline) {
-    const response = await fetch(`${demoURL}/api/config`).catch(() => null);
+    const response = await fetch(demoURL).catch(() => null);
     if (response?.ok) return;
     await Bun.sleep(500);
   }
