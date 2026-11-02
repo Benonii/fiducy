@@ -46,7 +46,6 @@ async function startGateway(demoURL: string, providerURL: string) {
         appID: DEMO_APP_ID,
         name: 'Demo chat',
         appSecret: DEMO_APP_SECRET,
-        accessMode: 'gateway',
         monthlyRequestLimitPerKey: 1,
         allowedOrigins: [demoURL]
       }

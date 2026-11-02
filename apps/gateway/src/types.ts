@@ -5,14 +5,11 @@ import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import type { Bytes, KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
 
-export type KeyAccessMode = 'gateway' | 'gateway_and_release';
-
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface RegisteredApp {
   appID: string;
   name: string;
-  accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;

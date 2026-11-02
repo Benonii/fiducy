@@ -78,7 +78,6 @@ async function seedDemoApp(secrets: PrototypeSecrets) {
     body: JSON.stringify({
       appID: DEMO_APP_ID,
       name: 'Fiducy demo',
-      accessMode: 'gateway',
       monthlyRequestLimitPerKey: 1000,
       allowedOrigins: [demoURL],
       appSecretHash: await hashSecret(secrets.demoAppSecret)
