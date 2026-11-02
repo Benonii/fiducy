@@ -6,7 +6,7 @@ export const SITE_TITLE = 'Fiducy: your users bring the keys, you never hold the
 export const SITE_DESCRIPTION =
   'Let users bring their own AI keys without storing them. A breach of your app leaks no keys.';
 export const ISSUES_URL = `${GITHUB_URL}/issues`;
-export const MAINTAINER_NAME = 'Ben Besckinder';
+export const MAINTAINER_NAME = 'Benoni Taddesse';
 export const MAINTAINER_CITY = 'San Francisco';
 export const NEW_TAB = { target: '_blank', rel: 'noopener noreferrer' } as const;
 

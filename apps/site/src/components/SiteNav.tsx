@@ -1,5 +1,5 @@
 import { buttonVariants } from '@/components/ui/button';
-import { DEMO_URL, GITHUB_URL } from '@/lib/constants';
+import { DASHBOARD_URL, DEMO_URL, GITHUB_URL } from '@/lib/constants';
 import { NEW_TAB } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +26,11 @@ export function SiteNav() {
         <a className={NAV_LINK_CLASS} href={GITHUB_URL} {...NEW_TAB}>
           GitHub
         </a>
+        {DASHBOARD_URL ? (
+          <a className={cn(buttonVariants({ size: 'sm' }), 'ml-2')} href={DASHBOARD_URL}>
+            Dashboard
+          </a>
+        ) : null}
       </nav>
     </header>
   );

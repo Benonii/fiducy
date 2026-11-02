@@ -91,10 +91,15 @@ export interface InfoSection {
   body: ReactNode;
 }
 
+export interface InfoVisualProps {
+  caption: string;
+}
+
 export interface InfoPageProps {
   title: string;
   intro: string;
   sections: InfoSection[];
+  visual: InfoVisualProps;
 }
 
 export interface FaqItem {

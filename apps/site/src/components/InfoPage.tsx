@@ -1,3 +1,4 @@
+import { InfoVisual } from '@/components/InfoVisual';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
 import { DESCRIPTION_CLASS, SECTION_CLASS, SECTION_HEAD_CLASS, TITLE_CLASS } from '@/lib/styles';
@@ -16,21 +17,26 @@ function Section({ title, body }: InfoSection) {
   );
 }
 
-export function InfoPage({ title, intro, sections }: InfoPageProps) {
+export function InfoPage({ title, intro, sections, visual }: InfoPageProps) {
   return (
     <div className="square-corners min-h-screen bg-white px-4 font-sans text-ink antialiased selection:bg-ink selection:text-white">
       <div className="mx-auto max-w-[1200px] divide-y divide-dashed divide-frame border-x border-frame">
         <SiteNav />
-        <main className={SECTION_CLASS}>
-          <div className={SECTION_HEAD_CLASS}>
-            <h1 className={TITLE_CLASS}>{title}</h1>
-            <p className={BODY_CLASS}>{intro}</p>
+        <main
+          className={`${SECTION_CLASS} lg:grid-cols-[minmax(0,720px)_minmax(0,1fr)] lg:items-start`}
+        >
+          <div className="grid gap-10 max-md:gap-8">
+            <div className={SECTION_HEAD_CLASS}>
+              <h1 className={TITLE_CLASS}>{title}</h1>
+              <p className={BODY_CLASS}>{intro}</p>
+            </div>
+            <div className="grid gap-8">
+              {sections.map((section) => (
+                <Section key={section.title} {...section} />
+              ))}
+            </div>
           </div>
-          <div className="grid max-w-[720px] gap-8">
-            {sections.map((section) => (
-              <Section key={section.title} {...section} />
-            ))}
-          </div>
+          <InfoVisual {...visual} />
         </main>
         <SiteFooter />
       </div>
