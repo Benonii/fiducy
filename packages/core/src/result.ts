@@ -1,4 +1,4 @@
-import type { Result } from './types';
+import type { Result } from './types.ts';
 
 export function succeed<Value>(value: Value): Result<Value, never> {
   return { ok: true, value };

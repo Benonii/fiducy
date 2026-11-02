@@ -12,11 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import type { AppSettings } from '@/lib/types';
 import type { AppSettingsFieldsProps } from './types';
 
-const ACCESS_MODES = [
-  { label: 'Gateway only', value: 'gateway' },
-  { label: 'Gateway and key release', value: 'gateway_and_release' }
-];
-
 const RECORD_STORAGE_OPTIONS = [
   { label: 'With Fiducy', value: 'fiducy' },
   { label: 'In your database', value: 'app' }
@@ -58,29 +53,6 @@ export function AppSettingsFields({ defaults }: AppSettingsFieldsProps) {
           min={1}
           defaultValue={defaults?.monthlyRequestLimitPerKey ?? 10000}
         />
-      </Field>
-      <Field>
-        <FieldLabel>Key access</FieldLabel>
-        <Select
-          name="accessMode"
-          items={ACCESS_MODES}
-          defaultValue={defaults?.accessMode ?? 'gateway'}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectPopup>
-            {ACCESS_MODES.map((mode) => (
-              <SelectItem key={mode.value} value={mode.value}>
-                {mode.label}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
-        <FieldDescription>
-          Gateway only keeps keys inside Fiducy. Key release lets your server fetch a plain key for
-          5 minutes. Leave it off unless a feature needs it.
-        </FieldDescription>
       </Field>
       {defaults ? (
         <Field>

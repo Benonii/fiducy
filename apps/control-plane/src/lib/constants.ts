@@ -12,6 +12,7 @@ export const OWNER_NAMESPACE = 'owners';
 export const USAGE_NAMESPACE = 'usage';
 export const CONTROL_STORAGE_MOUNT = 'control';
 export const KEY_ENTRY_NAMESPACE = 'key-entries';
+export const REVOKED_KEYS_NAMESPACE = 'revoked-keys';
 export const DAILY_USAGE_NAMESPACE = 'usage-days';
 export const GATEWAY_HEARTBEAT_KEY = 'gateway:heartbeat';
 export const GATEWAY_REACHABLE_WITHIN_MILLISECONDS = 2 * 60 * 1000;

@@ -19,6 +19,8 @@ jobs:
       - run: bun install
       - run: bun run lint
       - run: bun run typecheck
+      - run: bun run build
+      - run: bun run check:packages
       - run: bunx farm build
         working-directory: apps/site
       - run: bunx playwright@1.56.1 install --with-deps chromium

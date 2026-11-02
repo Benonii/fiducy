@@ -2,7 +2,9 @@ import { createLocalKeyWrapper } from '@fiducy/core';
 import { createProviderRegistry } from '@fiducy/providers';
 
 import { createEnclaverAttestation } from './attestation';
+import { createCachingKeyWrapper } from './cachingKeyWrapper';
 import { GATEWAY_TOKEN_PURPOSE } from './constants';
+import { SHARE_CACHE_MAXIMUM_ENTRIES, SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS } from './constants';
 import { createDynamoClient, createDynamoKeyStore } from './dynamoKeyStore';
 import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKeyWrapper';
 import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
@@ -63,7 +65,12 @@ function selectKeyStore(): KeyStore {
 }
 
 function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
-  return kms ? createKmsKeyWrapper(kms) : createLocalKeyWrapper(readMasterKey());
+  if (!kms) return createLocalKeyWrapper(readMasterKey());
+  return createCachingKeyWrapper({
+    keyWrapper: createKmsKeyWrapper(kms),
+    timeToLiveMilliseconds: SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS,
+    maximumEntries: SHARE_CACHE_MAXIMUM_ENTRIES
+  });
 }
 
 const kms = readKmsSettings();

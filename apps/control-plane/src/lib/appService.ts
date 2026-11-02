@@ -1,7 +1,6 @@
 import { fail, succeed } from './result';
 
 import { APP_NOT_FOUND } from './failures';
-import { listRevokedKeyIDs } from './keyService';
 import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from './secrets';
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
@@ -101,6 +100,6 @@ export async function deleteApp(
 export async function listGatewayApps(store: ControlStore): Promise<GatewayApp[]> {
   const apps = await store.listAllApps();
   return Promise.all(
-    apps.map(async (app) => toGatewayApp(app, await listRevokedKeyIDs(store, app.appID)))
+    apps.map(async (app) => toGatewayApp(app, await store.listRevokedKeyIDs(app.appID)))
   );
 }

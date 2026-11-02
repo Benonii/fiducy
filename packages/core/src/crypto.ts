@@ -1,9 +1,9 @@
-import { DATA_KEY_LENGTH, IV_LENGTH } from './constants';
-import { generateRandomBytes } from './encoding';
-import { fail, succeed } from './result';
+import { DATA_KEY_LENGTH, IV_LENGTH } from './constants.ts';
+import { generateRandomBytes } from './encoding.ts';
+import { fail, succeed } from './result.ts';
 
-import type { Bytes, DecryptSecretInput, EncryptSecretInput, EncryptedSecret } from './types';
-import type { KeyShares, Result } from './types';
+import type { Bytes, DecryptSecretInput, EncryptSecretInput, EncryptedSecret } from './types.ts';
+import type { KeyShares, Result } from './types.ts';
 
 export function generateDataKey(): Bytes {
   return generateRandomBytes(DATA_KEY_LENGTH);
