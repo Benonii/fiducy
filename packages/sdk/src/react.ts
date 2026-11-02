@@ -1,6 +1,6 @@
 export { ConnectKeyWidget } from './ConnectKeyWidget.tsx';
 export { KeyWidget } from './KeyWidget.tsx';
-export { fiducyKeysQueryKey, useFiducyKeys } from './useFiducyKeys.ts';
+export { FIDUCY_KEYS_CHANGED, saveConnectedKey } from './keysApi.ts';
 
 export type {
   ConnectKeyWidgetProps,

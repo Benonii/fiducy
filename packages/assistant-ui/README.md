@@ -5,10 +5,10 @@ Bring-your-own-key for [assistant-ui](https://www.assistant-ui.com) apps. When a
 ## Install
 
 ```sh
-npm install @fiducy/sdk @fiducy/assistant-ui @tanstack/react-query
+npm install @fiducy/sdk @fiducy/assistant-ui
 ```
 
-The key box saves through TanStack Query, so wrap the thread in a `QueryClientProvider`. Full guide: [assistant-ui docs](https://fiducy.dev/docs/assistant-ui).
+Full guide: [assistant-ui docs](https://fiducy.dev/docs/assistant-ui).
 
 ## Client
 

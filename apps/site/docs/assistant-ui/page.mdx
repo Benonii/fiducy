@@ -13,7 +13,7 @@ This page assumes an assistant-ui app on the AI SDK runtime (`useChatRuntime` fr
 ## 1. Install
 
 ```bash
-npm install @fiducy/sdk @fiducy/assistant-ui @tanstack/react-query
+npm install @fiducy/sdk @fiducy/assistant-ui
 ```
 
 You also need a gateway and an app in the dashboard. See [Quickstart, step 0 and 1](/docs/quickstart#0-have-a-gateway-to-talk-to) for both and for the env vars.
@@ -90,9 +90,7 @@ export async function POST(request: Request) {
 import { AssistantRuntimeProvider, AuiConfig, Tools } from '@assistant-ui/react';
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { fiducyToolkit } from '@fiducy/assistant-ui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
-import { useState } from 'react';
 
 import { Thread } from '@/components/assistant-ui/thread';
 
@@ -100,7 +98,6 @@ const gatewayURL = process.env.NEXT_PUBLIC_FIDUCY_GATEWAY_URL!;
 const appID = process.env.NEXT_PUBLIC_FIDUCY_APP_ID!;
 
 export function Assistant() {
-  const [queryClient] = useState(() => new QueryClient());
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({ api: '/api/chat' }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls
@@ -110,17 +107,15 @@ export function Assistant() {
   });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AssistantRuntimeProvider runtime={runtime} config={config}>
-        <Thread />
-      </AssistantRuntimeProvider>
-    </QueryClientProvider>
+    <AssistantRuntimeProvider runtime={runtime} config={config}>
+      <Thread />
+    </AssistantRuntimeProvider>
   );
 }
 ```
 
 - `sendAutomaticallyWhen` resends the user's message once the key is saved.
-- The key box saves the handle through your `/api/fiducy` route, which needs the `QueryClientProvider` above it.
+- The key box saves the handle through your `/api/fiducy` route.
 - The app ID and gateway URL are public. Expose them with your framework's public prefix (`NEXT_PUBLIC_` here); the app secret never gets one.
 - Spread your own tools next to `fiducyToolkit(...)` in the same `toolkit` object.
 
