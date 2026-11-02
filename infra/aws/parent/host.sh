@@ -255,7 +255,7 @@ seed_demo_app() {
   local secret_hash body
   secret_hash=$(printf '%s' "$DEMO_APP_SECRET" | sha256sum | cut -d' ' -f1)
   body=$(jq -n --arg appID "$DEMO_APP_ID" --arg hash "$secret_hash" --arg origin "https://${DEMO_HOST}" \
-    '{appID: $appID, name: "Fiducy demo", accessMode: "gateway", monthlyRequestLimitPerKey: 1000,
+    '{appID: $appID, name: "Fiducy demo", monthlyRequestLimitPerKey: 1000,
       allowedOrigins: [$origin], appSecretHash: $hash}')
   curl -fsS -X PUT http://127.0.0.1:3000/api/gateway/seed \
     -H "authorization: Bearer ${FIDUCY_GATEWAY_TOKEN}" -H 'content-type: application/json' \

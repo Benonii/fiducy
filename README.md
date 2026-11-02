@@ -9,7 +9,7 @@ Key custody for bring-your-own-key apps. Users paste their AI provider key into 
 | `packages/core` | Crypto core: AES-256-GCM sealing, split data keys, handles, key wrapping |
 | `packages/providers` | Provider adapters: header swap, path allowlist, error redaction, streaming usage |
 | `packages/widget` | Browser client that mounts the key widget iframe |
-| `packages/sdk` | App SDK: AI SDK provider settings, revoke and release helpers, React `KeyWidget` |
+| `packages/sdk` | App SDK: AI SDK provider settings, revoke helper, React `KeyWidget` |
 | `packages/testing` | Shared fixtures and a mock AI provider |
 | `apps/gateway` | The gateway server |
 | `apps/control-plane` | Farm.js developer dashboard and control plane: accounts, apps, hashed app secrets, limits, usage |
@@ -49,14 +49,14 @@ const fiducy = createGatewayClient({ gatewayURL, appSecret: process.env.FIDUCY_A
 const openai = createOpenAI(fiducy.providerSettings('openai', user.keyHandle));
 ```
 
-In the browser, `<KeyWidget gatewayURL appID onHandle />` from `@fiducy/sdk/react` shows the key form and gives you the handle. Store the handle with the user on your server. `fiducy.revokeKey(handle)` deletes a key and `fiducy.releaseKey(handle)` returns it for five minutes if the app allows release.
+In the browser, `<KeyWidget gatewayURL appID onHandle />` from `@fiducy/sdk/react` shows the key form and gives you the handle. Store the handle with the user on your server. `fiducy.revokeKey(handle)` deletes a key.
 
 ## Running the demo chat
 
 ```sh
 cd apps/gateway
 FIDUCY_MASTER_KEY=<32 random bytes, base64url> \
-FIDUCY_APPS_JSON='[{"appID":"app_demo","name":"Demo","appSecret":"fsk_demo_local","accessMode":"gateway","monthlyRequestLimitPerKey":100,"allowedOrigins":["http://localhost:3000"]}]' \
+FIDUCY_APPS_JSON='[{"appID":"app_demo","name":"Demo","appSecret":"fsk_demo_local","monthlyRequestLimitPerKey":100,"allowedOrigins":["http://localhost:3000"]}]' \
 bun run start
 
 cd apps/demo

@@ -9,6 +9,5 @@ export type {
   GatewayProvider,
   GatewayResult,
   ProviderSettings,
-  ReleasedKey,
   RevokedKey
 } from './types';

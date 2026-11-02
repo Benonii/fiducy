@@ -70,18 +70,6 @@ describe('managing keys from the app server', () => {
     });
   });
 
-  it('releases a key only for apps with release turned on', async () => {
-    const deskHandle = await storeHandle(DESK_APP.appID);
-    const released = await createClient(DESK_APP.appSecret).releaseKey(deskHandle);
-    expect(released).toEqual({
-      ok: true,
-      value: { apiKey: SAMPLE_API_KEY, expiresInSeconds: 300 }
-    });
-    const chatHandle = await storeHandle(CHAT_APP.appID);
-    const refused = await createClient().releaseKey(chatHandle);
-    expect(refused.ok ? null : refused.error.status).toBe(403);
-  });
-
   it('refuses malformed handles without calling the gateway', async () => {
     const client = createGatewayClient({
       gatewayURL: harness.gatewayURL,
@@ -89,7 +77,6 @@ describe('managing keys from the app server', () => {
       fetch: () => Promise.reject(new Error('should not be called'))
     });
     expect((await client.revokeKey('kh_bad')).ok).toBe(false);
-    expect((await client.releaseKey('not-a-handle')).ok).toBe(false);
   });
 
   it('reports an unreachable gateway as a failure', async () => {
