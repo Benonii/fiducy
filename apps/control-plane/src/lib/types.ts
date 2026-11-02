@@ -1,10 +1,13 @@
 export type RecordStorage = 'fiducy' | 'app';
 
+export type KeySource = 'widget' | 'import';
+
 export interface AppSettings {
   name: string;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
+  allowKeyImport?: boolean;
 }
 
 export interface StoredApp extends AppSettings {
@@ -96,6 +99,7 @@ export interface AppKeyView {
   lastUsedAt: string | null;
   requestCount: number;
   status: KeyStatus;
+  source?: KeySource;
 }
 
 export interface UsageDay {
@@ -132,6 +136,7 @@ export interface StoredKeyEntry {
   createdAt: string;
   lastUsedAt: string | null;
   status: KeyStatus;
+  source?: KeySource;
 }
 
 export interface TokenTotals {
@@ -155,4 +160,5 @@ export interface KeyEvent {
   type: KeyEventType;
   appID: string;
   keyID: string;
+  source?: KeySource;
 }

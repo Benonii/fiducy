@@ -7,12 +7,15 @@ import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/provide
 
 export type RecordStorage = 'fiducy' | 'app';
 
+export type KeySource = 'widget' | 'import';
+
 export interface RegisteredApp {
   appID: string;
   name: string;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
+  allowKeyImport?: boolean;
   revokedKeyIDs?: string[];
 }
 
@@ -59,6 +62,15 @@ export interface GatewayDependencies {
 export interface StoreKeyBody {
   appID: string;
   apiKey: string;
+}
+
+export interface ImportKeysBody {
+  apiKeys: string[];
+}
+
+export interface SealedKey {
+  handle: string;
+  record?: SealedRecord;
 }
 
 export interface GatewayFailure {
@@ -140,6 +152,7 @@ export interface KeyEvent {
   type: 'saved' | 'revoked';
   appID: string;
   keyID: string;
+  source?: KeySource;
 }
 
 export interface KeyEventReporter {

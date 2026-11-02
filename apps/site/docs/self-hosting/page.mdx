@@ -1,6 +1,6 @@
 ---
 title: Self-hosting
-order: 9
+order: 10
 description: Run the gateway enclave, KMS key and dashboard in your own AWS account.
 ---
 
@@ -58,7 +58,7 @@ bun install
 bun run prototype --mock
 ```
 
-This starts the dashboard on `:3000`, the demo chat on `:3001` and the gateway on `:8787`. `--mock` uses a fake OpenAI that logs the last four characters of the key it received, so you can see decryption happen.
+This starts the dashboard on `:3000`, the demo chat on `:3001` and the gateway on `:8787`. `--mock` uses a fake OpenAI that logs the last four characters of the key it received, so you can see decryption happen. Sealed records are saved to `.prototype/key-records.json`, so keys survive a restart. Delete `.prototype/` to start fresh.
 
 ## Gateway environment
 
