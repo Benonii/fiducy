@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Group, LineSegments, MeshBasicMaterial } from 'three';
-import type { Object3D, Scene } from 'three';
+import type { Object3D, OrthographicCamera, PerspectiveCamera, Scene } from 'three';
+import type { Vector2, WebGLRenderTarget } from 'three';
 
 export type Point = readonly [number, number, number];
 
@@ -63,6 +64,18 @@ export interface EnclaveParts {
   halves: KeyHalves;
 }
 
+export interface DitherKeyParts {
+  scene: Scene;
+  camera: PerspectiveCamera;
+  turntable: Group;
+  handleHalf: Group;
+  storedHalf: Group;
+  target: WebGLRenderTarget;
+  cells: Vector2;
+  quad: Scene;
+  quadCamera: OrthographicCamera;
+}
+
 export interface PointerState {
   targetX: number;
   targetY: number;
@@ -86,13 +99,40 @@ export interface SceneLabelElements {
   request: HTMLElement;
 }
 
+export interface InfoSection {
+  title: string;
+  body: ReactNode;
+}
+
+export interface InfoVisualProps {
+  caption: string;
+}
+
+export interface InfoPageProps {
+  title: string;
+  intro: string;
+  sections: InfoSection[];
+  visual: InfoVisualProps;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface PlanCardProps {
+  id?: string;
   title: string;
   price: string;
   description: string;
   linkLabel?: string;
   linkURL?: string;
   action?: ReactNode;
+}
+
+export interface WaitlistJoinInput {
+  email: string;
+  source: string;
 }
 
 export type WaitlistStatus = 'idle' | 'sending' | 'joined' | 'already_joined' | 'error';

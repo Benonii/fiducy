@@ -1,5 +1,6 @@
 import { CodeTabs } from '@/components/CodeTabs';
 import { CopyAgentPrompt } from '@/components/CopyAgentPrompt';
+import { Faq } from '@/components/Faq';
 import { HeroStage } from '@/components/HeroStage';
 import { InstallCommand } from '@/components/InstallCommand';
 import { KeyFlow } from '@/components/KeyFlow';
@@ -11,8 +12,17 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
 import { WaitlistForm } from '@/components/WaitlistForm';
 import { buttonVariants } from '@/components/ui/button';
+import { FAQ } from '@/lib/faq';
+import { NEW_TAB } from '@/lib/site';
 import { DESCRIPTION_CLASS, SECTION_CLASS, SECTION_HEAD_CLASS } from '@/lib/styles';
 import { TITLE_CLASS } from '@/lib/styles';
+import { faqPage } from '@farm.js/core/json-ld';
+
+import type { Metadata } from '@farm.js/core';
+
+export const metadata: Metadata = {
+  jsonLd: faqPage(FAQ.map((item) => ({ question: item.question, answer: item.answer })))
+};
 
 export default function HomePage() {
   return (
@@ -36,7 +46,11 @@ export default function HomePage() {
                 </p>
                 <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
                   <div className="flex flex-wrap items-center gap-2.5 max-sm:[&>a]:w-full sm:flex-nowrap">
-                    <a className={buttonVariants({ size: 'lg' })} href="/docs/quickstart">
+                    <a
+                      className={buttonVariants({ size: 'lg' })}
+                      href="/docs/quickstart"
+                      {...NEW_TAB}
+                    >
                       Read the docs
                     </a>
                     <InstallCommand />
@@ -90,13 +104,15 @@ export default function HomePage() {
                 Users don't have to take your word for it.{' '}
                 <code className="font-mono text-[0.95em] text-ink">GET /attestation</code> proves
                 which code holds their key, signed by AWS.{' '}
-                <a className="underline underline-offset-4" href="/docs/security">
+                <a className="underline underline-offset-4" href="/docs/security" {...NEW_TAB}>
                   How to check it
                 </a>
               </p>
             </div>
             <LeakScenes />
           </section>
+
+          <Faq />
 
           <section className="grid divide-dashed divide-frame max-md:divide-y md:grid-cols-2 md:divide-x">
             <PlanCard
@@ -107,6 +123,7 @@ export default function HomePage() {
               linkURL="/docs/self-hosting"
             />
             <PlanCard
+              id="managed"
               title="Managed"
               price="Coming soon"
               description="Skip the infrastructure. We run the enclave and the dashboard, you add the SDK. Leave your email and you hear first."
