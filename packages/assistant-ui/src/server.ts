@@ -1,9 +1,9 @@
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 
-import { CONNECT_KEY_TOOL, PROVIDER_LABELS, SERVER_TOOL_CALL_PREFIX } from './constants';
+import { CONNECT_KEY_TOOL, PROVIDER_LABELS, SERVER_TOOL_CALL_PREFIX } from './constants.ts';
 
 import type { UIMessage } from 'ai';
-import type { KeyRequestOptions } from './types';
+import type { KeyRequestOptions } from './types.ts';
 
 function isServerKeyRequest(part: UIMessage['parts'][number]): boolean {
   const isConnectTool =
@@ -51,5 +51,5 @@ export function withoutKeyRequests<T extends UIMessage>(messages: T[]): T[] {
   );
 }
 
-export { CONNECT_KEY_TOOL } from './constants';
-export type { ConnectKeyArgs, ConnectKeyResult, KeyRequestOptions } from './types';
+export { CONNECT_KEY_TOOL } from './constants.ts';
+export type { ConnectKeyArgs, ConnectKeyResult, KeyRequestOptions } from './types.ts';

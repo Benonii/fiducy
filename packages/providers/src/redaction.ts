@@ -1,4 +1,4 @@
-import { REDACTED_TEXT, SECRET_PATTERN } from './constants';
+import { REDACTED_TEXT, SECRET_PATTERN } from './constants.ts';
 
 export function redactSecrets(text: string, apiKey: string): string {
   const withoutExactKey = apiKey ? text.replaceAll(apiKey, REDACTED_TEXT) : text;

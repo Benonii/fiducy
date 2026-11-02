@@ -1,5 +1,5 @@
-import { STRIPPED_REQUEST_HEADERS } from './constants';
-import { fail, succeed } from './result';
+import { STRIPPED_REQUEST_HEADERS } from './constants.ts';
+import { fail, succeed } from './result.ts';
 
 import type { Result } from '@fiducy/core';
 import type {
@@ -7,7 +7,7 @@ import type {
   StreamingRequestInit,
   UpstreamRequestError,
   UpstreamRequestInput
-} from './types';
+} from './types.ts';
 
 export function isPathAllowed(provider: ProviderConfiguration, path: string): boolean {
   if (!path.startsWith(provider.allowedPathPrefix)) return false;

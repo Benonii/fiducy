@@ -1,6 +1,6 @@
 import type { Result } from '@fiducy/core';
 import type { WidgetSealedRecord } from '@fiducy/widget';
-import type { PROVIDER_BASE_PATHS } from './constants';
+import type { PROVIDER_BASE_PATHS } from './constants.ts';
 
 export type GatewayProvider = keyof typeof PROVIDER_BASE_PATHS;
 

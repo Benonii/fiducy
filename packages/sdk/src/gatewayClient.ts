@@ -1,6 +1,6 @@
 import { fail, parseHandle, succeed } from '@fiducy/core';
 
-import { KEY_HANDLE_HEADER, PROVIDER_BASE_PATHS } from './constants';
+import { KEY_HANDLE_HEADER, PROVIDER_BASE_PATHS } from './constants.ts';
 
 import type {
   FetchGateway,
@@ -11,7 +11,7 @@ import type {
   GatewayResult,
   ProviderSettings,
   RevokedKey
-} from './types';
+} from './types.ts';
 
 const INVALID_HANDLE_ERROR = { status: 400, message: 'The key handle is malformed' };
 const BROWSER_ERROR =

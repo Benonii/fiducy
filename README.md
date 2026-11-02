@@ -10,10 +10,20 @@ Key custody for bring-your-own-key apps. Users paste their AI provider key into 
 | `packages/providers` | Provider adapters: header swap, path allowlist, error redaction, streaming usage |
 | `packages/widget` | Browser client that mounts the key widget iframe |
 | `packages/sdk` | App SDK: AI SDK provider settings, revoke helper, React `KeyWidget` |
+| `packages/farm` | Farm.js integration: mounts the SDK's route handler |
+| `packages/assistant-ui` | assistant-ui toolkit: the key box opens inside the chat thread |
 | `packages/testing` | Shared fixtures and a mock AI provider |
 | `apps/gateway` | The gateway server |
 | `apps/control-plane` | Farm.js developer dashboard and control plane: accounts, apps, hashed app secrets, limits, usage |
 | `apps/demo` | Farm.js and assistant-ui chat where users bring their own OpenAI key |
+
+## Packages
+
+```sh
+bun add @fiducy/sdk @fiducy/farm
+```
+
+All `@fiducy/*` packages are released together with the same version, built in GitHub Actions and published to npm with provenance. Most apps install `@fiducy/sdk`, `@fiducy/farm` and, for chat UIs, `@fiducy/assistant-ui`. `@fiducy/core`, `@fiducy/providers` and `@fiducy/widget` are the building blocks underneath.
 
 ## Development
 
@@ -64,3 +74,11 @@ FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
 ```
 
 The demo is an assistant-ui chat. Pick a model; if you have no key for that provider, the reply opens the key box inside the thread (see `packages/assistant-ui`). Handles are stored server side per demo user.
+
+## Releasing
+
+Add a changeset to your pull request with `bunx changeset`. Merging to main opens a "Version packages" pull request; merging that one publishes to npm and tags the release.
+
+## License
+
+Apache-2.0. See [LICENSE](./LICENSE).
