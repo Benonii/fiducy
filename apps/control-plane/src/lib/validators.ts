@@ -20,7 +20,6 @@ const originSchema = z
 
 export const appSettingsSchema = z.object({
   name: z.string().trim().min(1, 'Give the app a name').max(80),
-  accessMode: z.enum(['gateway', 'gateway_and_release']).default('gateway'),
   monthlyRequestLimitPerKey: z.coerce.number().int().min(1).max(MAXIMUM_MONTHLY_REQUEST_LIMIT),
   allowedOrigins: z.array(originSchema).max(MAXIMUM_ALLOWED_ORIGINS),
   recordStorage: z.enum(['fiducy', 'app']).default('fiducy')
@@ -39,11 +38,6 @@ export const usageEventSchema = z.object({
 
 export const usageBatchSchema = z.object({
   events: z.array(usageEventSchema).max(MAXIMUM_USAGE_BATCH_SIZE)
-});
-
-export const seededAppSchema = appSettingsSchema.extend({
-  appID: z.string().regex(/^app_[A-Za-z0-9_-]{1,64}$/, 'App IDs start with app_'),
-  appSecretHash: z.string().regex(/^[a-f0-9]{64}$/, 'Send a SHA-256 hex digest')
 });
 
 export const usageSeriesQuerySchema = z.object({

@@ -1,6 +1,6 @@
 import { KEY_ROUTE_PATTERN, PROVIDER_ROUTE_PATTERN } from './constants';
 import { serveAttestation } from './controllers/attestation';
-import { releaseKey, revokeKey, storeKey } from './controllers/keys';
+import { revokeKey, storeKey } from './controllers/keys';
 import { proxyProviderRequest } from './controllers/proxy';
 import { serveWidget, serveWidgetFont } from './controllers/widget';
 import { respondWith } from './responses';
@@ -18,8 +18,6 @@ async function routeRequest(request: Request, dependencies: GatewayDependencies)
   if (request.method === 'GET' && pathname === '/widget') return serveWidget(request, dependencies);
   if (request.method === 'GET' && pathname === WIDGET_FONT_PATH) return serveWidgetFont();
   if (request.method === 'POST' && pathname === '/keys') return storeKey(request, dependencies);
-  if (request.method === 'POST' && pathname === '/release')
-    return releaseKey(request, dependencies);
 
   const keyRoute = KEY_ROUTE_PATTERN.exec(pathname);
   if (request.method === 'DELETE' && keyRoute?.[1])

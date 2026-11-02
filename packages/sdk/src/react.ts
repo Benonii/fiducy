@@ -1,6 +1,6 @@
-export { ConnectKeyWidget } from './ConnectKeyWidget';
-export { KeyWidget } from './KeyWidget';
-export { fiducyKeysQueryKey, useFiducyKeys } from './useFiducyKeys';
+export { ConnectKeyWidget } from './ConnectKeyWidget.tsx';
+export { KeyWidget } from './KeyWidget.tsx';
+export { fiducyKeysQueryKey, useFiducyKeys } from './useFiducyKeys.ts';
 
 export type {
   ConnectKeyWidgetProps,
@@ -8,4 +8,4 @@ export type {
   GatewayProvider,
   KeyWidgetProps,
   UserKeySummaryView
-} from './types';
+} from './types.ts';

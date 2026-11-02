@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { FiducyKeysState, UserKeySummaryView } from './types';
+import type { FiducyKeysState, UserKeySummaryView } from './types.ts';
 
 interface ResponseBody<T> {
   data: T | null;

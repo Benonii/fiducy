@@ -7,7 +7,6 @@ export const OTHER_OWNER_ID = 'user_mallory';
 
 export const CHAT_SETTINGS: AppSettings = {
   name: 'Chatforge',
-  accessMode: 'gateway',
   monthlyRequestLimitPerKey: 100,
   allowedOrigins: ['https://chatforge.example']
 };

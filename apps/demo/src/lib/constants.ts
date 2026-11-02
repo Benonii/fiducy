@@ -1,6 +1,5 @@
 import type { DemoModel } from './types';
 
-export const DEFAULT_GATEWAY_URL = 'http://localhost:8787';
 export const CHAT_API_PATH = '/api/chat';
 export const FIDUCY_BASE_PATH = '/api/fiducy';
 export const FIDUCY_STORAGE_MOUNT = 'fiducy';
