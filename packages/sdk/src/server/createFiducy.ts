@@ -1,12 +1,12 @@
 import { SEALED_RECORD_FIELDS, parseHandle } from '@fiducy/core';
 
-import { KEY_RECORD_HEADER, PROVIDER_BASE_PATHS } from '../constants';
-import { createGatewayClient } from '../gatewayClient';
+import { KEY_RECORD_HEADER, PROVIDER_BASE_PATHS } from '../constants.ts';
+import { createGatewayClient } from '../gatewayClient.ts';
 
 import type { SealedRecord } from '@fiducy/core';
-import type { GatewayProvider } from '../types';
-import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from './types';
-import type { UserKeySummary } from './types';
+import type { GatewayProvider } from '../types.ts';
+import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from './types.ts';
+import type { UserKeySummary } from './types.ts';
 
 const DEFAULT_BASE_PATH = '/api/fiducy';
 

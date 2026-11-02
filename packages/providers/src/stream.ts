@@ -1,6 +1,6 @@
-import { mergeUsage, parseJSON, readUsage } from './usage';
+import { mergeUsage, parseJSON, readUsage } from './usage.ts';
 
-import type { TokenUsage } from './types';
+import type { TokenUsage } from './types.ts';
 
 function readEventData(line: string): string | null {
   if (!line.startsWith('data:')) return null;

@@ -1,7 +1,8 @@
 import { fail, succeed } from './result';
 
 import { findOwnedApp } from './appService';
-import { noteKeyUse } from './keyService';
+import { groupBy } from './common';
+import { noteKeyUses } from './keyService';
 
 import type { ControlResult, ControlStore, UsageEvent, UsageSummary } from './types';
 import type { DailyUsage, ProviderUsage, TokenTotals, UsageDay, UsageSeries } from './types';
@@ -49,38 +50,29 @@ function addDailyEvent(usage: DailyUsage, event: UsageEvent): DailyUsage {
 }
 
 async function recordDailyUsage(store: ControlStore, appID: string, events: UsageEvent[]) {
-  const eventsByDate = new Map<string, UsageEvent[]>();
-  for (const event of events) {
-    const date = toUsageDate(new Date(event.recordedAt));
-    eventsByDate.set(date, [...(eventsByDate.get(date) ?? []), event]);
-  }
+  const eventsByDate = groupBy(events, (event) => toUsageDate(new Date(event.recordedAt)));
   for (const [date, datedEvents] of eventsByDate) {
     const usage = datedEvents.reduce(addDailyEvent, await store.readDailyUsage(appID, date));
     await store.saveDailyUsage(appID, usage);
   }
 }
 
-function groupEvents(events: UsageEvent[]): Map<string, UsageEvent[]> {
-  const groups = new Map<string, UsageEvent[]>();
-  for (const event of events) {
-    const groupKey = `${event.appID}|${toUsageMonth(new Date(event.recordedAt))}`;
-    groups.set(groupKey, [...(groups.get(groupKey) ?? []), event]);
-  }
-  return groups;
-}
-
 export async function recordUsageBatch(store: ControlStore, events: UsageEvent[]): Promise<number> {
-  let recordedCount = 0;
-  for (const [groupKey, groupedEvents] of groupEvents(events)) {
+  const recordedEvents: UsageEvent[] = [];
+  const eventsByAppMonth = groupBy(
+    events,
+    (event) => `${event.appID}|${toUsageMonth(new Date(event.recordedAt))}`
+  );
+  for (const [groupKey, groupedEvents] of eventsByAppMonth) {
     const [appID = '', month = ''] = groupKey.split('|');
     if (!(await store.findApp(appID))) continue;
     const summary = groupedEvents.reduce(addEvent, await store.readUsage(appID, month));
     await store.saveUsage(appID, summary);
     await recordDailyUsage(store, appID, groupedEvents);
-    for (const event of groupedEvents) await noteKeyUse(store, event);
-    recordedCount += groupedEvents.length;
+    recordedEvents.push(...groupedEvents);
   }
-  return recordedCount;
+  await noteKeyUses(store, recordedEvents);
+  return recordedEvents.length;
 }
 
 export async function readMonthlyUsage(

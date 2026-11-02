@@ -2,17 +2,14 @@ import type { DeleteItemCommand, GetItemCommand, PutItemCommand } from '@aws-sdk
 import type { DeleteItemCommandOutput, GetItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
 import type { DecryptCommand, EncryptCommand } from '@aws-sdk/client-kms';
-import type { KeyWrapper, Result, SealedRecord } from '@fiducy/core';
+import type { Bytes, KeyWrapper, Result, SealedRecord } from '@fiducy/core';
 import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/providers';
-
-export type KeyAccessMode = 'gateway' | 'gateway_and_release';
 
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface RegisteredApp {
   appID: string;
   name: string;
-  accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
@@ -147,4 +144,16 @@ export interface KeyEvent {
 
 export interface KeyEventReporter {
   report: (event: KeyEvent) => Promise<void>;
+}
+
+export interface CachingKeyWrapperOptions {
+  keyWrapper: KeyWrapper;
+  timeToLiveMilliseconds: number;
+  maximumEntries: number;
+  readCurrentTime?: () => number;
+}
+
+export interface CachedShare {
+  share: Bytes;
+  expiresAt: number;
 }

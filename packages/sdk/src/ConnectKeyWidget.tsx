@@ -1,7 +1,7 @@
-import { KeyWidget } from './KeyWidget';
-import { useSaveConnectedKey } from './useFiducyKeys';
+import { KeyWidget } from './KeyWidget.tsx';
+import { useSaveConnectedKey } from './useFiducyKeys.ts';
 
-import type { ConnectKeyWidgetProps } from './types';
+import type { ConnectKeyWidgetProps } from './types.ts';
 
 export function ConnectKeyWidget({
   gatewayURL,

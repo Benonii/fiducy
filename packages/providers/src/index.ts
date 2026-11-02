@@ -1,7 +1,7 @@
-export { createProviderRegistry } from './registry';
-export { relayResponse } from './relay';
-export { redactSecrets } from './redaction';
-export { buildUpstreamRequest, isPathAllowed } from './request';
+export { createProviderRegistry } from './registry.ts';
+export { relayResponse } from './relay.ts';
+export { redactSecrets } from './redaction.ts';
+export { buildUpstreamRequest, isPathAllowed } from './request.ts';
 
-export type { ProviderConfiguration, ProviderName, ProviderRegistry } from './types';
-export type { TokenUsage } from './types';
+export type { ProviderConfiguration, ProviderName, ProviderRegistry } from './types.ts';
+export type { TokenUsage } from './types.ts';

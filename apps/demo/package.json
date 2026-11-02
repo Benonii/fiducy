@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun run --cwd ../../packages/sdk build && bun run --cwd ../../packages/farm build && bun run --cwd ../../packages/assistant-ui build && farm dev",
-    "build": "bun run --cwd ../../packages/sdk build && bun run --cwd ../../packages/farm build && bun run --cwd ../../packages/assistant-ui build && farm build",
+    "dev": "bun run --cwd ../.. build && farm dev",
+    "build": "bun run --cwd ../.. build && farm build",
     "start": "farm start"
   },
   "dependencies": {

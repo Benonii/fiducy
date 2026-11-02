@@ -1,17 +1,26 @@
 {
   "name": "fiducy",
   "private": true,
+  "license": "Apache-2.0",
   "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "test": "bun test",
     "lint": "biome check .",
     "typecheck": "for project in packages/core packages/providers packages/testing packages/widget packages/sdk packages/farm packages/assistant-ui apps/gateway apps/control-plane apps/demo apps/site; do bunx tsc --noEmit -p $project || exit 1; done",
-    "prototype": "bun apps/gateway/scripts/prototype.ts"
+    "build": "bun run --filter './packages/*' build",
+    "check:packages": "for package in packages/core packages/providers packages/widget packages/sdk packages/farm packages/assistant-ui; do publint $package --strict && attw --pack $package --profile esm-only || exit 1; done",
+    "prototype": "bun apps/gateway/scripts/prototype.ts",
+    "version-packages": "changeset version && bun install --lockfile-only",
+    "release": "bun run build && changeset publish"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@biomejs/biome": "1.9.4",
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
     "@types/bun": "1.4.2",
     "@types/node": "26.6.6",
+    "publint": "0.3.25",
     "typescript": "7.0.2"
   }
 }

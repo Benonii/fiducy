@@ -59,10 +59,7 @@ describe('changing an app', () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
     const before = await store.findApp(app.appID);
-    const updated = await updateApp(store, OWNER_ID, app.appID, {
-      monthlyRequestLimitPerKey: 5,
-      accessMode: 'gateway_and_release'
-    });
+    const updated = await updateApp(store, OWNER_ID, app.appID, { monthlyRequestLimitPerKey: 5 });
     expect(updated).toMatchObject({ ok: true, value: { monthlyRequestLimitPerKey: 5 } });
     expect((await store.findApp(app.appID))?.appSecretHash).toBe(before?.appSecretHash ?? '');
   });
@@ -99,7 +96,6 @@ describe('the gateway feed', () => {
     const feed = await listGatewayApps(store);
     expect(feed).toHaveLength(2);
     expect(Object.keys(feed[0] ?? {}).sort()).toEqual([
-      'accessMode',
       'allowedOrigins',
       'appID',
       'appSecretHash',
