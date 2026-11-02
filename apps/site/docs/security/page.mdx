@@ -15,7 +15,7 @@ description: What Fiducy protects against, how to verify it, and its limits.
 ## Verify the enclave
 
 ```bash
-curl "https://gw.fiducy.dev/attestation?nonce=$(openssl rand -hex 16)"
+curl "https://gateway.yourapp.com/attestation?nonce=$(openssl rand -hex 16)"
 ```
 
 The response holds a CBOR attestation document signed by AWS. Check that:
