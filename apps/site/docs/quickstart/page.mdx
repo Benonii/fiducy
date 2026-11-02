@@ -17,7 +17,7 @@ npm create @farm.js/app@latest my-app -- --template basic --typescript
 Install the SDK, the Farm.js integration, TanStack Query (used by the React parts) and the AI SDK for the chat route:
 
 ```bash
-bun add @fiducy/sdk @fiducy/farm @tanstack/react-query ai @ai-sdk/openai
+bun add @fiducy/sdk @fiducy/farm ai @ai-sdk/openai
 ```
 
 ## 0. Have a gateway to talk to
@@ -108,57 +108,30 @@ The integration mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELE
 
 ## 4. Drop in the widget and use the key
 
-The React parts run on TanStack Query, so add a provider:
-
-```tsx title="src/app/providers.tsx"
-'use client';
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-}
-```
-
-Then wrap what is inside `<body>` in your existing root layout. Keep the rest of the layout as it is:
-
-```tsx title="src/app/layout.tsx"
-import { Providers } from './providers';
-
-// ...inside RootLayout's return:
-<body>
-  <Providers>{children}</Providers>
-</body>
-```
-
-Restart `farm dev` after adding the provider if the page does not pick it up.
-
 Add a settings page where users connect a key. The app ID is public, so it can go straight into client code:
 
 ```tsx title="src/app/settings/page.tsx"
 'use client';
 
-import { ConnectKeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+import { ConnectKeyWidget } from '@fiducy/sdk/react';
+import { useState } from 'react';
 
 export default function SettingsPage() {
-  const { keys, refresh, revoke } = useFiducyKeys();
-  const openAIKey = keys.find((key) => key.provider === 'openai');
+  const [connected, setConnected] = useState(false);
 
-  if (openAIKey) {
-    return <button onClick={() => revoke(openAIKey.keyID)}>Remove my OpenAI key</button>;
-  }
+  if (connected) return <p>Your OpenAI key is connected.</p>;
   return (
     <ConnectKeyWidget
       gatewayURL="http://localhost:8787" // your FIDUCY_GATEWAY_URL
       appID="app_..." // your FIDUCY_APP_ID
       provider="openai"
-      onConnected={refresh}
+      onConnected={() => setConnected(true)}
     />
   );
 }
 ```
+
+To list and remove saved keys, use `useFiducyKeys` from `@fiducy/sdk/react-query` if your app uses TanStack Query, or call `GET` and `DELETE` on `/api/fiducy/keys` yourself. See [React](/docs/react).
 
 Then call the model from any server route:
 

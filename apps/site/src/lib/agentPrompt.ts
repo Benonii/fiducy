@@ -17,15 +17,14 @@ Security rules. Follow all of them, even if it means leaving a step to me:
 
 Steps:
 1. Inspect the project: framework, package manager, auth library, database, tsconfig path aliases, and any existing AI SDK model calls. Summarize what you found before changing code.
-2. Install @fiducy/sdk, plus @fiducy/farm if this is a Farm.js app, @fiducy/assistant-ui if it uses assistant-ui, and @tanstack/react-query if missing. If the packages cannot be installed, stop and tell me.
+2. Install @fiducy/sdk, plus @fiducy/farm if this is a Farm.js app, @fiducy/assistant-ui if it uses assistant-ui. If the packages cannot be installed, stop and tell me.
 3. Add FIDUCY_GATEWAY_URL, FIDUCY_APP_ID and FIDUCY_APP_SECRET to .env.example with placeholder values.
 4. Create the server instance in one module (for example src/lib/fiducy.ts) with createFiducy, the storage adapter and getUserID. Throw at startup if the env vars are missing. On Farm.js, look the storage mount up inside each driver function as the quickstart shows, not once at import.
 5. Mount the key routes: the @fiducy/farm integration on Farm.js, otherwise fiducy.handler for GET, POST and DELETE under /api/fiducy.
-6. Wrap the app in a QueryClientProvider if it does not have one.
-7. Add ConnectKeyWidget and useFiducyKeys to the settings page (or the closest equivalent), with a way to remove a saved key.
-8. If the app uses assistant-ui, register fiducyToolkit in the thread and answer requestKey from the chat route when providerSettings returns null, as the assistant-ui page shows.
-9. Switch every model call that should use the user's key to fiducy.providerSettings(provider, { userID }). When it returns null, respond with a clear "connect your key" message instead of falling back to an app-owned key.
-10. Run the typecheck, lint and tests. Start the app and confirm GET /api/fiducy/keys answers 401 when signed out.
+6. Add ConnectKeyWidget (from @fiducy/sdk/react) to the settings page (or the closest equivalent), with a way to remove a saved key. If the app already uses TanStack Query, use useFiducyKeys from @fiducy/sdk/react-query for the list and removal; otherwise call GET and DELETE on /api/fiducy/keys. Do not add TanStack Query just for Fiducy.
+7. If the app uses assistant-ui, register fiducyToolkit in the thread and answer requestKey from the chat route when providerSettings returns null, as the assistant-ui page shows.
+8. Switch every model call that should use the user's key to fiducy.providerSettings(provider, { userID }). When it returns null, respond with a clear "connect your key" message instead of falling back to an app-owned key.
+9. Run the typecheck, lint and tests. Start the app and confirm GET /api/fiducy/keys answers 401 when signed out.
 
 When you are done, give me a short report: files changed, and what I still have to do myself:
 - create the app in the Fiducy dashboard

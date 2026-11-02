@@ -1,18 +1,21 @@
 ---
 title: React
 order: 5
-description: ConnectKeyWidget and useFiducyKeys.
+description: ConnectKeyWidget, KeyWidget and the optional useFiducyKeys hook.
 ---
 
 # React
 
 ```ts
-import { ConnectKeyWidget, KeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+import { ConnectKeyWidget, KeyWidget, saveConnectedKey } from '@fiducy/sdk/react';
+import { useFiducyKeys } from '@fiducy/sdk/react-query'; // optional
 ```
 
 ## Setup
 
-`useFiducyKeys` and `ConnectKeyWidget` run on TanStack Query. Install it next to the SDK and put a `QueryClientProvider` above any component that uses them.
+`ConnectKeyWidget` and `KeyWidget` need only React. Nothing else to install.
+
+`useFiducyKeys` is optional and lives in `@fiducy/sdk/react-query`. Use it if your app already runs TanStack Query; it needs `@tanstack/react-query` and a `QueryClientProvider` above it:
 
 ```bash
 bun add @tanstack/react-query
@@ -30,7 +33,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-`KeyWidget` does not need the provider.
+Without TanStack Query, list keys with a plain `fetch('/api/fiducy/keys')` and revoke with `DELETE /api/fiducy/keys/:keyID` (see [Server SDK](/docs/server)).
 
 ## ConnectKeyWidget
 
@@ -60,6 +63,8 @@ The iframe only loads on origins listed in your app's allowed origins.
 
 ## useFiducyKeys(basePath?)
 
+From `@fiducy/sdk/react-query`. Refreshes on its own when `ConnectKeyWidget` saves a key.
+
 ```tsx
 const { keys, isLoading, error, refresh, revoke } = useFiducyKeys();
 ```
@@ -75,7 +80,7 @@ const { keys, isLoading, error, refresh, revoke } = useFiducyKeys();
 The list is cached under `fiducyKeysQueryKey(basePath)`, so you can invalidate it from your own mutations:
 
 ```tsx
-import { fiducyKeysQueryKey } from '@fiducy/sdk/react';
+import { fiducyKeysQueryKey } from '@fiducy/sdk/react-query';
 
 queryClient.invalidateQueries({ queryKey: fiducyKeysQueryKey() });
 ```
