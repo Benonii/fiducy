@@ -12,6 +12,7 @@ import { ErrorAlert } from '@/components/ErrorAlert';
 import { PageStatus } from '@/components/PageStatus';
 import { QuickStart } from '@/components/QuickStart';
 import { Tabs, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs';
+import { useSignInRedirect } from '@/components/useSignInRedirect';
 import { useApp, useGatewayURL } from '@/lib/queries';
 
 import type { AppTab, AppTabOption } from '@/components/types';
@@ -29,6 +30,9 @@ export default function AppPage({ params = {} }: PageProps) {
   const app = useApp(appID);
   const gatewayURL = useGatewayURL();
   const [tab, setTab] = useState<AppTab>('overview');
+  const signedOut = useSignInRedirect(app.error);
+
+  if (signedOut) return <PageStatus isLoading>Taking you to sign in</PageStatus>;
 
   return (
     <DashboardShell activeAppID={appID}>
