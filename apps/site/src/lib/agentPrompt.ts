@@ -1,10 +1,10 @@
 export const AGENT_SETUP_PROMPT = `Set up Fiducy in this app so users can bring their own AI provider keys (OpenAI, Anthropic, Gemini, OpenRouter) without the app ever storing or seeing a raw key.
 
 Read these first, they are the source of truth:
-- https://fiducy-nine.vercel.app/docs/quickstart.md
-- https://fiducy-nine.vercel.app/docs/server.md
-- https://fiducy-nine.vercel.app/docs/react.md
-- https://fiducy-nine.vercel.app/docs/storage.md
+- https://fiducy.dev/docs/quickstart.md
+- https://fiducy.dev/docs/server.md
+- https://fiducy.dev/docs/react.md
+- https://fiducy.dev/docs/storage.md
 
 Security rules. Follow all of them, even if it means leaving a step to me:
 1. Never ask me to paste FIDUCY_APP_SECRET (fsk_...) into this chat, and never write it into a file that is committed. Add placeholders to .env.example, make sure .env files are gitignored, and tell me which env vars to set myself.
