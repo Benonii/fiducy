@@ -23,3 +23,5 @@ export const IMDS_ROLE_PATH = '/latest/meta-data/iam/security-credentials/';
 export const IMDS_TOKEN_TTL_SECONDS = 300;
 export const SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS = 300000;
 export const SHARE_CACHE_MAXIMUM_ENTRIES = 10000;
+export const POSTGRES_KEYS_TABLE = 'fiducy_sealed_records';
+export const MOCK_PROVIDER_PATH_PREFIX = '/v1/';

@@ -1,0 +1,120 @@
+import { createLocalKeyWrapper } from '@fiducy/core';
+import { createProviderRegistry } from '@fiducy/providers';
+import { answerMockProviderRequest } from '@fiducy/testing';
+
+import { createEnclaverAttestation } from './attestation';
+import { createCachingKeyWrapper } from './cachingKeyWrapper';
+import { GATEWAY_TOKEN_PURPOSE, MOCK_PROVIDER_PATH_PREFIX } from './constants';
+import { SHARE_CACHE_MAXIMUM_ENTRIES, SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS } from './constants';
+import { createDynamoClient, createDynamoKeyStore } from './dynamoKeyStore';
+import { createKmsClient, createKmsKeyWrapper, decryptBootSecret } from './kmsKeyWrapper';
+import { createMemoryAppDirectory, createMemoryKeyStore } from './memoryStores';
+import { createMemoryUsageLedger } from './memoryStores';
+import { createPostgresKeyStore } from './postgresKeyStore';
+import { createRemoteAppDirectory } from './remoteAppDirectory';
+import { createRemoteKeyEvents } from './remoteKeyEvents';
+import { createRemoteUsageLedger } from './remoteUsageLedger';
+import { createGateway } from './router';
+
+import type { Bytes, KeyWrapper } from '@fiducy/core';
+import type { AppRegistration, ControlPlaneConnection, GatewayRuntime } from './types';
+import type { KeyStore, KmsSettings, RequestHandler } from './types';
+
+function readMasterKey(): Bytes {
+  const encodedMasterKey = process.env.FIDUCY_MASTER_KEY;
+  if (!encodedMasterKey) throw new Error('Set FIDUCY_MASTER_KEY to 32 random bytes in base64url');
+  return new Uint8Array(Buffer.from(encodedMasterKey, 'base64url'));
+}
+
+function readKmsSettings(): KmsSettings | null {
+  const keyID = process.env.FIDUCY_KMS_KEY_ID;
+  if (!keyID) return null;
+  const endpoint = process.env.AWS_KMS_ENDPOINT ?? 'http://127.0.0.1:9999';
+  const region = process.env.AWS_REGION ?? 'us-east-1';
+  return { client: createKmsClient(endpoint, region), keyID };
+}
+
+function readAppRegistrations(): AppRegistration[] {
+  return JSON.parse(process.env.FIDUCY_APPS_JSON ?? '[]');
+}
+
+async function readGatewayToken(kms: KmsSettings | null): Promise<string | undefined> {
+  const ciphertext = process.env.FIDUCY_GATEWAY_TOKEN_CIPHERTEXT;
+  if (!ciphertext) return process.env.FIDUCY_GATEWAY_TOKEN;
+  if (!kms) throw new Error('FIDUCY_GATEWAY_TOKEN_CIPHERTEXT needs FIDUCY_KMS_KEY_ID');
+  return decryptBootSecret(kms.client, kms.keyID, ciphertext, GATEWAY_TOKEN_PURPOSE);
+}
+
+async function readControlPlaneConnection(
+  kms: KmsSettings | null
+): Promise<ControlPlaneConnection | null> {
+  const controlPlaneURL = process.env.FIDUCY_CONTROL_PLANE_URL;
+  if (!controlPlaneURL) return null;
+  const gatewayToken = await readGatewayToken(kms);
+  if (!gatewayToken) throw new Error('Set FIDUCY_GATEWAY_TOKEN to match the control plane');
+  return { controlPlaneURL, gatewayToken };
+}
+
+function selectKeyStore(): KeyStore {
+  const tableName = process.env.FIDUCY_KEYS_TABLE;
+  const databaseURL = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  if (tableName) {
+    const client = createDynamoClient(process.env.AWS_REGION ?? 'us-east-1');
+    return createDynamoKeyStore({ client, tableName });
+  }
+  if (databaseURL) return createPostgresKeyStore({ databaseURL });
+  return createMemoryKeyStore();
+}
+
+function selectKeyWrapper(kms: KmsSettings | null): KeyWrapper {
+  if (!kms) return createLocalKeyWrapper(readMasterKey());
+  return createCachingKeyWrapper({
+    keyWrapper: createKmsKeyWrapper(kms),
+    timeToLiveMilliseconds: SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS,
+    maximumEntries: SHARE_CACHE_MAXIMUM_ENTRIES
+  });
+}
+
+function readMockProviderURL(): string | null {
+  const publicURL = process.env.FIDUCY_GATEWAY_PUBLIC_URL;
+  if (process.env.FIDUCY_MOCK_PROVIDERS !== 'true') return null;
+  if (!publicURL) throw new Error('FIDUCY_MOCK_PROVIDERS needs FIDUCY_GATEWAY_PUBLIC_URL');
+  return publicURL;
+}
+
+function withMockProvider(gateway: RequestHandler, mockProviderURL: string | null): RequestHandler {
+  if (!mockProviderURL) return gateway;
+  return async (request) => {
+    const { pathname } = new URL(request.url);
+    if (!pathname.startsWith(MOCK_PROVIDER_PATH_PREFIX)) return gateway(request);
+    return answerMockProviderRequest(pathname, await request.text());
+  };
+}
+
+export async function createGatewayFromEnvironment(): Promise<GatewayRuntime> {
+  const kms = readKmsSettings();
+  const connection = await readControlPlaneConnection(kms);
+  const enclaveAPIURL = process.env.FIDUCY_ENCLAVE_API_URL;
+  const mockProviderURL = readMockProviderURL();
+  const usageLedger = connection
+    ? createRemoteUsageLedger({ ...connection, flushIntervalMilliseconds: 5000 })
+    : null;
+  const gateway = createGateway({
+    keyWrapper: selectKeyWrapper(kms),
+    keyStore: selectKeyStore(),
+    keyEvents: connection ? createRemoteKeyEvents(connection) : undefined,
+    appDirectory: connection
+      ? createRemoteAppDirectory({ ...connection, refreshIntervalMilliseconds: 30000 })
+      : await createMemoryAppDirectory(readAppRegistrations()),
+    usageLedger: usageLedger ?? createMemoryUsageLedger(),
+    providerRegistry: createProviderRegistry(
+      mockProviderURL ? { openai: mockProviderURL, anthropic: mockProviderURL } : undefined
+    ),
+    attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined
+  });
+  return {
+    handleRequest: withMockProvider(gateway, mockProviderURL),
+    usageLedger,
+    keyWrapperName: kms ? 'KMS' : 'a local master key'
+  };
+}
