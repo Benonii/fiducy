@@ -9,7 +9,7 @@ import { STORAGE_SETUPS } from './setups';
 
 import type { AppRegistration } from '../../../../apps/gateway/src/types';
 import type { Fiducy } from '../../src/server';
-import type { OpenedStorage, TestDatabase } from './types';
+import type { OpenedStorage } from './types';
 
 const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore_storage',
@@ -50,7 +50,6 @@ async function connectKey(fiducy: Fiducy, app: AppRegistration, userID: string) 
 
 for (const setup of STORAGE_SETUPS) {
   describe.skipIf(!setup.isAvailable)(`Fiducy with ${setup.label}`, () => {
-    let database: TestDatabase;
     let opened: OpenedStorage;
     const createApp = (app: AppRegistration) =>
       createFiducy({
@@ -61,13 +60,11 @@ for (const setup of STORAGE_SETUPS) {
       });
 
     beforeAll(async () => {
-      database = setup.openDatabase();
-      opened = await setup.openStorage(database);
-    });
+      opened = await setup.open();
+    }, 60000);
 
     afterAll(async () => {
-      opened.cleanUp();
-      await database.close();
+      await opened.close();
     });
 
     it('connects a key, chats with it, and revokes the old key when the user replaces it', async () => {

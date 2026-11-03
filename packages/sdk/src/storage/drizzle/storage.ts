@@ -2,35 +2,16 @@ import { and, desc, eq, getTableName } from 'drizzle-orm';
 
 import { explainMissingTable } from '../errors.ts';
 import { generateSchema } from '../generateSchema.ts';
-import { fromUserKeyRow } from '../rows.ts';
+import { fromUserKeyModel, toUserKeyModel } from '../rows.ts';
 import { resolveTableName } from '../sqlSchema.ts';
 import { assertUserKeyTable, readTableDialect, resolveDrizzleTable } from './table.ts';
 
 import type { FiducyStorage, StoredUserKey } from '../../server/types.ts';
 import type { SQLDialect } from '../types.ts';
 import type { DrizzleConnection, DrizzleDatabase, DrizzleStorageOptions } from './types.ts';
-import type { DrizzleUserKeyRow } from './types.ts';
-
-function toDrizzleRow(key: StoredUserKey): DrizzleUserKeyRow {
-  const { userID, keyID, provider, handle, createdAt } = key;
-  const record = key.record ? JSON.stringify(key.record) : null;
-  return { userID, keyID, provider, handle, record, createdAt };
-}
-
-function fromDrizzleRow(row: DrizzleUserKeyRow): StoredUserKey {
-  const { userID, keyID, provider, handle, record, createdAt } = row;
-  return fromUserKeyRow({
-    user_id: userID,
-    key_id: keyID,
-    provider,
-    handle,
-    record,
-    created_at: createdAt
-  });
-}
 
 function upsertKey({ db, table }: DrizzleConnection, dialect: SQLDialect, key: StoredUserKey) {
-  const row = toDrizzleRow(key);
+  const row = toUserKeyModel(key);
   const { provider, handle, record, createdAt } = row;
   const insert = db.insert(table).values(row);
   const set = { provider, handle, record, createdAt };
@@ -67,13 +48,13 @@ function createUserKeyMethods(
     findKey: async (userID, provider) => {
       const query = selectUserKeys(connection, userID, provider).limit(1);
       const [row] = await Promise.resolve(query).catch(rethrowMissingTable);
-      return row ? fromDrizzleRow(row) : null;
+      return row ? fromUserKeyModel(row) : null;
     },
     listKeys: async (userID) => {
       const rows = await Promise.resolve(selectUserKeys(connection, userID)).catch(
         rethrowMissingTable
       );
-      return rows.map(fromDrizzleRow);
+      return rows.map(fromUserKeyModel);
     },
     deleteKey: async (userID, keyID) => {
       const query = db.select().from(table).where(matchKey(userID, keyID)).limit(1);

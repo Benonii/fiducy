@@ -10,7 +10,7 @@ import { STORAGE_SETUPS } from './setups';
 import type { Browser } from 'playwright';
 import type { AppRegistration } from '../../../../apps/gateway/src/types';
 import type { FiducyStorage } from '../../src/server';
-import type { OpenedStorage, TestDatabase } from './types';
+import type { OpenedStorage } from './types';
 
 const BROWSER_APP: AppRegistration = {
   appID: 'app_notes_storage',
@@ -35,14 +35,12 @@ afterAll(async () => {
 
 for (const setup of STORAGE_SETUPS) {
   describe.skipIf(!setup.isAvailable)(`the key widget with ${setup.label}`, () => {
-    let database: TestDatabase;
     let storage: FiducyStorage;
     let opened: OpenedStorage;
     let appServer: Awaited<ReturnType<typeof startAppServer>>;
 
     beforeAll(async () => {
-      database = setup.openDatabase();
-      opened = await setup.openStorage(database);
+      opened = await setup.open();
       storage = opened.storage;
       const fiducy = createFiducy({
         gatewayURL: harness.gatewayURL,
@@ -52,12 +50,11 @@ for (const setup of STORAGE_SETUPS) {
       });
       appServer = await startAppServer(fiducy, harness.gatewayURL, BROWSER_APP.appID);
       BROWSER_APP.allowedOrigins.push(`http://localhost:${appServer.port}`);
-    });
+    }, 60000);
 
     afterAll(async () => {
       appServer.stop(true);
-      opened.cleanUp();
-      await database.close();
+      await opened.close();
     });
 
     it('saves the handle in the database, chats with it, and removes it on disconnect', async () => {

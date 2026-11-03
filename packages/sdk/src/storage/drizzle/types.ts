@@ -1,4 +1,5 @@
 import type { Column, SQL } from 'drizzle-orm';
+import type { UserKeyModel } from '../types.ts';
 
 export type DrizzleProvider = 'pg' | 'mysql' | 'sqlite';
 
@@ -9,18 +10,9 @@ export interface DrizzleStorageOptions {
   tableName?: string;
 }
 
-export interface DrizzleUserKeyRow {
-  userID: string;
-  keyID: string;
-  provider: string;
-  handle: string;
-  record: string | null;
-  createdAt: string;
-}
+export type DrizzleUserKeyTable = Record<keyof UserKeyModel, Column>;
 
-export type DrizzleUserKeyTable = Record<keyof DrizzleUserKeyRow, Column>;
-
-export interface DrizzleSelectQuery extends PromiseLike<DrizzleUserKeyRow[]> {
+export interface DrizzleSelectQuery extends PromiseLike<UserKeyModel[]> {
   where: (condition: SQL | undefined) => DrizzleSelectQuery;
   orderBy: (...columns: SQL[]) => DrizzleSelectQuery;
   limit: (count: number) => DrizzleSelectQuery;
@@ -28,18 +20,18 @@ export interface DrizzleSelectQuery extends PromiseLike<DrizzleUserKeyRow[]> {
 
 export interface DrizzleUpsertConfig {
   target: Column[];
-  set: Partial<DrizzleUserKeyRow>;
+  set: Partial<UserKeyModel>;
 }
 
 export interface DrizzleInsertQuery {
   onConflictDoUpdate: (config: DrizzleUpsertConfig) => PromiseLike<unknown>;
-  onDuplicateKeyUpdate: (config: { set: Partial<DrizzleUserKeyRow> }) => PromiseLike<unknown>;
+  onDuplicateKeyUpdate: (config: { set: Partial<UserKeyModel> }) => PromiseLike<unknown>;
 }
 
 export interface DrizzleDatabase {
   select: () => { from: (table: DrizzleUserKeyTable) => DrizzleSelectQuery };
   insert: (table: DrizzleUserKeyTable) => {
-    values: (row: DrizzleUserKeyRow) => DrizzleInsertQuery;
+    values: (row: UserKeyModel) => DrizzleInsertQuery;
   };
   delete: (table: DrizzleUserKeyTable) => {
     where: (condition: SQL | undefined) => PromiseLike<unknown>;

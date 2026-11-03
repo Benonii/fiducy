@@ -1,7 +1,7 @@
 import { isProvider, isSealedRecord } from '../server/validators.ts';
 
 import type { StoredUserKey } from '../server/types.ts';
-import type { UserKeyRow } from './types.ts';
+import type { UserKeyModel, UserKeyRow } from './types.ts';
 
 function parseRecord(record: string | null): StoredUserKey['record'] {
   if (record === null) return undefined;
@@ -33,4 +33,22 @@ export function fromUserKeyRow(row: UserKeyRow): StoredUserKey {
   const record = parseRecord(row.record);
   if (record) key.record = record;
   return key;
+}
+
+export function toUserKeyModel(key: StoredUserKey): UserKeyModel {
+  const { userID, keyID, provider, handle, createdAt } = key;
+  const record = key.record ? JSON.stringify(key.record) : null;
+  return { userID, keyID, provider, handle, record, createdAt };
+}
+
+export function fromUserKeyModel(model: UserKeyModel): StoredUserKey {
+  const { userID, keyID, provider, handle, record, createdAt } = model;
+  return fromUserKeyRow({
+    user_id: userID,
+    key_id: keyID,
+    provider,
+    handle,
+    record,
+    created_at: createdAt
+  });
 }
