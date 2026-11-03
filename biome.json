@@ -19,6 +19,7 @@
       "examples/*/src/routeTree.gen.ts",
       "**/farm.d.ts",
       "**/*.generated.ts",
+      "packages/sdk/tests/storage/.fiducy_test_*",
       "apps/site/src/components/ui",
       "apps/site/src/lib/utils.ts",
       "apps/site/convex/_generated"
