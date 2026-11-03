@@ -35,7 +35,7 @@ export default function AppPage({ params = {} }: PageProps) {
       {app.isPending ? <PageStatus isLoading>Loading app</PageStatus> : null}
       <ErrorAlert error={app.error} />
       {app.data ? (
-        <main className="grid gap-6">
+        <main className="grid grid-cols-[minmax(0,1fr)] gap-6">
           <AppHeader app={app.data} />
           <Tabs value={tab} onValueChange={(value) => setTab(value as AppTab)}>
             <TabsList className="w-full justify-start overflow-x-auto border-b" variant="underline">

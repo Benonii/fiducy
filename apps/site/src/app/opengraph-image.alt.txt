@@ -1,0 +1,1 @@
+Fiducy: users bring keys, you never hold them. Bring-your-own-key for AI apps with keys sealed in an enclave.

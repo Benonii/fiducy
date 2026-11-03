@@ -10,4 +10,4 @@ bun add @fiducy/core
 import { createHandle, openSecret, parseHandle, sealSecret } from '@fiducy/core';
 ```
 
-Most apps do not use this package directly; `@fiducy/sdk` depends on it. See [How it works](https://fiducy-nine.vercel.app/docs/how-it-works).
+Most apps do not use this package directly; `@fiducy/sdk` depends on it. See [How it works](https://fiducy.dev/docs/how-it-works).
