@@ -26,6 +26,15 @@ function readDelegate(prisma: object, modelName: string): PrismaUserKeyDelegate 
   );
 }
 
+function createLazyDelegate(prisma: object, modelName: string): PrismaUserKeyDelegate {
+  return {
+    upsert: (query) => readDelegate(prisma, modelName).upsert(query),
+    findFirst: (query) => readDelegate(prisma, modelName).findFirst(query),
+    findMany: (query) => readDelegate(prisma, modelName).findMany(query),
+    deleteMany: (query) => readDelegate(prisma, modelName).deleteMany(query)
+  };
+}
+
 function createUserKeyMethods(delegate: PrismaUserKeyDelegate, tableName: string): FiducyStorage {
   const rethrowMissingTable = explainMissingTable(tableName, PRISMA_TABLE_HINT);
   const newestFirst = { createdAt: 'desc' } as const;
@@ -58,7 +67,7 @@ export function prismaStorage(prisma: object, options: PrismaStorageOptions): Fi
   const dialect = PROVIDER_DIALECTS[options.provider];
   if (!dialect) throw new Error("prismaStorage needs provider: 'postgresql', 'mysql' or 'sqlite'");
   return {
-    ...createUserKeyMethods(readDelegate(prisma, modelName), tableName),
+    ...createUserKeyMethods(createLazyDelegate(prisma, modelName), tableName),
     schema: {
       adapter: 'prisma',
       dialect,

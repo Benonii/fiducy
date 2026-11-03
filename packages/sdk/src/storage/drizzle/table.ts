@@ -50,7 +50,7 @@ export function resolveDrizzleTable(db: DrizzleDatabase, options: DrizzleStorage
   );
 }
 
-export function readTableDialect(table: Table, provider?: DrizzleProvider): SQLDialect {
+export function readTableDialect(table: Table | undefined, provider?: DrizzleProvider): SQLDialect {
   if (provider) return PROVIDER_DIALECTS[provider];
   if (is(table, PgTable)) return 'postgres';
   if (is(table, MySqlTable)) return 'mysql';
