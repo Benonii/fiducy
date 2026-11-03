@@ -1,8 +1,6 @@
 import { sealSecret } from '@fiducy/core';
 
-import { authenticateApp, identifyRevokeCaller } from '../authentication';
-import { RELEASE_TIME_TO_LIVE_SECONDS } from '../constants';
-import { resolveApiKey } from '../resolveKey';
+import { identifyRevokeCaller } from '../authentication';
 import { respondWith, respondWithFailure } from '../responses';
 import { readJSONBody, validateStoreKeyBody } from '../validators';
 
@@ -59,16 +57,4 @@ export async function revokeKey(
     await dependencies.keyEvents?.report({ type: 'revoked', appID: app.appID, keyID });
   }
   return respondWith(200, { keyID }, 'Key revoked');
-}
-
-export async function releaseKey(request: Request, dependencies: GatewayDependencies) {
-  const app = await authenticateApp(dependencies.appDirectory, request.headers);
-  if (!app.ok) return respondWithFailure(app.error);
-  if (app.value.accessMode !== 'gateway_and_release') {
-    return respondWith(403, null, 'Key release is turned off for this app');
-  }
-  const resolved = await resolveApiKey(app.value, request.headers, dependencies);
-  if (!resolved.ok) return respondWithFailure(resolved.error);
-  const data = { apiKey: resolved.value.apiKey, expiresInSeconds: RELEASE_TIME_TO_LIVE_SECONDS };
-  return respondWith(200, data, 'Key released. Keep it in memory only');
 }

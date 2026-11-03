@@ -1,8 +1,8 @@
-import { ConnectKeyToolUI } from './ConnectKeyToolUI';
-import { CONNECT_KEY_TOOL, PROVIDERS } from './constants';
+import { ConnectKeyToolUI } from './ConnectKeyToolUI.tsx';
+import { CONNECT_KEY_TOOL, PROVIDERS } from './constants.ts';
 
 import type { Toolkit } from '@assistant-ui/react';
-import type { FiducyToolkitOptions } from './types';
+import type { FiducyToolkitOptions } from './types.ts';
 
 /**
  * Tools to spread into an assistant-ui toolkit. `connect_api_key` is a human tool: the

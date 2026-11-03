@@ -35,9 +35,6 @@ Neither side can open a key alone:
 | AWS account owner | KMS key | No: the key policy only allows the attested enclave |
 | The enclave | Code only, no stored state | Only while serving a request that carries both |
 
-## Modes
+## No way back out
 
-Every app picks an access mode in the dashboard:
-
-- **Gateway only** (default). Keys can only be used through the gateway proxy.
-- **Gateway and release.** Your server may call `POST /release` to get the plaintext key, valid for 5 minutes of in-memory use, for providers or features the proxy does not cover. This gives up most of the protection, so leave it off unless you need it.
+The gateway proxy is the only way to use a stored key. There is no endpoint that returns a plaintext key to your server. If the proxy does not cover a provider you need, ask us to add it.

@@ -9,11 +9,21 @@ Key custody for bring-your-own-key apps. Users paste their AI provider key into 
 | `packages/core` | Crypto core: AES-256-GCM sealing, split data keys, handles, key wrapping |
 | `packages/providers` | Provider adapters: header swap, path allowlist, error redaction, streaming usage |
 | `packages/widget` | Browser client that mounts the key widget iframe |
-| `packages/sdk` | App SDK: AI SDK provider settings, revoke and release helpers, React `KeyWidget` |
+| `packages/sdk` | App SDK: AI SDK provider settings, revoke helper, React `KeyWidget` |
+| `packages/farm` | Farm.js integration: mounts the SDK's route handler |
+| `packages/assistant-ui` | assistant-ui toolkit: the key box opens inside the chat thread |
 | `packages/testing` | Shared fixtures and a mock AI provider |
 | `apps/gateway` | The gateway server |
 | `apps/control-plane` | Farm.js developer dashboard and control plane: accounts, apps, hashed app secrets, limits, usage |
 | `apps/demo` | Farm.js and assistant-ui chat where users bring their own OpenAI key |
+
+## Packages
+
+```sh
+bun add @fiducy/sdk @fiducy/farm
+```
+
+All `@fiducy/*` packages are released together with the same version, built in GitHub Actions and published to npm with provenance. Most apps install `@fiducy/sdk`, `@fiducy/farm` and, for chat UIs, `@fiducy/assistant-ui`. `@fiducy/core`, `@fiducy/providers` and `@fiducy/widget` are the building blocks underneath.
 
 ## Development
 
@@ -49,18 +59,26 @@ const fiducy = createGatewayClient({ gatewayURL, appSecret: process.env.FIDUCY_A
 const openai = createOpenAI(fiducy.providerSettings('openai', user.keyHandle));
 ```
 
-In the browser, `<KeyWidget gatewayURL appID onHandle />` from `@fiducy/sdk/react` shows the key form and gives you the handle. Store the handle with the user on your server. `fiducy.revokeKey(handle)` deletes a key and `fiducy.releaseKey(handle)` returns it for five minutes if the app allows release.
+In the browser, `<KeyWidget gatewayURL appID onHandle />` from `@fiducy/sdk/react` shows the key form and gives you the handle. Store the handle with the user on your server. `fiducy.revokeKey(handle)` deletes a key.
 
 ## Running the demo chat
 
 ```sh
 cd apps/gateway
 FIDUCY_MASTER_KEY=<32 random bytes, base64url> \
-FIDUCY_APPS_JSON='[{"appID":"app_demo","name":"Demo","appSecret":"fsk_demo_local","accessMode":"gateway","monthlyRequestLimitPerKey":100,"allowedOrigins":["http://localhost:3000"]}]' \
+FIDUCY_APPS_JSON='[{"appID":"app_demo","name":"Demo","appSecret":"fsk_demo_local","monthlyRequestLimitPerKey":100,"allowedOrigins":["http://localhost:3000"]}]' \
 bun run start
 
 cd apps/demo
-FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
+FIDUCY_GATEWAY_URL=http://localhost:8787 FIDUCY_APP_ID=app_demo FIDUCY_APP_SECRET=fsk_demo_local bun run dev
 ```
 
 The demo is an assistant-ui chat. Pick a model; if you have no key for that provider, the reply opens the key box inside the thread (see `packages/assistant-ui`). Handles are stored server side per demo user.
+
+## Releasing
+
+Add a changeset to your pull request with `bunx changeset`. Merging to main opens a "Version packages" pull request; merging that one publishes to npm and tags the release.
+
+## License
+
+Apache-2.0. See [LICENSE](./LICENSE).

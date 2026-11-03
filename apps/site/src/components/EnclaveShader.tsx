@@ -1,7 +1,7 @@
 'use client';
 
+import { useMotionAllowed } from '@/components/useMotionAllowed';
 import { MeshGradient } from '@paper-design/shaders-react';
-import { useEffect, useState } from 'react';
 
 import type { ShaderBoxProps } from '@/types';
 
@@ -10,14 +10,6 @@ const SHADER_COLORS = ['#ffffff', '#d4d4d4', '#f2f2f2', '#bdbdbd'];
 
 function toPercent(value: number, total: number) {
   return `${(value / total) * 100}%`;
-}
-
-function useMotionAllowed() {
-  const [isAllowed, setIsAllowed] = useState(false);
-  useEffect(() => {
-    setIsAllowed(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, []);
-  return isAllowed;
 }
 
 export function EnclaveShader({ x, y, width, height, viewWidth, viewHeight }: ShaderBoxProps) {

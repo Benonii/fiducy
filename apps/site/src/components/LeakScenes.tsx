@@ -1,5 +1,7 @@
 import { IsoScene } from '@/components/IsoScene';
 import { TypedTag } from '@/components/TypedTag';
+import { IsoKey, KEY_SHAFT_DEPTH, KEY_SHAFT_OFFSET } from '@/components/isoKey';
+import { KEY_SPLIT_AT, KEY_TIP_END } from '@/components/isoKey';
 import { Box, Line, Plate, offset } from '@/components/isometric';
 import { ISO_DETAIL, ISO_GHOST, ISO_LINE_STRONG } from '@/lib/isoStyles';
 import { ISO_SCREEN, ISO_SCROLL, ISO_SLOT } from '@/lib/isoStyles';
@@ -102,21 +104,29 @@ function LogsScene() {
 function StorageScene() {
   return (
     <>
-      <Plate at={[0, 0, 0]} size={[4.4, 4.4]} className={ISO_GHOST} />
-      <Box at={[0, 0, 0]} size={[2.2, 4.4, 3]}>
-        <Plate at={[0.7, 1.6, 3]} size={[0.8, 1.2]} className={ISO_SLOT} />
-      </Box>
-      <g className={ISO_STEAL} style={moves({ '--to': offset(2.6, 0, 1.6) })}>
-        <Box at={[2.2, 0, 0]} size={[2.2, 4.4, 3]} tone="solid" />
+      <Plate at={[-1, -1.2, 0]} size={[7.4, 4.2]} className={ISO_GHOST} />
+      <IsoKey at={[0, 0, 0]} part="bow" />
+      <Plate
+        at={[KEY_SPLIT_AT, KEY_SHAFT_OFFSET, 0]}
+        size={[KEY_TIP_END - KEY_SPLIT_AT, KEY_SHAFT_DEPTH]}
+        className={ISO_GHOST}
+      />
+      <Line
+        from={[KEY_SPLIT_AT, -0.3, 0.35]}
+        to={[KEY_SPLIT_AT, 2.3, 0.35]}
+        className={ISO_GHOST}
+      />
+      <g className={ISO_STEAL} style={moves({ '--to': offset(1.4, 2.4, 1.2) })}>
+        <IsoKey at={[0, 0, 0]} part="tip" tone="solid" />
         <TypedTag
-          at={[6.2, 2.2, 1]}
+          at={[5.6, 1.4, 1.6]}
           text="stolen: half a key"
           startsAt={LEAK_FIRST_AT}
           className={ISO_TAG_FIRST}
         />
       </g>
       <TypedTag
-        at={[6.2, 2.2, 2.6]}
+        at={[5.6, 1.4, 3.4]}
         text="opens nothing"
         startsAt={LEAK_LAST_AT}
         className={ISO_TAG_LAST}
@@ -128,24 +138,24 @@ function StorageScene() {
 function EnclaveScene() {
   return (
     <>
-      <Plate at={[-1, -1, 0]} size={[7, 7]} className={ISO_GHOST} />
-      <Box at={[0, 0, 0]} size={[5, 5, 3.2]}>
-        <Plate at={[1.8, 2.1, 3.2]} size={[1.4, 0.8]} className={ISO_SLOT} />
-        <Line from={[0.5, 5, 2.6]} to={[2, 5, 2.6]} className={ISO_DETAIL} />
-        <Line from={[5, 0.5, 2.6]} to={[5, 1.4, 2.6]} className={ISO_DETAIL} />
+      <Plate at={[-1, -1, 0]} size={[6.5, 6.5]} className={ISO_GHOST} />
+      <Box at={[0, 0, 0]} size={[4.5, 4.5, 3.4]}>
+        <Plate at={[2.4, 1.9, 3.4]} size={[2, 0.8]} className={ISO_SLOT} />
+        <Line from={[0.5, 4.5, 2.8]} to={[2.2, 4.5, 2.8]} className={ISO_DETAIL} />
+        <Line from={[0.5, 4.5, 2.4]} to={[1.4, 4.5, 2.4]} className={ISO_DETAIL} />
+        <Line from={[4.5, 0.5, 2.8]} to={[4.5, 1.6, 2.8]} className={ISO_DETAIL} />
       </Box>
-      <g className={ISO_STEAL} style={moves({ '--to': offset(3.6, 0, -1.2) })}>
-        <Box at={[-3.4, 2.25, 4.6]} size={[2.4, 0.5, 0.35]} tone="solid" />
-        <Box at={[-4.4, 2, 4.55]} size={[1, 1, 0.45]} />
+      <g className={ISO_STEAL} style={moves({ '--to': offset(0, 0, -1.9) })}>
+        <IsoKey at={[-0.8, 1.5, 5.6]} tone="solid" />
       </g>
       <TypedTag
-        at={[4.4, 0.2, 5.4]}
+        at={[4.6, 0.2, 6]}
         text="admin: decrypt key"
         startsAt={LEAK_FIRST_AT}
         className={ISO_TAG_FIRST}
       />
       <TypedTag
-        at={[4.4, 0.2, 5.4]}
+        at={[4.6, 0.2, 6]}
         text="KMS: unwrap denied"
         startsAt={LEAK_LAST_AT}
         className={ISO_TAG_LAST}

@@ -11,7 +11,7 @@ import {
 } from '@assistant-ui/react';
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { PROVIDER_LABELS, fiducyToolkit } from '@fiducy/assistant-ui';
-import { useFiducyKeys } from '@fiducy/sdk/react';
+import { useFiducyKeys } from '@fiducy/sdk/react-query';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useMemo, useRef, useState } from 'react';
 
@@ -31,9 +31,8 @@ import {
   FIDUCY_BASE_PATH,
   SUGGESTIONS
 } from '@/lib/constants';
+import { readPublicEnvironment } from '@/lib/publicEnvironment';
 import { cn } from '@/lib/utils';
-
-import type { PublicDemoConfig } from '@/lib/types';
 
 const MODEL_ITEMS = DEMO_MODELS.map((model) => ({ label: model.label, value: model.id }));
 
@@ -47,7 +46,7 @@ function ThreadListItem() {
   );
 }
 
-export function Chat({ config }: { config: PublicDemoConfig }) {
+export function Chat() {
   const [modelID, setModelID] = useState(DEFAULT_MODEL_ID);
   const modelRef = useRef(modelID);
   modelRef.current = modelID;
@@ -64,20 +63,19 @@ export function Chat({ config }: { config: PublicDemoConfig }) {
     // After the user saves a key in the thread, send the conversation again so the model answers.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls
   });
-  // Saving a key refreshes useFiducyKeys through TanStack Query, so no callback is needed here.
-  const auiConfig = useMemo(
-    () =>
-      AuiConfig({
-        tools: Tools({
-          toolkit: fiducyToolkit({
-            gatewayURL: config.gatewayURL,
-            appID: config.appID,
-            basePath: FIDUCY_BASE_PATH
-          })
+  // ConnectKeyWidget announces saved keys and useFiducyKeys refreshes itself, so no callback is needed here.
+  const auiConfig = useMemo(() => {
+    const environment = readPublicEnvironment();
+    return AuiConfig({
+      tools: Tools({
+        toolkit: fiducyToolkit({
+          gatewayURL: environment.FIDUCY_GATEWAY_URL,
+          appID: environment.FIDUCY_APP_ID,
+          basePath: FIDUCY_BASE_PATH
         })
-      }),
-    [config]
-  );
+      })
+    });
+  }, []);
 
   const selected = DEMO_MODELS.find((model) => model.id === modelID) ?? DEMO_MODELS[0];
   const hasKey = keysState.keys.some((key) => key.provider === selected?.provider);

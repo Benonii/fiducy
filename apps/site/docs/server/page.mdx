@@ -14,7 +14,7 @@ import { createFiducy, keyValueStorage, memoryStorage } from '@fiducy/sdk/server
 
 ```ts
 const fiducy = createFiducy({
-  gatewayURL: 'https://gw.fiducy.dev',
+  gatewayURL: 'https://gateway.yourapp.com',
   appSecret: process.env.FIDUCY_APP_SECRET!,
   storage: keyValueStorage(driver),
   getUserID: (request) => readSession(request)?.userID ?? null,
@@ -24,7 +24,7 @@ const fiducy = createFiducy({
 
 | Option | Type | Notes |
 | --- | --- | --- |
-| `gatewayURL` | `string` | Your gateway, for example `https://gw.fiducy.dev` |
+| `gatewayURL` | `string` | Your gateway, for example `https://gateway.yourapp.com` |
 | `appSecret` | `string` | `fsk_...` from the dashboard. Server only |
 | `storage` | `FiducyStorage` | Where handles (and records) live. See [Storage](/docs/storage) |
 | `getUserID` | `(request) => string \| null` | Your signed-in user. May be async |
@@ -59,7 +59,7 @@ Returns settings for the AI SDK provider factories, or `null` when the user has 
 
 ```ts
 const settings = await fiducy.providerSettings('anthropic', { userID });
-// { baseURL: 'https://gw.fiducy.dev/anthropic/v1', apiKey: 'fsk_...', headers: { 'x-key-handle': 'kh_...' } }
+// { baseURL: 'https://gateway.yourapp.com/anthropic/v1', apiKey: 'fsk_...', headers: { 'x-key-handle': 'kh_...' } }
 const anthropic = createAnthropic(settings!);
 ```
 
@@ -77,4 +77,4 @@ await fiducy.revokeKey(userID, keyID);                 // boolean
 
 ## Low-level client
 
-For scripts or custom flows, `@fiducy/sdk` exports `createGatewayClient({ gatewayURL, appSecret })` with `providerSettings(provider, handle)`, `revokeKey(handle)` and `releaseKey(handle)`.
+For scripts or custom flows, `@fiducy/sdk` exports `createGatewayClient({ gatewayURL, appSecret })` with `providerSettings(provider, handle)` and `revokeKey(handle)`.
