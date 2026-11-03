@@ -8,7 +8,8 @@ import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
   title: 'Fiducy',
-  description: 'Key custody for apps that let users bring their own AI keys'
+  description: 'Key custody for apps that let users bring their own AI keys',
+  icons: { icon: '/favicon.svg', apple: '/apple-touch-icon.png' }
 };
 
 export default function RootLayout({ children }: LayoutProps) {

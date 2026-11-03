@@ -15,6 +15,8 @@ You add four things:
 3. the key widget, where users paste their key
 4. a model call that uses the user's key through the gateway
 
+**Before you start:** your app needs sign-in. Fiducy stores each key for a signed-in user, so set up auth first if you don't have it ([Better Auth](https://www.better-auth.com), [Auth.js](https://authjs.dev), [Clerk](https://clerk.com) or any auth with a server session).
+
 Install the SDK:
 
 ```bash
@@ -60,14 +62,15 @@ Create the Fiducy instance once, in a file only server code imports:
 ```ts title="lib/fiducy.ts"
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { getSessionUserID } from './auth'; // your auth
+import { auth } from './auth'; // your Better Auth instance
 import { kv } from './kv'; // your storage
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
 export async function getUserID(request: Request) {
-  return (await getSessionUserID(request)) ?? null;
+  const session = await auth.api.getSession({ headers: request.headers });
+  return session?.user.id ?? null;
 }
 
 export const fiducy = createFiducy({
@@ -80,17 +83,37 @@ export const fiducy = createFiducy({
 
 The check at the top throws the first time the module loads. Build tools that load routes at build time (`next build`, for example) need the env vars at build time too.
 
-**`getUserID`** tells Fiducy who is asking. Read the user from your auth's server session and return `null` when nobody is signed in. Never take the ID from the request body, the query or a header the browser sets. For example:
+**`getUserID`** tells Fiducy who is asking. Read the user from your auth's server session and return `null` when nobody is signed in. Never take the ID from the request body, the query or a header the browser sets. The example uses Better Auth; with other auth, replace the body of `getUserID`:
 
 | Auth | `getUserID` body |
 | --- | --- |
-| Better Auth | `(await auth.api.getSession({ headers: request.headers }))?.user.id` |
 | Auth.js | `(await auth())?.user?.id` |
 | Clerk (Next.js) | `(await auth()).userId` |
 | Supabase | `(await supabase.auth.getUser()).data.user?.id` |
 | Farm Auth | `(await auth.user({ request }))?.id` |
 
 **`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Postgres, Cloudflare KV, the file system and more), or you can write four methods against your own database table. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
+
+### No auth or storage yet?
+
+A fresh template (for example `npx assistant-ui create`) has neither.
+
+**Storage:** unstorage's file driver keeps handles on disk:
+
+```bash
+npm install unstorage
+```
+
+```ts title="lib/kv.ts"
+import { createStorage } from 'unstorage';
+import fsDriver from 'unstorage/drivers/fs';
+
+export const kv = createStorage({ driver: fsDriver({ base: '.data/fiducy' }) });
+```
+
+Add `.data/` to `.gitignore`. This works locally and on a long-running server. Serverless hosts such as Vercel wipe the disk, so there, switch the driver to Upstash, Vercel KV or Redis; nothing else changes.
+
+**Auth:** set it up first (see the top of this page), then come back to `getUserID`.
 
 ## 3. Mount the key route
 
