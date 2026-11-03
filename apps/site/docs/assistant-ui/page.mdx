@@ -112,6 +112,8 @@ export const Assistant = () => {
 
 Sign in, send a message. The thread answers "Connect your OpenAI key to keep going" with the key box. Save a key, and the original message is answered. With the local prototype and `--mock`, any string works as a key. The fake OpenAI answers both the Chat Completions API (`.chat(...)`) and the Responses API (`openai(...)` or `.responses(...)`, the template's default).
 
+If the thread shows "Waiting on tool: connect_api_key" with Allow and Deny buttons instead of the key box, the tool isn't registered: check that `<AssistantRuntimeProvider>` has `config={config}`. Start a new chat after fixing it.
+
 ## Styling
 
 The tool renders plain elements with `fiducy-tool`, `fiducy-tool-title`, `fiducy-tool-widget`, `fiducy-tool-error` and `fiducy-tool-done` classes. Style them to match your thread.
