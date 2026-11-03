@@ -9,7 +9,7 @@ import {
 } from '../src/memoryStores';
 import { createGateway } from '../src/router';
 
-import type { AppRegistration } from '../src/types';
+import type { AppRegistration, RateLimiter } from '../src/types';
 import type { StoreKeyResponseBody } from './types';
 
 export const CHAT_APP: AppRegistration = {
@@ -28,7 +28,10 @@ export const DESK_APP: AppRegistration = {
   allowedOrigins: ['https://promptdesk.example']
 };
 
-export async function startGatewayHarness(extraApps: AppRegistration[] = []) {
+export async function startGatewayHarness(
+  extraApps: AppRegistration[] = [],
+  rateLimiter?: RateLimiter
+) {
   const mockProvider = startMockProvider();
   const usageLedger = createMemoryUsageLedger();
   const keyStore = createMemoryKeyStore();
@@ -40,19 +43,24 @@ export async function startGatewayHarness(extraApps: AppRegistration[] = []) {
     providerRegistry: createProviderRegistry({
       openai: mockProvider.baseURL,
       anthropic: mockProvider.baseURL
-    })
+    }),
+    rateLimiter
   });
   const server = Bun.serve({ port: 0, fetch: gateway });
   const gatewayURL = `http://localhost:${server.port}`;
 
-  const storeKey = async (appID: string, apiKey: string) => {
+  const storeKey = async (
+    appID: string,
+    apiKey: string,
+    extraHeaders: Record<string, string> = {}
+  ) => {
     const response = await fetch(`${gatewayURL}/keys`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', ...extraHeaders },
       body: JSON.stringify({ appID, apiKey })
     });
     const body = (await response.json()) as StoreKeyResponseBody;
-    return { status: response.status, body };
+    return { status: response.status, body, retryAfter: response.headers.get('retry-after') };
   };
 
   const stop = () => {
