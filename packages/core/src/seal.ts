@@ -1,12 +1,12 @@
-import { combineShares, decryptSecret, encryptSecret } from './crypto';
-import { generateDataKey, splitDataKey } from './crypto';
-import { decodeBase64URL, decodeText, encodeBase64URL } from './encoding';
-import { encodeText, wipeBytes } from './encoding';
-import { createHandle, generateKeyID, parseHandle } from './handle';
-import { fail, succeed } from './result';
+import { combineShares, decryptSecret, encryptSecret } from './crypto.ts';
+import { generateDataKey, splitDataKey } from './crypto.ts';
+import { decodeBase64URL, decodeText, encodeBase64URL } from './encoding.ts';
+import { encodeText, wipeBytes } from './encoding.ts';
+import { createHandle, generateKeyID, parseHandle } from './handle.ts';
+import { fail, succeed } from './result.ts';
 
-import type { Bytes, OpenSecretError, OpenSecretInput, Result } from './types';
-import type { SealSecretInput, SealSecretResult } from './types';
+import type { Bytes, OpenSecretError, OpenSecretInput, Result } from './types.ts';
+import type { SealSecretInput, SealSecretResult } from './types.ts';
 
 function buildAssociatedData(appID: string, keyID: string): Bytes {
   return encodeText(`${appID}:${keyID}`);

@@ -1,4 +1,4 @@
-import type { ProviderName, ProviderRegistry } from './types';
+import type { ProviderName, ProviderRegistry } from './types.ts';
 
 function formatBearer(apiKey: string): string {
   return `Bearer ${apiKey}`;

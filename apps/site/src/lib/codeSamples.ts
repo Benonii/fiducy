@@ -49,30 +49,20 @@ export default defineConfig({
     id: 'widget',
     label: 'Widget',
     file: 'src/app/settings/page.tsx',
-    code: `import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConnectKeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+    code: `import { ConnectKeyWidget } from '@fiducy/sdk/react';
+import { useState } from 'react';
 
-const queryClient = new QueryClient();
-
-function ConnectOpenAI() {
-  const { keys, refresh } = useFiducyKeys();
-  if (keys.length > 0) return <p>Your OpenAI key is connected.</p>;
+export default function Settings() {
+  const [connected, setConnected] = useState(false);
+  if (connected) return <p>Your OpenAI key is connected.</p>;
 
   return (
     <ConnectKeyWidget
-      gatewayURL="https://gw.fiducy.dev"
+      gatewayURL="https://gateway.yourapp.com"
       appID="app_..."
       provider="openai"
-      onConnected={refresh}
+      onConnected={() => setConnected(true)}
     />
-  );
-}
-
-export default function Settings() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ConnectOpenAI />
-    </QueryClientProvider>
   );
 }`
   },

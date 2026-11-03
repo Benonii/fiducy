@@ -6,6 +6,7 @@ import { createControlStorageClient } from './src/lib/storage';
 const dataDirectory = process.env.FIDUCY_CONTROL_DATA_DIR ?? '.farm';
 
 export default defineConfig({
+  deploy: { target: 'vercel' },
   auth: {
     enabled: true,
     appName: 'Fiducy',

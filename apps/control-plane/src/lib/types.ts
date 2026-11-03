@@ -1,9 +1,10 @@
-export type KeyAccessMode = 'gateway' | 'gateway_and_release';
+import type { Group, OrthographicCamera, PerspectiveCamera, Scene } from 'three';
+import type { Vector2, WebGLRenderTarget } from 'three';
+
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface AppSettings {
   name: string;
-  accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
@@ -43,11 +44,6 @@ export interface UsageSummary {
   inputTokens: number;
   outputTokens: number;
   requestsByKey: Record<string, number>;
-}
-
-export interface SeededApp extends AppSettings {
-  appID: string;
-  appSecretHash: string;
 }
 
 export type StoredValue =
@@ -162,4 +158,16 @@ export interface KeyEvent {
   type: KeyEventType;
   appID: string;
   keyID: string;
+}
+
+export interface DitherKeyParts {
+  scene: Scene;
+  camera: PerspectiveCamera;
+  turntable: Group;
+  handleHalf: Group;
+  storedHalf: Group;
+  target: WebGLRenderTarget;
+  cells: Vector2;
+  quad: Scene;
+  quadCamera: OrthographicCamera;
 }

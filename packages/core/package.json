@@ -1,8 +1,31 @@
 {
   "name": "@fiducy/core",
   "version": "0.1.0",
-  "private": true,
+  "description": "Crypto core for Fiducy key custody: AES-256-GCM sealed records, split data keys and key handles",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Benonii/fiducy.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://fiducy.dev/docs/how-it-works",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target node --packages external --sourcemap=linked && tsc -p tsconfig.build.json"
+  }
 }

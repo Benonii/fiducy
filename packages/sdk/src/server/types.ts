@@ -1,5 +1,5 @@
 import type { SealedRecord } from '@fiducy/core';
-import type { FetchGateway, GatewayProvider, ProviderSettings } from '../types';
+import type { FetchGateway, GatewayProvider, ProviderSettings } from '../types.ts';
 
 export interface StoredUserKey {
   userID: string;

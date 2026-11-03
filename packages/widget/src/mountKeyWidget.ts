@@ -1,6 +1,6 @@
-import { WIDGET_DEFAULT_HEIGHT, WIDGET_MESSAGE_TYPES } from './constants';
+import { WIDGET_DEFAULT_HEIGHT, WIDGET_MESSAGE_TYPES } from './constants.ts';
 
-import type { MountKeyWidgetOptions, MountedKeyWidget, WidgetMessage } from './types';
+import type { MountKeyWidgetOptions, MountedKeyWidget, WidgetMessage } from './types.ts';
 
 function buildWidgetURL(gatewayURL: string, appID: string): string {
   const widgetURL = new URL('/widget', gatewayURL);

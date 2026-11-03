@@ -32,8 +32,17 @@ Works with any unstorage-style driver, including Farm.js storage mounts.
 import { getStorage } from '@farm.js/core/storage';
 import { keyValueStorage } from '@fiducy/sdk/server';
 
-const storage = keyValueStorage(getStorage('fiducy'));
+const storage = keyValueStorage({
+  getItem: (key) => getStorage('fiducy').getItem(key),
+  setItem: (key, value) => getStorage('fiducy').setItem(key, value),
+  removeItem: (key) => getStorage('fiducy').removeItem(key),
+  getKeys: (base) => getStorage('fiducy').getKeys(base)
+});
 ```
+
+Look the mount up on each call, as above. The module that creates the Fiducy instance is usually imported by `farm.config.ts`, which runs before Farm registers its storage mounts, so `keyValueStorage(getStorage('fiducy'))` would capture a different store than the one your routes use.
+
+Outside Farm, pass any [unstorage](https://unstorage.unjs.io) instance directly, for example `keyValueStorage(createStorage({ driver: redisDriver({ url }) }))`.
 
 Keys are stored as `fiducy:<userID>:<keyID>`.
 
