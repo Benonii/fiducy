@@ -1,0 +1,49 @@
+import { PUBLIC_ENVIRONMENT_PREFIXES } from '../constants.ts';
+import { FiducyConfigurationError } from './errors.ts';
+
+import type { CreateFiducyOptions, EnvironmentHolder, FiducyConnection } from './types.ts';
+
+function readEnvironmentVariable(name: string): string | undefined {
+  const value = (globalThis as EnvironmentHolder).process?.env?.[name]?.trim();
+  return value ? value : undefined;
+}
+
+function findExposedSecret(): string | null {
+  const exposedNames = PUBLIC_ENVIRONMENT_PREFIXES.map((prefix) => `${prefix}FIDUCY_APP_SECRET`);
+  return exposedNames.find((name) => readEnvironmentVariable(name) !== undefined) ?? null;
+}
+
+function requireValue(value: string | undefined, name: string, option: string): string {
+  if (value) return value;
+  throw new FiducyConfigurationError(
+    `Fiducy needs ${name}. Set it in your server environment or pass ${option} to createFiducy().`
+  );
+}
+
+function requireGatewayURL(value: string): string {
+  const parsed = URL.parse(value);
+  if (parsed?.protocol === 'http:' || parsed?.protocol === 'https:') return value;
+  throw new FiducyConfigurationError(
+    `FIDUCY_GATEWAY_URL must be a full http(s) URL such as http://localhost:8787, not "${value}".`
+  );
+}
+
+export function resolveConnection(options: CreateFiducyOptions): FiducyConnection {
+  const exposedSecret = findExposedSecret();
+  if (exposedSecret) {
+    throw new FiducyConfigurationError(
+      `${exposedSecret} is a public env var, so the app secret ships to the browser. Rename it to FIDUCY_APP_SECRET and rotate the secret in the Fiducy dashboard.`
+    );
+  }
+  const gatewayURL = options.gatewayURL ?? readEnvironmentVariable('FIDUCY_GATEWAY_URL');
+  const appSecret = options.appSecret ?? readEnvironmentVariable('FIDUCY_APP_SECRET');
+  return {
+    gatewayURL: requireGatewayURL(requireValue(gatewayURL, 'FIDUCY_GATEWAY_URL', 'gatewayURL')),
+    appSecret: requireValue(appSecret, 'FIDUCY_APP_SECRET', 'appSecret'),
+    appID: options.appID ?? readEnvironmentVariable('FIDUCY_APP_ID') ?? null
+  };
+}
+
+export function requireAppID(connection: FiducyConnection): string {
+  return requireValue(connection.appID ?? undefined, 'FIDUCY_APP_ID', 'appID');
+}

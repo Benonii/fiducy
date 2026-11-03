@@ -64,6 +64,7 @@ export interface StoreKeyBody {
 export interface GatewayFailure {
   status: number;
   message: string;
+  code?: string;
 }
 
 export interface ResolvedKey {
