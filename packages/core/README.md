@@ -1,6 +1,6 @@
 # @fiducy/core
 
-Crypto core for [Fiducy](https://github.com/Benonii/fiducy): AES-256-GCM sealed records, split data keys, key handles and the `KeyWrapper` interface the gateway uses to wrap data keys with KMS. WebCrypto only, so it runs in browsers, Node and Bun.
+Crypto core for [Fiducy](https://github.com/fiducy-dev/fiducy): AES-256-GCM sealed records, split data keys, key handles and the `KeyWrapper` interface the gateway uses to wrap data keys with KMS. WebCrypto only, so it runs in browsers, Node and Bun.
 
 ```sh
 bun add @fiducy/core

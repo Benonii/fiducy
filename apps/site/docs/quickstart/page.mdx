@@ -1,24 +1,29 @@
 ---
 title: Quickstart
 order: 2
-description: Add bring-your-own-key to a Farm.js app in four steps.
+description: Add bring-your-own-key to an app you already have, in any framework.
 ---
 
 # Quickstart
 
-This guide adds Fiducy to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler. Using assistant-ui? Follow this guide, then [assistant-ui](/docs/assistant-ui).
+This guide adds Fiducy to an app you already have. It works with any server that handles a standard Web `Request` (Next.js, Hono, React Router, SvelteKit, Farm.js, Bun, Deno and others), any auth with a server session, and any way of calling the model.
 
-Starting from nothing? Create a Farm.js app first:
+You add four things:
+
+1. a server module that knows your gateway, your storage and your signed-in user
+2. one route that saves and lists each user's key handles
+3. the key widget, where users paste their key
+4. a model call that uses the user's key through the gateway
+
+**Before you start:** your app needs sign-in. Fiducy stores each key for a signed-in user, so set up auth first if you don't have it ([Better Auth](https://www.better-auth.com), [Auth.js](https://authjs.dev), [Clerk](https://clerk.com) or any auth with a server session).
+
+Install the SDK:
 
 ```bash
-npm create @farm.js/app@latest my-app -- --template basic --typescript
+npm install @fiducy/sdk
 ```
 
-Install the SDK, the Farm.js integration, TanStack Query (used by the React parts) and the AI SDK for the chat route:
-
-```bash
-bun add @fiducy/sdk @fiducy/farm ai @ai-sdk/openai
-```
+Using Farm.js or assistant-ui? Follow this guide, then the [Farm.js](/docs/farm) or [assistant-ui](/docs/assistant-ui) page for the shortcuts they add.
 
 ## 0. Have a gateway to talk to
 
@@ -29,7 +34,7 @@ Your app needs a running Fiducy gateway and dashboard. Two options:
 | Local, for trying it out | `http://localhost:3000` | `http://localhost:8787` |
 | Your own deployment | Wherever you host it | Its public URL, for example `https://gateway.yourapp.com` |
 
-For the local option, clone the [Fiducy repo](https://github.com/Benonii/fiducy) and run `bun install && bun run prototype --mock`; see [Self-hosting](/docs/self-hosting#run-locally). It takes ports 3000, 3001 and 8787, so run your own app on another port, for example `farm dev --port 5173`.
+For the local option, clone the [Fiducy repo](https://github.com/fiducy-dev/fiducy) and run `bun install && bun run prototype --mock`; see [Self-hosting](/docs/self-hosting#run-locally). It takes ports 3000, 3001 and 8787, so run your own app on another port, for example 5173.
 
 ## 1. Register your app
 
@@ -40,7 +45,7 @@ Sign up in the Fiducy dashboard and create an app. You get:
 
 Add your site's origin to the app's allowed origins, so the widget can be embedded there. Use the exact scheme, host and port, for example `http://localhost:5173` while developing and `https://myapp.com` in production.
 
-Put the values in `.env` (keep it out of git):
+Put the values in your server's environment (keep `.env` out of git):
 
 ```bash
 FIDUCY_GATEWAY_URL=http://localhost:8787
@@ -48,75 +53,123 @@ FIDUCY_APP_ID=app_...
 FIDUCY_APP_SECRET=fsk_...
 ```
 
-## 2. Create the server instance
+Never give the app secret a client-exposed prefix such as `NEXT_PUBLIC_` or `VITE_`. Only the app ID and gateway URL may reach the browser. The widget in step 4 needs those two: either pass them down from server code as props, or add public copies such as `NEXT_PUBLIC_FIDUCY_APP_ID` and `NEXT_PUBLIC_FIDUCY_GATEWAY_URL`.
 
-The examples import from `@/`, which points at `src/` through `paths` in your `tsconfig.json`. `@/lib/auth` stands for your app's auth (Farm Auth, Better Auth, anything with a server session).
+## 2. Create the server module
 
-```ts title="src/lib/fiducy.ts"
-import { getStorage } from '@farm.js/core/storage';
+Create the Fiducy instance once, in a file only server code imports:
+
+```ts title="lib/fiducy.ts"
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { auth } from '@/lib/auth';
+import { auth } from './auth'; // your auth (this example uses Better Auth)
+import { kv } from './kv'; // your storage
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
 export async function getUserID(request: Request) {
+  // Replace with your own auth's server-side session lookup (see the table below).
   const session = await auth.api.getSession({ headers: request.headers });
   return session?.user.id ?? null;
 }
 
-export const fiducyServer = createFiducy({
+export const fiducy = createFiducy({
   gatewayURL: FIDUCY_GATEWAY_URL,
   appSecret: FIDUCY_APP_SECRET,
-  storage: keyValueStorage({
-    getItem: (key) => getStorage('fiducy').getItem(key),
-    setItem: (key, value) => getStorage('fiducy').setItem(key, value),
-    removeItem: (key) => getStorage('fiducy').removeItem(key),
-    getKeys: (base) => getStorage('fiducy').getKeys(base)
-  }),
+  storage: keyValueStorage(kv),
   getUserID
 });
 ```
 
-`getUserID` is how Fiducy knows who is asking. Return your own user ID from your auth's server session, or `null` when nobody is signed in. Never take the ID from the request body or a header the browser sets.
+The check at the top throws the first time the module loads. Build tools that load routes at build time (`next build`, for example) need the env vars at build time too.
 
-`storage` is where your app keeps each user's key handle (a reference to the sealed key, not the key). The functions call `getStorage('fiducy')` on every use rather than once at import: this file is also imported by `farm.config.ts`, which loads before Farm sets up its storage mounts, so a storage object captured at import time would not be the `fiducy` mount from step 3.
+**`getUserID`** tells Fiducy who is asking. Read the user from your auth's server session and return `null` when nobody is signed in. Never take the ID from the request body, the query or a header the browser sets. The example uses Better Auth only as an illustration. Use your own auth's server-side session lookup; for example:
 
-## 3. Add the integration
+| Auth | `getUserID` body |
+| --- | --- |
+| Better Auth | `(await auth.api.getSession({ headers: request.headers }))?.user.id` |
+| Auth.js | `(await auth())?.user?.id` |
+| Clerk (Next.js) | `(await auth()).userId` |
+| Supabase | `(await supabase.auth.getUser()).data.user?.id` |
+| Farm Auth | `(await auth.user({ request }))?.id` |
 
-```ts title="farm.config.ts"
-import { defineConfig } from '@farm.js/core';
-import { localStorage } from '@farm.js/core/storage';
-import { fiducy } from '@fiducy/farm';
+**`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Postgres, Cloudflare KV, the file system and more), or you can write four methods against your own database table. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
 
-import { fiducyServer } from './src/lib/fiducy';
+### No storage yet?
 
-export default defineConfig({
-  storage: {
-    mounts: { fiducy: localStorage({ base: '.data/fiducy' }) }
-  },
-  integrations: {
-    byok: fiducy({ instance: fiducyServer })
-  }
-});
+A fresh template (for example `npx assistant-ui create`) has none. unstorage's file driver keeps handles on disk:
+
+```bash
+npm install unstorage
 ```
 
-The `storage` block defines the `fiducy` mount the server instance reads. Farm's `localStorage` driver writes files on your server under `.data/fiducy` (it is not the browser's localStorage). That is fine while developing; in production, point the mount at a database, for example `postgresStorage({ url: process.env.DATABASE_URL })` from `@farm.js/core/storage`. See [Storage](/docs/storage).
+```ts title="lib/kv.ts"
+import { createStorage } from 'unstorage';
+import fsDriver from 'unstorage/drivers/fs';
 
-The integration mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`.
+export const kv = createStorage({ driver: fsDriver({ base: '.data/fiducy' }) });
+```
 
-## 4. Drop in the widget and use the key
+Add `.data/` to `.gitignore`. This works locally and on a long-running server. Serverless hosts such as Vercel wipe the disk, so there, switch the driver to Upstash, Vercel KV or Redis; nothing else changes.
 
-Add a settings page where users connect a key. The app ID is public, so it can go straight into client code:
+## 3. Mount the key route
 
-```tsx title="src/app/settings/page.tsx"
+`fiducy.handler` is a standard `Request => Response` handler. Mount it for `GET`, `POST` and `DELETE` under `/api/fiducy`:
+
+<CodeGroup>
+
+```ts title="Next.js"
+// app/api/fiducy/[...path]/route.ts
+import { fiducy } from '@/lib/fiducy';
+
+export const GET = fiducy.handler;
+export const POST = fiducy.handler;
+export const DELETE = fiducy.handler;
+```
+
+```ts title="Hono"
+app.all('/api/fiducy/*', (c) => fiducy.handler(c.req.raw));
+```
+
+```ts title="React Router"
+// app/routes/api.fiducy.$.ts
+import { fiducy } from '~/lib/fiducy.server';
+
+export const loader = ({ request }: { request: Request }) => fiducy.handler(request);
+export const action = ({ request }: { request: Request }) => fiducy.handler(request);
+```
+
+```ts title="SvelteKit"
+// src/routes/api/fiducy/[...path]/+server.ts
+import { fiducy } from '$lib/server/fiducy';
+
+const handle = ({ request }: { request: Request }) => fiducy.handler(request);
+export { handle as GET, handle as POST, handle as DELETE };
+```
+
+</CodeGroup>
+
+Farm.js mounts it for you through `@fiducy/farm`; see [Farm.js](/docs/farm). Frameworks built on Node's `req`/`res` (Express, Fastify) need a small adapter that turns the request into a Web `Request`, such as `@whatwg-node/server`.
+
+You get `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`. They answer `401` when signed out and `403` for cross-site writes.
+
+## 4. Add the key widget
+
+The widget is an iframe served by your gateway. The key goes straight from the user's browser into it, and your page only gets back a handle, which it saves through the route from step 3.
+
+Use the React component, or `@fiducy/widget` and one `fetch` in any other framework (Vue, Svelte, Solid, plain HTML):
+
+<CodeGroup>
+
+```tsx title="React"
+// components/ConnectOpenAIKey.tsx
 'use client';
 
 import { ConnectKeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
-export default function SettingsPage() {
+export function ConnectOpenAIKey() {
   const [connected, setConnected] = useState(false);
 
   if (connected) return <p>Your OpenAI key is connected.</p>;
@@ -131,20 +184,47 @@ export default function SettingsPage() {
 }
 ```
 
-To list and remove saved keys, use `useFiducyKeys` from `@fiducy/sdk/react-query` if your app uses TanStack Query, or call `GET` and `DELETE` on `/api/fiducy/keys` yourself. See [React](/docs/react).
+```ts title="Any framework"
+import { mountKeyWidget } from '@fiducy/widget';
 
-Then call the model from any server route:
+mountKeyWidget({
+  gatewayURL: 'http://localhost:8787',
+  appID: 'app_...',
+  container: document.getElementById('key-box')!,
+  onHandle: async (handle, record) => {
+    await fetch('/api/fiducy/keys', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ provider: 'openai', handle, record })
+    });
+  }
+});
+```
 
-```ts title="src/app/api/chat/route.ts"
+</CodeGroup>
+
+Step 6 shows where to put it.
+
+## 5. Call the model with the user's key
+
+`fiducy.providerSettings(provider, { userID })` returns `{ baseURL, apiKey, headers }` pointing at your gateway, or `null` when the user has no key for that provider. Pass it to whatever you call the model with. When it is `null`, answer `409` with the missing provider so the page can ask for that key (step 6); never fall back to a key of your own.
+
+Examples for the [AI SDK](https://ai-sdk.dev), the official OpenAI SDK (also works for `openrouter`) and plain `fetch`:
+
+<CodeGroup>
+
+```ts title="AI SDK"
+// app/api/chat/route.ts
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
-import { fiducyServer, getUserID } from '@/lib/fiducy';
+import { fiducy, getUserID } from '@/lib/fiducy';
 
 export async function POST(request: Request) {
   const userID = await getUserID(request);
-  const settings = userID ? await fiducyServer.providerSettings('openai', { userID }) : null;
-  if (!settings) return new Response('Connect your API key first', { status: 400 });
+  const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
+  // Tell the browser which key is missing, so it can show the widget (step 6).
+  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });
@@ -152,12 +232,132 @@ export async function POST(request: Request) {
 }
 ```
 
-## 5. Try it
+```ts title="OpenAI SDK"
+import OpenAI from 'openai';
 
-1. Sign in to your app, open `/settings`, paste a key and save. With `--mock`, any string works, for example `sk-test-1234`.
-2. The page switches to "Remove my OpenAI key".
-3. Send a chat request. With `--mock`, the prototype's terminal logs `[fake OpenAI] ... received the decrypted key ...1234`.
+const { baseURL, apiKey, headers } = settings;
+const openai = new OpenAI({ baseURL, apiKey, defaultHeaders: headers });
+```
 
-If the chat route answers "Connect your API key first" right after you connected one, check the `storage` functions in step 2.
+```ts title="fetch"
+const { baseURL, apiKey, headers } = settings;
+const response = await fetch(`${baseURL}/chat/completions`, {
+  method: 'POST',
+  headers: { ...headers, authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
+  body: JSON.stringify({ model: 'gpt-4o-mini', messages })
+});
+```
+
+</CodeGroup>
+
+For Anthropic, the AI SDK's `createAnthropic(settings)` works as is. The official Anthropic SDK adds `/v1` itself, so give it `baseURL.replace(/\/v1$/, '')`.
+
+## 6. Put the widget where users need it
+
+Most apps want the widget in two places.
+
+### In the chat, when a key is missing
+
+This is what the [demo](https://demo.fiducy.dev) does. The user sends a message without a key. Instead of an error, the widget appears where the reply would be. Once the key is saved, the message is sent again and the answer streams in. Nobody has to find a settings page first.
+
+It takes three parts:
+
+1. The chat route answers `409` with `{ connectKey: provider }` when the user has no key (step 5 already does this).
+2. The page reads that answer and renders the widget at the end of the message list, above the input.
+3. When the widget reports the key is saved, the page clears the error and sends the last message again.
+
+<CodeGroup>
+
+```tsx title="React + AI SDK"
+// components/Chat.tsx
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { ConnectKeyWidget, type GatewayProvider } from '@fiducy/sdk/react';
+
+// useChat puts the failed response body in error.message.
+function missingKey(error: Error | undefined): GatewayProvider | null {
+  try {
+    return JSON.parse(error?.message ?? '').connectKey ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function Chat() {
+  const { messages, sendMessage, error, clearError, regenerate } = useChat();
+  const provider = missingKey(error);
+
+  return (
+    <div>
+      {/* your message list, rendered from `messages` */}
+
+      {provider && (
+        <ConnectKeyWidget
+          gatewayURL="http://localhost:8787" // your FIDUCY_GATEWAY_URL
+          appID="app_..." // your FIDUCY_APP_ID
+          provider={provider}
+          onConnected={() => {
+            clearError();
+            regenerate(); // sends the last message again
+          }}
+        />
+      )}
+
+      {/* your input, calling sendMessage */}
+    </div>
+  );
+}
+```
+
+```ts title="Any framework"
+import { mountKeyWidget } from '@fiducy/widget';
+
+// keySlot: an empty element at the end of your message list, above the input.
+async function send(messages: unknown[]) {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+
+  if (response.status === 409) {
+    const { connectKey } = await response.json();
+    mountKeyWidget({
+      gatewayURL: 'http://localhost:8787',
+      appID: 'app_...',
+      container: keySlot,
+      onHandle: async (handle, record) => {
+        await fetch('/api/fiducy/keys', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ provider: connectKey, handle, record })
+        });
+        keySlot.replaceChildren(); // remove the widget
+        send(messages); // and try again
+      }
+    });
+    return;
+  }
+
+  // ...read the reply as you do today
+}
+```
+
+</CodeGroup>
+
+Using assistant-ui? `@fiducy/assistant-ui` does all three parts for you; see [assistant-ui](/docs/assistant-ui).
+
+### In settings, to see and remove keys
+
+Users also need a place to check which keys are connected and remove one. A settings page works, or a small panel next to the chat like the demo's sidebar. List keys with `GET /api/fiducy/keys`, remove one with `DELETE /api/fiducy/keys/:keyID`, and put a widget there too for adding keys ahead of time. [React](/docs/react) has a ready-made list.
+
+## 7. Try it
+
+1. Sign in to your app and send a chat message. The widget appears in the chat.
+2. Paste a key and save. With `--mock`, any string works, for example `sk-test-1234`.
+3. The message is sent again and the reply arrives. With `--mock`, the prototype's terminal logs `[fake OpenAI] ... received the decrypted key ...1234`.
+
+If the widget comes back right after you connected a key, check `getUserID` (same user in both routes?) and your storage.
 
 That is the whole integration. The plaintext key only ever exists inside the gateway.
