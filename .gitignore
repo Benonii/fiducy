@@ -20,3 +20,4 @@ examples/*/.react-router
 examples/*/.tanstack
 examples/*/next-env.d.ts
 examples/*/src/routeTree.gen.ts
+packages/sdk/tests/storage/.fiducy_test_*

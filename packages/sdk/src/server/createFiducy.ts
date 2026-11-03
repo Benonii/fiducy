@@ -73,6 +73,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
     listKeys,
     saveKey,
     revokeKey,
-    basePath
+    basePath,
+    storage
   };
 }

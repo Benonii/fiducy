@@ -11,7 +11,7 @@ export function isProvider(value: unknown): value is GatewayProvider {
   return typeof value === 'string' && Object.hasOwn(PROVIDER_BASE_PATHS, value);
 }
 
-function isSealedRecord(value: unknown): value is SealedRecord {
+export function isSealedRecord(value: unknown): value is SealedRecord {
   if (typeof value !== 'object' || value === null) return false;
   const fields = value as Record<string, unknown>;
   return SEALED_RECORD_FIELDS.every((field) => typeof fields[field] === 'string');
