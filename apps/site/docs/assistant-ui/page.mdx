@@ -25,12 +25,13 @@ Create the server instance once. In Next.js:
 ```ts title="lib/fiducy.ts"
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { getSessionUserID } from '@/lib/auth'; // your auth
+import { getSessionUserID } from '@/lib/auth'; // placeholder: your own auth's session lookup
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
-export const getUserID = (request: Request) => getSessionUserID(request); // null when signed out
+// Write getSessionUserID with your auth provider; see the Quickstart table. Return null when signed out.
+export const getUserID = (request: Request) => getSessionUserID(request);
 
 export const fiducy = createFiducy({
   gatewayURL: FIDUCY_GATEWAY_URL,

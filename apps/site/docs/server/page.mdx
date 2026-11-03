@@ -17,7 +17,7 @@ const fiducy = createFiducy({
   gatewayURL: 'https://gateway.yourapp.com',
   appSecret: process.env.FIDUCY_APP_SECRET!,
   storage: keyValueStorage(driver),
-  getUserID: (request) => readSession(request)?.userID ?? null,
+  getUserID: (request) => readSession(request)?.userID ?? null, // readSession: your own auth's lookup
   basePath: '/api/fiducy' // optional, this is the default
 });
 ```
