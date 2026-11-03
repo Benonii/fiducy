@@ -23,7 +23,7 @@ export default function ContactPage() {
             <p>
               Open an issue at{' '}
               <a href={ISSUES_URL} {...NEW_TAB}>
-                github.com/Benonii/fiducy/issues
+                github.com/fiducy-dev/fiducy/issues
               </a>
               . Include the SDK version, the framework you integrate with, and the exact response
               you saw. Pull requests are welcome; the repository README explains how to run the

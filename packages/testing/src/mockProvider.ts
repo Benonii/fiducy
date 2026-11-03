@@ -21,6 +21,15 @@ export const ANTHROPIC_STREAM_CHUNKS = [
   'event: message_stop\ndata: {"type":"message_stop"}\n\n'
 ];
 
+export const OPENAI_RESPONSES_STREAM_CHUNKS = [
+  'event: response.created\ndata: {"type":"response.created","sequence_number":0,"response":{"id":"resp_1","object":"response","created_at":1767225600,"model":"gpt-4o-mini","status":"in_progress","output":[],"usage":null}}\n\n',
+  'event: response.output_item.added\ndata: {"type":"response.output_item.added","sequence_number":1,"output_index":0,"item":{"type":"message","id":"msg_1","status":"in_progress","role":"assistant","content":[]}}\n\n',
+  'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","sequence_number":2,"item_id":"msg_1","output_index":0,"content_index":0,"delta":"Here is","logprobs":[]}\n\n',
+  'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","sequence_number":3,"item_id":"msg_1","output_index":0,"content_index":0,"delta":" a summary.","logprobs":[]}\n\n',
+  'event: response.output_item.done\ndata: {"type":"response.output_item.done","sequence_number":4,"output_index":0,"item":{"type":"message","id":"msg_1","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Here is a summary.","annotations":[]}]}}\n\n',
+  'event: response.completed\ndata: {"type":"response.completed","sequence_number":5,"response":{"id":"resp_1","object":"response","created_at":1767225600,"model":"gpt-4o-mini","status":"completed","incomplete_details":null,"usage":{"input_tokens":36,"output_tokens":14,"input_tokens_details":{"cached_tokens":0},"output_tokens_details":{"reasoning_tokens":0}}}}\n\n'
+];
+
 function streamChunks(chunks: string[]): Response {
   const body = new ReadableStream({
     start: (controller) => {
@@ -45,6 +54,28 @@ function answerChatCompletion(body: string): Response {
   );
 }
 
+function answerResponse(body: string): Response {
+  if (JSON.parse(body).stream) return streamChunks(OPENAI_RESPONSES_STREAM_CHUNKS);
+  return Response.json({
+    id: 'resp_0',
+    object: 'response',
+    created_at: 1767225600,
+    model: 'gpt-4o-mini',
+    status: 'completed',
+    incomplete_details: null,
+    output: [
+      {
+        type: 'message',
+        id: 'msg_0',
+        status: 'completed',
+        role: 'assistant',
+        content: [{ type: 'output_text', text: 'Hello', annotations: [] }]
+      }
+    ],
+    usage: { input_tokens: 9, output_tokens: 3 }
+  });
+}
+
 function answerInvalidKey(): Response {
   const message = `Incorrect API key provided: sk-proj-a81f****9c2e. Received ${SAMPLE_API_KEY}`;
   return Response.json({ error: { message } }, { status: 401 });
@@ -52,6 +83,7 @@ function answerInvalidKey(): Response {
 
 export function answerMockProviderRequest(path: string, body: string): Response {
   if (path.endsWith('/v1/chat/completions')) return answerChatCompletion(body);
+  if (path.endsWith('/v1/responses')) return answerResponse(body);
   if (path.endsWith('/v1/messages')) return streamChunks(ANTHROPIC_STREAM_CHUNKS);
   if (path.endsWith('/v1/invalid-key')) return answerInvalidKey();
   return new Response('not found', { status: 404 });

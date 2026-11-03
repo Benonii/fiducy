@@ -17,7 +17,7 @@ const fiducy = createFiducy({
   gatewayURL: 'https://gateway.yourapp.com',
   appSecret: process.env.FIDUCY_APP_SECRET!,
   storage: keyValueStorage(driver),
-  getUserID: (request) => readSession(request)?.userID ?? null,
+  getUserID: (request) => readSession(request)?.userID ?? null, // readSession: your own auth's lookup
   basePath: '/api/fiducy' // optional, this is the default
 });
 ```
@@ -37,17 +37,20 @@ A standard `Request => Response` handler. Mount it under `basePath` in any frame
 
 | Route | Body | Result |
 | --- | --- | --- |
-| `GET {basePath}/keys` | | `{ data: UserKeySummary[] }` |
-| `POST {basePath}/keys` | `{ provider, handle, record? }` | `201 { data: UserKeySummary }` |
-| `DELETE {basePath}/keys/:keyID` | | `{ data: { keyID } }` |
+| `GET {basePath}/keys` | | `{ data: { keys: UserKeySummary[] }, message }` |
+| `POST {basePath}/keys` | `{ provider, handle, record? }` | `201 { data: UserKeySummary, message }` |
+| `DELETE {basePath}/keys/:keyID` | | `{ data: { keyID }, message }` |
 
 - Every route answers `401` when `getUserID` returns `null`.
 - `POST` and `DELETE` answer `403` when the request's `Origin` is a different site.
 - Saving a key for a provider replaces and revokes that user's previous key for the same provider.
+- Removing a key revokes it on the gateway first, then deletes your row. If the gateway is unreachable, `DELETE` answers `502` and the key stays, so a user never ends up with a key that looks removed but still works.
+- The cross-site check compares `Origin` with the request's `Host`. If a proxy in front of your app rewrites `Host`, forward the original one (most platforms do).
+- Errors have the same shape: `{ data: null, message }`.
 
-Without the Farm integration, mount it yourself:
+Mount it in your framework (more examples in the [Quickstart](/docs/quickstart#3-mount-the-key-route)):
 
-```ts title="app/api/fiducy/[...path]/route.ts"
+```ts title="Next.js: app/api/fiducy/[...path]/route.ts"
 export const GET = fiducy.handler;
 export const POST = fiducy.handler;
 export const DELETE = fiducy.handler;

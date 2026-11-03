@@ -100,7 +100,7 @@ export function Chat() {
           <KeysPanel {...keysState} />
           <p className="hidden border-b-0! text-muted-foreground text-xs md:block">
             Keys sealed by{' '}
-            <a className="text-foreground underline" href="https://github.com/Benonii/fiducy">
+            <a className="text-foreground underline" href="https://github.com/fiducy-dev/fiducy">
               Fiducy
             </a>
           </p>
