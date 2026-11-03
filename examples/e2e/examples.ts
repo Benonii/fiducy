@@ -5,6 +5,12 @@ export interface ExampleApp {
   readyPath?: string;
 }
 
+export interface ExampleConnection {
+  gatewayURL: string;
+  appID: string;
+  appSecret: string;
+}
+
 export const EXAMPLE_APPS: ExampleApp[] = [
   {
     name: 'next',

@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { startGatewayHarness } from '../../apps/gateway/tests/harness';
 
 import type { AppRegistration } from '../../apps/gateway/src/types';
-import type { ExampleApp } from './examples';
+import type { ExampleApp, ExampleConnection } from './examples';
 
 const ROOT = resolve(import.meta.dir, '../..');
 const STARTUP_TIMEOUT_MILLISECONDS = 240000;
@@ -40,8 +40,15 @@ async function waitForApp(url: string, process: Bun.Subprocess) {
   throw new Error(`The example did not start at ${url}`);
 }
 
-export async function startExample(example: ExampleApp, gatewayURL: string) {
-  const port = 5200 + Math.floor(Math.random() * 600);
+export function chooseExamplePort(): number {
+  return 5200 + Math.floor(Math.random() * 600);
+}
+
+export async function startExample(
+  example: ExampleApp,
+  connection: ExampleConnection,
+  port = chooseExamplePort()
+) {
   const appURL = `http://localhost:${port}`;
   EXAMPLE_REGISTRATION.allowedOrigins.push(appURL);
   const dataDirectory = mkdtempSync(join(tmpdir(), `fiducy-${example.name}-`));
@@ -50,9 +57,9 @@ export async function startExample(example: ExampleApp, gatewayURL: string) {
   writeFileSync(
     environmentFile,
     [
-      `FIDUCY_GATEWAY_URL=${gatewayURL}`,
-      `FIDUCY_APP_ID=${EXAMPLE_REGISTRATION.appID}`,
-      `FIDUCY_APP_SECRET=${EXAMPLE_REGISTRATION.appSecret}`,
+      `FIDUCY_GATEWAY_URL=${connection.gatewayURL}`,
+      `FIDUCY_APP_ID=${connection.appID}`,
+      `FIDUCY_APP_SECRET=${connection.appSecret}`,
       `EXAMPLE_SESSION_SECRET=${crypto.randomUUID().repeat(2)}`,
       `EXAMPLE_DATA_DIR=${dataDirectory}`,
       ''
