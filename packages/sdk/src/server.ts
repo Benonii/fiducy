@@ -1,5 +1,5 @@
-export { createFiducy } from './server/createFiducy';
-export { keyValueStorage, memoryStorage } from './server/storage';
+export { createFiducy } from './server/createFiducy.ts';
+export { keyValueStorage, memoryStorage } from './server/storage.ts';
 
 export type {
   CreateFiducyOptions,
@@ -9,5 +9,5 @@ export type {
   SaveKeyInput,
   StoredUserKey,
   UserKeySummary
-} from './server/types';
-export type { GatewayProvider, ProviderSettings } from './types';
+} from './server/types.ts';
+export type { GatewayProvider, ProviderSettings } from './types.ts';

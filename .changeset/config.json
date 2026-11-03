@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "Benonii/fiducy"
+    }
+  ],
+  "commit": false,
+  "fixed": [
+    [
+      "@fiducy/core",
+      "@fiducy/providers",
+      "@fiducy/widget",
+      "@fiducy/sdk",
+      "@fiducy/farm",
+      "@fiducy/assistant-ui"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
+  "ignore": []
+}

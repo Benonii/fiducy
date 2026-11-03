@@ -1,4 +1,4 @@
-import type { Bytes } from './types';
+import type { Bytes } from './types.ts';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

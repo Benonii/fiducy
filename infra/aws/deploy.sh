@@ -142,14 +142,16 @@ DASHED_IP="${PUBLIC_IP//./-}"
 check_endpoint "https://gw.${DASHED_IP}.sslip.io/health"
 check_endpoint "https://gw.${DASHED_IP}.sslip.io/attestation"
 check_endpoint "https://app.${DASHED_IP}.sslip.io/api/config"
-check_endpoint "https://demo.${DASHED_IP}.sslip.io/api/config"
+if aws ssm get-parameter --name /fiducy/demo/app-id >/dev/null 2>&1; then
+  check_endpoint "https://demo.${DASHED_IP}.sslip.io/"
+fi
 
 summary "## Fiducy prototype deployed"
 summary ""
 summary "- Gateway (in the enclave): https://gw.${DASHED_IP}.sslip.io"
 summary "- Dashboard: https://app.${DASHED_IP}.sslip.io"
 summary "- Demo chat: https://demo.${DASHED_IP}.sslip.io"
-summary "- Site and docs: https://fiducy-nine.vercel.app"
+summary "- Site and docs: https://fiducy.dev"
 summary "- Enclave image PCR0: \`${PCR0}\`"
 if [ "$ROTATE_TOKEN" = true ]; then
   summary "- Gateway token rotated: the previous token no longer authenticates the gateway"

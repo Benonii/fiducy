@@ -15,7 +15,6 @@ const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore_sdk',
   name: 'Ownstore',
   appSecret: 'app_sk_ownstore_sdk_3Wq7Rt1Nm',
-  accessMode: 'gateway',
   monthlyRequestLimitPerKey: 50,
   allowedOrigins: ['https://ownstore.example'],
   recordStorage: 'app'

@@ -1,14 +1,12 @@
 'use client';
 
 import { AuthForm } from '@/components/AuthForm';
-import { SiteFrame } from '@/components/SiteFrame';
+import { AuthFrame } from '@/components/AuthFrame';
 
 export default function SignInPage() {
   return (
-    <SiteFrame>
-      <div className="mx-auto max-w-md">
-        <AuthForm mode="sign-in" />
-      </div>
-    </SiteFrame>
+    <AuthFrame mode="sign-in">
+      <AuthForm mode="sign-in" />
+    </AuthFrame>
   );
 }

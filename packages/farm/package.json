@@ -1,24 +1,39 @@
 {
   "name": "@fiducy/farm",
   "version": "0.1.0",
-  "private": true,
+  "description": "Farm.js integration for Fiducy: mounts the key routes in one line",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Benonii/fiducy.git",
+    "directory": "packages/farm"
+  },
+  "homepage": "https://fiducy.dev/docs/quickstart",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
       "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
   "files": ["dist", "src"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --external @farm.js/core"
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target node --packages external --sourcemap=linked && tsc -p tsconfig.build.json"
   },
   "peerDependencies": {
-    "@farm.js/core": "0.1.40"
+    "@farm.js/core": "^0.1.40",
+    "@fiducy/sdk": "^0.1.0"
   },
   "devDependencies": {
     "@farm.js/core": "0.1.40",
-    "@fiducy/sdk": "workspace:*"
+    "@fiducy/sdk": "0.1.0"
   }
 }

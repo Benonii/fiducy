@@ -55,6 +55,15 @@ Resources:
               - Effect: Allow
                 Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:DeleteItem]
                 Resource: !GetAtt KeysTable.Arn
+              - Effect: Allow
+                Action: [ssm:GetParameter]
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/fiducy/*'
+              - Effect: Allow
+                Action: [kms:Decrypt]
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    kms:ViaService: !Sub 'ssm.${AWS::Region}.amazonaws.com'
 
   HostProfile:
     Type: AWS::IAM::InstanceProfile

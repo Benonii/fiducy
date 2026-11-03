@@ -7,16 +7,11 @@ import { formatRelativeTime, shortenIdentifier } from './format';
 import type { AppView, GatewayStatus } from '@/lib/types';
 import type { AppProps, SecurityRow } from './types';
 
-function describeAccess(app: AppView): SecurityRow {
-  const isReleaseOn = app.accessMode === 'gateway_and_release';
-  return {
-    label: 'Key access',
-    value: isReleaseOn ? 'Gateway and key release' : 'Gateway only',
-    detail: isReleaseOn
-      ? 'Your server can fetch a plain key for 5 minutes.'
-      : 'Plain keys never leave the enclave.'
-  };
-}
+const KEY_ACCESS_ROW: SecurityRow = {
+  label: 'Key access',
+  value: 'Gateway only',
+  detail: 'Plain keys never leave the enclave.'
+};
 
 function describeStorage(app: AppView): SecurityRow {
   const isAppStorage = app.recordStorage === 'app';
@@ -65,7 +60,7 @@ function describeGateway(status: GatewayStatus | undefined): SecurityRow {
 export function SecurityPanel({ app }: AppProps) {
   const gatewayStatus = useGatewayStatus();
   const rows = [
-    describeAccess(app),
+    KEY_ACCESS_ROW,
     describeStorage(app),
     describeAttestation(gatewayStatus.data),
     describeGateway(gatewayStatus.data)
