@@ -24,10 +24,11 @@ const fiducy = createFiducy({
 | --- | --- | --- |
 | `gatewayURL` | `string` | Optional. Defaults to `FIDUCY_GATEWAY_URL` |
 | `appID` | `string` | Optional. Defaults to `FIDUCY_APP_ID`. Served to the browser by `GET {basePath}/config` |
-| `appSecret` | `string` | Optional. Defaults to `FIDUCY_APP_SECRET`. Server only: Fiducy refuses to run if it finds it in a `NEXT_PUBLIC_`, `VITE_`, `PUBLIC_` or `NUXT_PUBLIC_` env var |
+| `appSecret` | `string` | Optional. Defaults to `FIDUCY_APP_SECRET`. Server only: Fiducy refuses to run if it finds it in a `NEXT_PUBLIC_`, `VITE_`, `PUBLIC_`, `NUXT_PUBLIC_`, `EXPO_PUBLIC_` or `REACT_APP_` env var |
 | `storage` | `FiducyStorage` | Where handles (and records) live. See [Storage](/docs/storage) |
 | `getUserID` | `(request) => string \| null` | Your signed-in user. May be async |
 | `basePath` | `string` | Where the handler is mounted. Default `/api/fiducy` |
+| `env` | `Record<string, string \| undefined>` | Optional. Where to read `FIDUCY_*` from when your framework keeps `.env` out of `process.env` (SvelteKit: pass its env module) |
 | `fetch` | `typeof fetch` | Optional, for tests |
 
 ## fiducy.handler(request)
@@ -48,12 +49,12 @@ A standard `Request => Response` handler. Mount it under `basePath` in any frame
 - The cross-site check compares `Origin` with the request's `Host`. If a proxy in front of your app rewrites `Host`, forward the original one (most platforms do).
 - Errors have the same shape: `{ data: null, message }`.
 
-Mount it in your framework (more examples in the [Quickstart](/docs/quickstart#3-mount-the-key-route)):
+Mount it with your framework's helper; see [Frameworks](/docs/frameworks):
 
 ```ts title="Next.js: app/api/fiducy/[...path]/route.ts"
-export const GET = fiducy.handler;
-export const POST = fiducy.handler;
-export const DELETE = fiducy.handler;
+import { toNextJsHandler } from '@fiducy/sdk/next';
+
+export const { GET, POST, DELETE } = toNextJsHandler(fiducy);
 ```
 
 ## `fiducy.providerSettings(provider, user)`

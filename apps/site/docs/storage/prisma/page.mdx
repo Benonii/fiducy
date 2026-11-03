@@ -6,6 +6,8 @@ description: Store handles with Prisma. Add the generated model to your schema a
 
 # Prisma
 
+**Quickest:** `npx fiducy generate` writes the model to `prisma/schema/fiducy.prisma` when you use a schema folder, or prints it for you to paste into a single `schema.prisma`; then run `prisma migrate dev`. The steps below do the same by hand.
+
 `prismaStorage` keeps handles in a model of your [Prisma](https://www.prisma.io) schema, using the `PrismaClient` you already have. It works on Postgres, MySQL and SQLite. Migrations go through Prisma, like the rest of your schema.
 
 Fiducy doesn't install or import Prisma. It calls four methods on your client's model: `upsert`, `findFirst`, `findMany` and `deleteMany`. It is tested with Prisma 7 and its driver adapters (`@prisma/adapter-pg`, `@prisma/adapter-mariadb`, `@prisma/adapter-libsql`), and the same calls work on Prisma 5 and 6.

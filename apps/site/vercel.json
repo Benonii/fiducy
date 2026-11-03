@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "bun install --linker hoisted",
-  "buildCommand": "bash scripts/vercel-build.sh"
+  "buildCommand": "bash scripts/vercel-build.sh",
+  "redirects": [
+    { "source": "/docs/farm", "destination": "/docs/frameworks/farm", "permanent": true },
+    { "source": "/docs/farm.md", "destination": "/docs/frameworks/farm.md", "permanent": true },
+    { "source": "/docs/react", "destination": "/docs/widget/react", "permanent": true },
+    { "source": "/docs/react.md", "destination": "/docs/widget/react.md", "permanent": true }
+  ]
 }

@@ -51,7 +51,9 @@ Run the **AWS teardown** workflow, or `bash infra/aws/teardown.sh`. The KMS key 
 
 ## Run locally
 
-No AWS needed. A local master key stands in for KMS:
+To build an app against Fiducy, you only need `npx fiducy dev`: a single local gateway with a dev app, no dashboard and no clone. See [CLI](/docs/cli#dev).
+
+To work on Fiducy itself, run the whole stack from this repo. No AWS needed; a local master key stands in for KMS:
 
 ```bash
 bun install

@@ -16,6 +16,6 @@ One small app per framework, each wired the way the docs describe. The same flow
 
 ## Run one
 
-1. Start a local gateway and copy the three `FIDUCY_` values it prints.
-2. `cp .env.example .env` in the example folder and fill it in.
-3. `bun install` at the repository root, then `bun run dev` in the example folder.
+1. `bun install` and `bun run build` at the repository root.
+2. In the example folder, start a local gateway: `node ../../packages/cli/dist/index.js dev --mock` (in your own app this is `npx fiducy dev --mock`). It writes `.env` with the three `FIDUCY_` values.
+3. Add `EXAMPLE_SESSION_SECRET` (any 32+ characters) to that `.env`, then `bun run dev` in the example folder.
