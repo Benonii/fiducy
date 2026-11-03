@@ -32,9 +32,9 @@ for (const testDatabase of PRISMA_DATABASES) {
     itBehavesLikeFiducyStorage(() => storage);
 
     it('explains a missing model and a missing table', async () => {
-      expect(() => prismaStorage(database.prisma, { provider: database.provider })).toThrow(
-        /no FiducyUserKey model/
-      );
+      const unmodeled = prismaStorage(database.prisma, { provider: database.provider });
+      expect(unmodeled.schema?.tableName).toBe('fiducy_user_key');
+      await expect(unmodeled.listKeys('user_ada')).rejects.toThrow(/no FiducyUserKey model/);
       await database.execute(`drop table ${database.tableName}`);
       await expect(storage.listKeys('user_ada')).rejects.toThrow(/does not exist yet/);
     });
