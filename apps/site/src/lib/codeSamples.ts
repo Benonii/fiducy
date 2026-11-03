@@ -12,13 +12,14 @@ export const CODE_SAMPLES: CodeSampleTab[] = [
     file: 'lib/fiducy.ts',
     code: `import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { auth } from '@/lib/auth'; // your auth
+import { auth } from '@/lib/auth'; // your auth (Better Auth shown)
 import { kv } from '@/lib/kv'; // any unstorage driver
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
 export async function getUserID(request: Request) {
+  // Use your own auth's server-side session lookup here.
   const session = await auth.api.getSession({ headers: request.headers });
   return session?.user.id ?? null;
 }
