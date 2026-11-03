@@ -16,7 +16,6 @@ export const CHAT_APP: AppRegistration = {
   appID: 'app_chatforge',
   name: 'Chatforge',
   appSecret: 'app_sk_chatforge_9Vx2Lr7Tn4Wd6Hc3',
-  accessMode: 'gateway',
   monthlyRequestLimitPerKey: 3,
   allowedOrigins: ['https://chatforge.example']
 };
@@ -27,7 +26,6 @@ export const DESK_APP: AppRegistration = {
   appID: 'app_promptdesk',
   name: 'Promptdesk',
   appSecret: 'app_sk_promptdesk_2Qw8Ym1Kp4Lz5Ub',
-  accessMode: 'gateway_and_release',
   monthlyRequestLimitPerKey: 100,
   allowedOrigins: ['https://promptdesk.example']
 };

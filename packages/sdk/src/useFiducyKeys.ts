@@ -1,19 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
-import type { FiducyKeysState, UserKeySummaryView } from './types';
+import { FIDUCY_KEYS_CHANGED, callApp } from './keysApi.ts';
 
-interface ResponseBody<T> {
-  data: T | null;
-  message: string;
-}
-
-async function callApp<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: 'same-origin', ...init });
-  const body = (await response.json().catch(() => null)) as ResponseBody<T> | null;
-  if (!response.ok || !body?.data)
-    throw new Error(body?.message ?? `Request failed: ${response.status}`);
-  return body.data;
-}
+import type { FiducyKeysState, UserKeySummaryView } from './types.ts';
 
 export function fiducyKeysQueryKey(basePath = '/api/fiducy') {
   return ['fiducy', basePath, 'keys'] as const;
@@ -32,6 +22,17 @@ export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
     onSuccess: () => queryClient.invalidateQueries({ queryKey })
   });
 
+  // ConnectKeyWidget saves without React Query and announces it with a window event.
+  useEffect(() => {
+    const onChanged = (event: Event) => {
+      const changedPath = (event as CustomEvent<{ basePath: string }>).detail?.basePath;
+      if (changedPath === basePath)
+        queryClient.invalidateQueries({ queryKey: fiducyKeysQueryKey(basePath) });
+    };
+    window.addEventListener(FIDUCY_KEYS_CHANGED, onChanged);
+    return () => window.removeEventListener(FIDUCY_KEYS_CHANGED, onChanged);
+  }, [basePath, queryClient]);
+
   return {
     keys: keysQuery.data ?? [],
     isLoading: keysQuery.isPending,
@@ -43,17 +44,4 @@ export function useFiducyKeys(basePath = '/api/fiducy'): FiducyKeysState {
       await revokeMutation.mutateAsync(keyID);
     }
   };
-}
-
-export function useSaveConnectedKey(basePath = '/api/fiducy') {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (body: unknown) =>
-      callApp<UserKeySummaryView>(`${basePath}/keys`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body)
-      }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: fiducyKeysQueryKey(basePath) })
-  });
 }

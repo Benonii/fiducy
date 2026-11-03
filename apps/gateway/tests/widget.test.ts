@@ -16,7 +16,6 @@ const widgetApp: AppRegistration = {
   appID: 'app_widgetdemo',
   name: 'Chatforge',
   appSecret: 'app_sk_widgetdemo_7Hc3Bk8Pz1Ys5Ue',
-  accessMode: 'gateway_and_release',
   monthlyRequestLimitPerKey: 100,
   allowedOrigins: []
 };
@@ -34,12 +33,18 @@ afterAll(async () => {
   harness.stop();
 });
 
-async function releaseKey(handle: string) {
-  const response = await fetch(`${harness.gatewayURL}/release`, {
+async function callProviderWith(handle: string) {
+  const response = await fetch(`${harness.gatewayURL}/openai/v1/chat/completions`, {
     method: 'POST',
-    headers: { authorization: `Bearer ${widgetApp.appSecret}`, 'x-key-handle': handle }
+    headers: {
+      authorization: `Bearer ${widgetApp.appSecret}`,
+      'x-key-handle': handle,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages: [] })
   });
-  return response.json();
+  const forwarded = harness.mockProvider.recordedRequests.at(-1);
+  return { status: response.status, upstreamKey: forwarded?.headers.get('authorization') };
 }
 
 describe('the embedded key widget', () => {
@@ -54,7 +59,10 @@ describe('the embedded key widget', () => {
     const handle = (await page.textContent('#result')) ?? '';
     expect(await page.content()).not.toContain(SAMPLE_API_KEY);
     expect(await widget.getByText('Key saved and encrypted.').isVisible()).toBe(true);
-    expect(await releaseKey(handle)).toMatchObject({ data: { apiKey: SAMPLE_API_KEY } });
+    expect(await callProviderWith(handle)).toEqual({
+      status: 200,
+      upstreamKey: `Bearer ${SAMPLE_API_KEY}`
+    });
     await page.close();
   });
 

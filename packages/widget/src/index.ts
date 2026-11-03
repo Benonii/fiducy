@@ -1,5 +1,5 @@
-export { WIDGET_MESSAGE_TYPES } from './constants';
-export { mountKeyWidget } from './mountKeyWidget';
+export { WIDGET_MESSAGE_TYPES } from './constants.ts';
+export { mountKeyWidget } from './mountKeyWidget.ts';
 
-export type { MountKeyWidgetOptions, MountedKeyWidget, WidgetMessage } from './types';
-export type { WidgetSealedRecord } from './types';
+export type { MountKeyWidgetOptions, MountedKeyWidget, WidgetMessage } from './types.ts';
+export type { WidgetSealedRecord } from './types.ts';

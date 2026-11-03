@@ -12,8 +12,3 @@ export const GATEWAY_UNAVAILABLE = describeFailure(
   502,
   'The gateway could not delete the sealed key, so it stays active. Try again in a moment'
 );
-
-export const APP_OWNED_BY_USER = describeFailure(
-  409,
-  'This app belongs to a developer account and cannot be seeded'
-);

@@ -1,8 +1,8 @@
-import { HANDLE_PATTERN, HANDLE_PREFIX, KEY_ID_LENGTH } from './constants';
-import { decodeBase64URL, encodeBase64URL, generateRandomBytes } from './encoding';
-import { fail, succeed } from './result';
+import { HANDLE_PATTERN, HANDLE_PREFIX, KEY_ID_LENGTH } from './constants.ts';
+import { decodeBase64URL, encodeBase64URL, generateRandomBytes } from './encoding.ts';
+import { fail, succeed } from './result.ts';
 
-import type { Bytes, ParsedHandle, Result } from './types';
+import type { Bytes, ParsedHandle, Result } from './types.ts';
 
 export function generateKeyID(): string {
   return encodeBase64URL(generateRandomBytes(KEY_ID_LENGTH));

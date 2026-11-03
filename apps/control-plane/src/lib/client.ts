@@ -46,8 +46,6 @@ export function readAppSettingsForm(form: HTMLFormElement): AppSettings {
     name: String(formData.get('name') ?? ''),
     allowedOrigins: parseOriginList(String(formData.get('allowedOrigins') ?? '')),
     monthlyRequestLimitPerKey: Number(formData.get('monthlyRequestLimitPerKey')),
-    accessMode:
-      formData.get('accessMode') === 'gateway_and_release' ? 'gateway_and_release' : 'gateway',
     ...(formData.has('recordStorage') && {
       recordStorage: formData.get('recordStorage') === 'app' ? 'app' : 'fiducy'
     })

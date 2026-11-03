@@ -1,6 +1,6 @@
 import { fail, parseHandle, succeed } from '@fiducy/core';
 
-import { KEY_HANDLE_HEADER, PROVIDER_BASE_PATHS } from './constants';
+import { KEY_HANDLE_HEADER, PROVIDER_BASE_PATHS } from './constants.ts';
 
 import type {
   FetchGateway,
@@ -10,9 +10,8 @@ import type {
   GatewayResponseBody,
   GatewayResult,
   ProviderSettings,
-  ReleasedKey,
   RevokedKey
-} from './types';
+} from './types.ts';
 
 const INVALID_HANDLE_ERROR = { status: 400, message: 'The key handle is malformed' };
 const BROWSER_ERROR =
@@ -77,18 +76,9 @@ export function createGatewayClient({
     return callGateway(fetchGateway, url, { method: 'DELETE', headers: authorization });
   };
 
-  const releaseKey = async (handle: string): Promise<GatewayResult<ReleasedKey>> => {
-    if (!parseHandle(handle).ok) return fail(INVALID_HANDLE_ERROR);
-    return callGateway(fetchGateway, joinURL(gatewayURL, '/release'), {
-      method: 'POST',
-      headers: { ...authorization, [KEY_HANDLE_HEADER]: handle }
-    });
-  };
-
   return {
     providerSettings: (provider, handle) =>
       createProviderSettings(gatewayURL, appSecret, provider, handle),
-    revokeKey,
-    releaseKey
+    revokeKey
   };
 }

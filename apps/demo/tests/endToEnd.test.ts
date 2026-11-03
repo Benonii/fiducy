@@ -24,8 +24,17 @@ afterAll(async () => {
   await stack?.stop();
 });
 
-async function askAndConnect(page: Page, question: string) {
+async function openDemo(page: Page) {
   await page.goto(stack.demoURL);
+  await page.locator('html[data-farm-hydrated="true"]').waitFor();
+}
+
+function demoUserCookies(response: Response): string[] {
+  return response.headers.getSetCookie().filter((cookie) => cookie.startsWith('fiducy_demo_user='));
+}
+
+async function askAndConnect(page: Page, question: string) {
+  await openDemo(page);
   await sendMessage(page, question);
   await page.getByText('Connect your OpenAI key', { exact: true }).waitFor();
   const widget = page.frameLocator('.fiducy-tool iframe');
@@ -88,12 +97,14 @@ describe('assistant-ui demo with bring-your-own keys', () => {
   );
 
   it('gives a new browser an http-only demo user cookie once', async () => {
-    const first = await fetch(`${stack.demoURL}/api/config`);
-    expect(first.headers.get('set-cookie')).toMatch(/^fiducy_demo_user=[0-9a-f-]{36};.*HttpOnly/);
-    const returning = await fetch(`${stack.demoURL}/api/config`, {
+    const first = await fetch(stack.demoURL);
+    expect(demoUserCookies(first)).toEqual([
+      expect.stringMatching(/^fiducy_demo_user=[0-9a-f-]{36};.*HttpOnly/)
+    ]);
+    const returning = await fetch(stack.demoURL, {
       headers: { cookie: 'fiducy_demo_user=returning-user-01' }
     });
-    expect(returning.headers.get('set-cookie')).toBeNull();
+    expect(demoUserCookies(returning)).toEqual([]);
   });
 
   it('answers a user with no key by calling the connect tool', async () => {

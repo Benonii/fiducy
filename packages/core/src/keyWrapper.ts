@@ -1,8 +1,8 @@
-import { IV_LENGTH, MASTER_KEY_LENGTH, WRAPPER_SALT } from './constants';
-import { concatenateBytes, encodeText, generateRandomBytes } from './encoding';
-import { fail, succeed } from './result';
+import { IV_LENGTH, MASTER_KEY_LENGTH, WRAPPER_SALT } from './constants.ts';
+import { concatenateBytes, encodeText, generateRandomBytes } from './encoding.ts';
+import { fail, succeed } from './result.ts';
 
-import type { Bytes, KeyWrapper } from './types';
+import type { Bytes, KeyWrapper } from './types.ts';
 
 async function deriveAppKey(masterKey: CryptoKey, appID: string): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
