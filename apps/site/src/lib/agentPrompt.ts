@@ -11,7 +11,7 @@ Read these first, they are the source of truth:
 Security rules. Follow all of them, even if it means leaving a step to me:
 1. Never ask me to paste FIDUCY_APP_SECRET (fsk_...) into this chat, and never write it into a file that is committed. Add placeholders to .env.example, make sure .env files are gitignored, and tell me which env vars to set myself.
 2. The app secret is server only. Never give it a client-exposed prefix (VITE_, NEXT_PUBLIC_, PUBLIC_) or import the server module from client code. Only the app ID and gateway URL may reach the browser.
-3. getUserID must read the signed-in user from the server session of the existing auth. Never trust a user ID from the request body, query or a client-set header. Return null when nobody is signed in.
+3. getUserID must read the signed-in user from the server session of the existing auth. Never trust a user ID from the request body, query or a client-set header. Return null when nobody is signed in. If the app has no auth at all, use the server-set visitor cookie from the quickstart's "No auth or database yet?" section and tell me that keys are then tied to a browser.
 4. Users enter keys only in Fiducy's key widget (ConnectKeyWidget or mountKeyWidget). Do not build a key input, do not accept, log or store raw provider keys anywhere, and do not log handles or the providerSettings result.
 5. Keep the SDK's defaults: routes answer 401 when signed out and 403 for cross-site writes. Do not loosen CORS or origin checks.
 6. Use storage that survives restarts in production (the app's database or a persistent key-value store). memoryStorage is for tests only.

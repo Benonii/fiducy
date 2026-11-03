@@ -92,6 +92,57 @@ The check at the top throws the first time the module loads. Build tools that lo
 
 **`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Postgres, Cloudflare KV, the file system and more), or you can write four methods against your own database table. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
 
+### No auth or database yet?
+
+A fresh template (for example `npx assistant-ui create`) has neither. Fiducy needs both, but they can be small.
+
+**Storage:** unstorage's file driver keeps handles on disk:
+
+```bash
+npm install unstorage
+```
+
+```ts title="lib/kv.ts"
+import { createStorage } from 'unstorage';
+import fsDriver from 'unstorage/drivers/fs';
+
+export const kv = createStorage({ driver: fsDriver({ base: '.data/fiducy' }) });
+```
+
+Add `.data/` to `.gitignore`. This works locally and on a long-running server. Serverless hosts such as Vercel wipe the disk, so there, switch the driver to Upstash, Vercel KV or Redis; nothing else changes.
+
+**User ID:** without sign-in, give each browser a random ID in an `httpOnly` cookie that only your server sets, and read it in `getUserID`. A saved key then belongs to that browser; if the cookie is cleared, the user connects their key again. In Next.js:
+
+```ts title="proxy.ts (middleware.ts before Next.js 16)"
+import { NextResponse, type NextRequest } from 'next/server';
+
+const VISITOR_COOKIE = 'visitor_id';
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
+export function proxy(request: NextRequest) {
+  const response = NextResponse.next();
+  if (!request.cookies.has(VISITOR_COOKIE)) {
+    response.cookies.set(VISITOR_COOKIE, crypto.randomUUID(), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: ONE_YEAR_SECONDS
+    });
+  }
+  return response;
+}
+```
+
+```ts title="lib/fiducy.ts"
+export async function getUserID(request: Request) {
+  const cookie = request.headers.get('cookie') ?? '';
+  return /(?:^|;\s*)visitor_id=([0-9a-f-]{36})(?:;|$)/.exec(cookie)?.[1] ?? null;
+}
+```
+
+On Next.js 15 and older, name the function `middleware`. When you add real sign-in later, switch `getUserID` to the session user; keys saved under visitor IDs then need connecting again.
+
 ## 3. Mount the key route
 
 `fiducy.handler` is a standard `Request => Response` handler. Mount it for `GET`, `POST` and `DELETE` under `/api/fiducy`:
