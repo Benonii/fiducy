@@ -26,10 +26,11 @@ export function createFiducyKeyElement(): CustomElementConstructor {
     #root = this.attachShadow({ mode: 'open' });
     #widget: MountedKeyWidget | null = null;
     #loadCount = 0;
+    #isRefreshScheduled = false;
 
     #handleKeysChanged = (event: Event) => {
       const detail = (event as CustomEvent<KeysChangedDetail>).detail;
-      if (detail?.source !== this && detail?.basePath === this.basePath) this.refresh();
+      if (detail?.source !== this && detail?.basePath === this.basePath) this.#scheduleRefresh();
     };
 
     get basePath(): string {
@@ -42,7 +43,7 @@ export function createFiducyKeyElement(): CustomElementConstructor {
 
     connectedCallback() {
       window.addEventListener(FIDUCY_KEYS_CHANGED, this.#handleKeysChanged);
-      this.refresh();
+      this.#scheduleRefresh();
     }
 
     disconnectedCallback() {
@@ -52,7 +53,16 @@ export function createFiducyKeyElement(): CustomElementConstructor {
     }
 
     attributeChangedCallback(_name: string, previous: string | null, next: string | null) {
-      if (this.isConnected && previous !== next) this.refresh();
+      if (this.isConnected && previous !== next) this.#scheduleRefresh();
+    }
+
+    #scheduleRefresh() {
+      if (this.#isRefreshScheduled) return;
+      this.#isRefreshScheduled = true;
+      queueMicrotask(() => {
+        this.#isRefreshScheduled = false;
+        if (this.isConnected) this.refresh();
+      });
     }
 
     async refresh() {
