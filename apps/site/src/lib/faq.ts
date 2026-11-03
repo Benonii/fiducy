@@ -7,6 +7,11 @@ export const FAQ: FaqItem[] = [
       'Bring-your-own-key (BYOK) means your users pay OpenAI, Anthropic, Gemini or OpenRouter directly with their own API key instead of you reselling tokens. The hard part is holding those keys: one database leak or one logged request exposes every key you stored. Fiducy takes custody off your hands so a breach of your app leaks nothing usable.'
   },
   {
+    question: 'Why not just encrypt the keys in my own database?',
+    answer:
+      'Because whatever decrypts them sits next to them. Your server holds the encryption key (or can call KMS for it), so anyone who breaks into that server, reads its env vars or gets an insider login can decrypt every stored key in one go. Each request also puts the plaintext key in your app memory, where logs and error trackers can catch it. With Fiducy your app never holds a plaintext key or anything that can decrypt one: it keeps a handle that only works through the gateway, and the gateway only decrypts inside an enclave that KMS trusts by its exact image. A full breach of your app lets an attacker make calls through the gateway until you revoke, within your limits, but not walk away with a single key.'
+  },
+  {
     question: 'Does Fiducy ever see the plaintext key?',
     answer:
       'Only inside a sealed AWS Nitro enclave, for the length of one request. The key is split in two: your app keeps one half as a handle, the enclave keeps the other half sealed with KMS. Neither half opens anything alone, the gateway stores no plaintext, and operators, including AWS admins, cannot read enclave memory.'
