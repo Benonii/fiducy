@@ -77,7 +77,7 @@ import { fiducy, getUserID } from '@/lib/fiducy';
 export async function POST(request: Request) {
   const userID = await getUserID(request);
   const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
-  if (!settings) return new Response('Connect your API key first', { status: 400 });
+  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });
