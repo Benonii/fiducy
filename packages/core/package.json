@@ -1,11 +1,11 @@
 {
   "name": "@fiducy/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Crypto core for Fiducy key custody: AES-256-GCM sealed records, split data keys and key handles",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Benonii/fiducy.git",
+    "url": "git+https://github.com/fiducy-dev/fiducy.git",
     "directory": "packages/core"
   },
   "homepage": "https://fiducy.dev/docs/how-it-works",
