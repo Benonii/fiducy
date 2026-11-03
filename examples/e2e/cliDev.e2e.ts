@@ -13,7 +13,7 @@ import type { Browser } from 'playwright';
 
 const ROOT = resolve(import.meta.dir, '../..');
 const CLI_PATH = join(ROOT, 'packages/cli/dist/index.js');
-const selectedNames = Bun.env.EXAMPLES?.split(',') ?? ['next'];
+const selectedNames = Bun.env.EXAMPLES?.split(',') ?? EXAMPLE_APPS.map(({ name }) => name);
 
 let browser: Browser;
 let projectRoot: string;

@@ -106,7 +106,7 @@ describe('npx fiducy init in an existing Next.js + Better Auth app', () => {
 
     const init = runCli(['init', '--skip-install']);
     expect(init.code).toBe(0);
-    expect(init.output).toContain('Found next, npm, auth: better-auth');
+    expect(init.output).toContain('Found next, bun, auth: better-auth');
     const serverModule = readFileSync(join(APP_DIRECTORY, 'lib/fiducy.ts'), 'utf8');
     expect(serverModule).toContain("import { auth } from '@/lib/auth';");
     expect(serverModule).toContain('auth.api.getSession({ headers: request.headers })');

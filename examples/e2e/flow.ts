@@ -7,8 +7,18 @@ export function waitForKeyState(page: Page, state: string) {
 }
 
 export async function ask(page: Page, expected: string) {
+  const answered = page.waitForResponse((response) => response.url().endsWith('/api/ask'));
   await page.getByRole('button', { name: 'Ask' }).click();
-  await page.getByRole('status').filter({ hasText: expected }).waitFor({ timeout: 30000 });
+  await answered;
+  const status = page.getByRole('status');
+  await status
+    .filter({ hasText: expected })
+    .waitFor({ timeout: 30000 })
+    .catch(async (error: Error) => {
+      throw new Error(`Expected "${expected}" but the reply was "${await status.textContent()}"`, {
+        cause: error
+      });
+    });
 }
 
 export async function signInAndConnectKey(page: Page, appURL: string) {
