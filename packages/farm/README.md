@@ -1,6 +1,6 @@
 # @fiducy/farm
 
-Farm.js integration for [Fiducy](https://github.com/Benonii/fiducy). Mounts the SDK's route handler at `/api/fiducy/*`.
+Farm.js integration for [Fiducy](https://github.com/fiducy-dev/fiducy). Mounts the SDK's route handler at `/api/fiducy/*`.
 
 ```sh
 bun add @fiducy/sdk @fiducy/farm

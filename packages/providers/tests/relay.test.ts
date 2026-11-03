@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it } from 'bun:test';
 
 import { SAMPLE_API_KEY, SAMPLE_APP_SECRET, SAMPLE_HANDLE } from '@fiducy/testing';
 import { ANTHROPIC_STREAM_CHUNKS, OPENAI_STREAM_CHUNKS, startMockProvider } from '@fiducy/testing';
+import { OPENAI_RESPONSES_STREAM_CHUNKS } from '@fiducy/testing';
 import { buildUpstreamRequest, createProviderRegistry, relayResponse } from '../src';
 
 import type { ProviderName, TokenUsage } from '../src';
@@ -122,6 +123,14 @@ describe('relaying the provider response', () => {
     );
     expect(responseText).toBe(OPENAI_STREAM_CHUNKS.join(''));
     expect(usageReports).toEqual([{ inputTokens: 41, outputTokens: 17 }]);
+  });
+
+  it('counts OpenAI Responses API usage from the response.completed event', async () => {
+    const { responseText, usageReports } = await sendThroughGateway('openai', '/v1/responses', {
+      stream: true
+    });
+    expect(responseText).toBe(OPENAI_RESPONSES_STREAM_CHUNKS.join(''));
+    expect(usageReports).toEqual([{ inputTokens: 36, outputTokens: 14 }]);
   });
 
   it('counts Anthropic usage from message_start and message_delta events', async () => {

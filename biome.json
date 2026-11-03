@@ -7,6 +7,7 @@
       ".farm",
       ".output",
       ".vercel",
+      ".prototype",
       "**/farm.d.ts",
       "**/*.generated.ts",
       "apps/site/src/components/ui",
