@@ -206,3 +206,30 @@ html:root {
     border-color: var(--color-border);
   }
 }
+
+/* Docs code tabs: the selected tab gets the code title's hatch and a solid border, not an underline. */
+.fd-code-group [role="tab"] {
+  border: 1px solid transparent !important;
+  outline: none;
+  transition-property: color;
+}
+
+/* The theme's underline for the selected tab. */
+.fd-code-group [role="tab"] > div {
+  display: none;
+}
+
+.fd-code-group [role="tab"][data-state="active"] {
+  border-color: var(--color-fd-foreground) !important;
+  color: var(--color-fd-foreground);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--color-fd-foreground) 16%, transparent) 0 1px,
+    transparent 1px 6px
+  );
+}
+
+.fd-code-group [role="tab"]:focus-visible {
+  outline: 2px solid var(--color-fd-foreground);
+  outline-offset: 2px;
+}
