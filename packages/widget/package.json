@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Benonii/fiducy.git",
+    "url": "git+https://github.com/fiducy-dev/fiducy.git",
     "directory": "packages/widget"
   },
   "homepage": "https://fiducy.dev/docs/react",

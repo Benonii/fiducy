@@ -1,4 +1,4 @@
-export const GITHUB_URL = 'https://github.com/Benonii/fiducy';
+export const GITHUB_URL = 'https://github.com/fiducy-dev/fiducy';
 export const DEMO_URL: string | null = import.meta.env.VITE_FIDUCY_DEMO_URL ?? null;
 export const DASHBOARD_URL: string | null = import.meta.env.VITE_FIDUCY_DASHBOARD_URL ?? null;
 export const INSTALL_COMMAND = 'bun add @fiducy/sdk @fiducy/farm';

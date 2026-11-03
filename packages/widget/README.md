@@ -1,6 +1,6 @@
 # @fiducy/widget
 
-Browser client that mounts the [Fiducy](https://github.com/Benonii/fiducy) key widget iframe and hands your page the key handle. `@fiducy/sdk/react` wraps it in a React component; use this package directly with other frameworks.
+Browser client that mounts the [Fiducy](https://github.com/fiducy-dev/fiducy) key widget iframe and hands your page the key handle. `@fiducy/sdk/react` wraps it in a React component; use this package directly with other frameworks.
 
 ```sh
 bun add @fiducy/widget

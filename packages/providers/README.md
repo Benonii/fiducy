@@ -1,6 +1,6 @@
 # @fiducy/providers
 
-Provider adapters for the [Fiducy](https://github.com/Benonii/fiducy) gateway: swaps the key handle for the real key header, allows only known provider paths, redacts secrets from error bodies and reads token usage from streamed responses. Covers OpenAI, Anthropic, Gemini and OpenRouter.
+Provider adapters for the [Fiducy](https://github.com/fiducy-dev/fiducy) gateway: swaps the key handle for the real key header, allows only known provider paths, redacts secrets from error bodies and reads token usage from streamed responses. Covers OpenAI, Anthropic, Gemini and OpenRouter.
 
 ```sh
 bun add @fiducy/providers

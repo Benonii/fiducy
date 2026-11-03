@@ -6,7 +6,7 @@ export default defineDocs({
   contentDir: 'docs',
   theme: pixelBorder(),
   nav: { title: 'FIDUCY', url: '/' },
-  github: 'https://github.com/Benonii/fiducy',
+  github: 'https://github.com/fiducy-dev/fiducy',
   ordering: 'numeric',
   themeToggle: { default: 'light' },
   feedback: false,
