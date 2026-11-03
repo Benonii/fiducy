@@ -117,7 +117,10 @@ Add `.data/` to `.gitignore`. This works locally and on a long-running server. S
 
 `fiducy.handler` is a standard `Request => Response` handler. Mount it for `GET`, `POST` and `DELETE` under `/api/fiducy`:
 
-```ts title="Next.js: app/api/fiducy/[...path]/route.ts"
+<CodeGroup>
+
+```ts title="Next.js"
+// app/api/fiducy/[...path]/route.ts
 import { fiducy } from '@/lib/fiducy';
 
 export const GET = fiducy.handler;
@@ -129,19 +132,23 @@ export const DELETE = fiducy.handler;
 app.all('/api/fiducy/*', (c) => fiducy.handler(c.req.raw));
 ```
 
-```ts title="React Router / Remix: app/routes/api.fiducy.$.ts"
+```ts title="React Router"
+// app/routes/api.fiducy.$.ts
 import { fiducy } from '~/lib/fiducy.server';
 
 export const loader = ({ request }: { request: Request }) => fiducy.handler(request);
 export const action = ({ request }: { request: Request }) => fiducy.handler(request);
 ```
 
-```ts title="SvelteKit: src/routes/api/fiducy/[...path]/+server.ts"
+```ts title="SvelteKit"
+// src/routes/api/fiducy/[...path]/+server.ts
 import { fiducy } from '$lib/server/fiducy';
 
 const handle = ({ request }: { request: Request }) => fiducy.handler(request);
 export { handle as GET, handle as POST, handle as DELETE };
 ```
+
+</CodeGroup>
 
 Farm.js mounts it for you through `@fiducy/farm`; see [Farm.js](/docs/farm). Frameworks built on Node's `req`/`res` (Express, Fastify) need a small adapter that turns the request into a Web `Request`, such as `@whatwg-node/server`.
 
@@ -151,9 +158,12 @@ You get `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/
 
 The widget is an iframe served by your gateway. The key goes straight from the user's browser into it, and your page only gets back a handle, which it saves through the route from step 3.
 
-**React:**
+Use the React component, or `@fiducy/widget` and one `fetch` in any other framework (Vue, Svelte, Solid, plain HTML):
 
-```tsx title="components/ConnectOpenAIKey.tsx"
+<CodeGroup>
+
+```tsx title="React"
+// components/ConnectOpenAIKey.tsx
 'use client';
 
 import { ConnectKeyWidget } from '@fiducy/sdk/react';
@@ -174,9 +184,7 @@ export function ConnectOpenAIKey() {
 }
 ```
 
-**Any other framework** (Vue, Svelte, Solid, plain HTML) uses `@fiducy/widget` and one `fetch`:
-
-```ts
+```ts title="Any framework"
 import { mountKeyWidget } from '@fiducy/widget';
 
 mountKeyWidget({
@@ -193,15 +201,20 @@ mountKeyWidget({
 });
 ```
 
+</CodeGroup>
+
 Put the widget on a settings page, or wherever users first need a key. To list and remove saved keys, call `GET /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`. See [React](/docs/react) for the list helpers.
 
 ## 5. Call the model with the user's key
 
 `fiducy.providerSettings(provider, { userID })` returns `{ baseURL, apiKey, headers }` pointing at your gateway, or `null` when the user has no key for that provider. Pass it to whatever you call the model with. When it is `null`, ask the user to connect a key; never fall back to a key of your own.
 
-With the [AI SDK](https://ai-sdk.dev):
+Examples for the [AI SDK](https://ai-sdk.dev), the official OpenAI SDK (also works for `openrouter`) and plain `fetch`:
 
-```ts title="app/api/chat/route.ts"
+<CodeGroup>
+
+```ts title="AI SDK"
+// app/api/chat/route.ts
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
@@ -218,18 +231,14 @@ export async function POST(request: Request) {
 }
 ```
 
-With the official OpenAI SDK (also works for `openrouter`):
-
-```ts
+```ts title="OpenAI SDK"
 import OpenAI from 'openai';
 
 const { baseURL, apiKey, headers } = settings;
 const openai = new OpenAI({ baseURL, apiKey, defaultHeaders: headers });
 ```
 
-With plain `fetch`:
-
-```ts
+```ts title="fetch"
 const { baseURL, apiKey, headers } = settings;
 const response = await fetch(`${baseURL}/chat/completions`, {
   method: 'POST',
@@ -237,6 +246,8 @@ const response = await fetch(`${baseURL}/chat/completions`, {
   body: JSON.stringify({ model: 'gpt-4o-mini', messages })
 });
 ```
+
+</CodeGroup>
 
 For Anthropic, the AI SDK's `createAnthropic(settings)` works as is. The official Anthropic SDK adds `/v1` itself, so give it `baseURL.replace(/\/v1$/, '')`.
 
