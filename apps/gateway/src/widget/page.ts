@@ -22,7 +22,7 @@ export function renderWidgetPage({ appID, appName, parentOrigin, nonce }: Widget
 <style nonce="${nonce}">${WIDGET_STYLES}</style>
 </head>
 <body class="m-0 bg-white p-4 font-sans text-sm leading-[1.55] text-ink antialiased selection:bg-ink selection:text-white">
-<form id="key-form" class="grid gap-2.5" autocomplete="off">
+<form id="key-form" class="grid grid-cols-[minmax(0,1fr)] gap-2.5" autocomplete="off">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
     <label for="api-key" class="text-[15px] font-semibold tracking-[-0.01em]">Your API key</label>
     <span class="inline-flex items-center gap-1.5 border border-border px-1.5 py-0.5 text-xs text-muted-foreground"><span class="size-1.5 bg-ink"></span>Sealed in an enclave</span>
@@ -37,7 +37,7 @@ export function renderWidgetPage({ appID, appName, parentOrigin, nonce }: Widget
   <p class="m-0 text-xs font-light text-muted-foreground">${escapeHTML(appName)} never sees your key. It is sealed and only opened to call your AI provider.</p>
   <p id="status" class="m-0 min-h-[1.55em] text-[13px] data-[state=error]:text-destructive" role="status"></p>
 </form>
-<div id="saved" class="grid animate-settle gap-2.5 motion-reduce:animate-none" hidden>
+<div id="saved" class="grid grid-cols-[minmax(0,1fr)] animate-settle gap-2.5 motion-reduce:animate-none" hidden>
   <div class="flex flex-wrap items-baseline justify-between gap-2">
     <p class="m-0 text-[15px] font-semibold tracking-[-0.01em]">Key saved and encrypted.</p>
     <span id="key-hint" class="font-mono text-xs text-muted-foreground"></span>

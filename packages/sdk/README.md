@@ -1,6 +1,6 @@
 # @fiducy/sdk
 
-App SDK for [Fiducy](https://github.com/Benonii/fiducy) key custody. `@fiducy/sdk/server` gives you `createFiducy()`: a route handler, `providerSettings()` for the AI SDK, and list, save and revoke for the signed-in user's keys. `@fiducy/sdk/react` gives you `<ConnectKeyWidget />` (React only). `@fiducy/sdk/react-query` adds an optional `useFiducyKeys()` hook for apps on TanStack Query.
+App SDK for [Fiducy](https://github.com/fiducy-dev/fiducy) key custody. `@fiducy/sdk/server` gives you `createFiducy()`: a route handler, `providerSettings()` for the AI SDK, and list, save and revoke for the signed-in user's keys. `@fiducy/sdk/react` gives you `<ConnectKeyWidget />` (React only). `@fiducy/sdk/react-query` adds an optional `useFiducyKeys()` hook for apps on TanStack Query.
 
 ```sh
 bun add @fiducy/sdk

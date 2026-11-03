@@ -20,10 +20,10 @@ Key custody for bring-your-own-key apps. Users paste their AI provider key into 
 ## Packages
 
 ```sh
-bun add @fiducy/sdk @fiducy/farm
+npm install @fiducy/sdk
 ```
 
-All `@fiducy/*` packages are released together with the same version, built in GitHub Actions and published to npm with provenance. Most apps install `@fiducy/sdk`, `@fiducy/farm` and, for chat UIs, `@fiducy/assistant-ui`. `@fiducy/core`, `@fiducy/providers` and `@fiducy/widget` are the building blocks underneath.
+All `@fiducy/*` packages are released together with the same version, built in GitHub Actions and published to npm with provenance. Most apps only need `@fiducy/sdk`: it works in any framework that handles a Web `Request`. Optional extras: `@fiducy/widget` for non-React UIs, `@fiducy/farm` for Farm.js, `@fiducy/assistant-ui` for assistant-ui chats. `@fiducy/core` and `@fiducy/providers` are the building blocks underneath.
 
 ## Development
 

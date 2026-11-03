@@ -22,7 +22,7 @@ function createQueryClient() {
 
 let browserQueryClient: QueryClient | undefined;
 
-// One client per browser tab, so a page that wraps itself (see SiteFrame) shares the
+// One client per browser tab, so a page that wraps itself (see AuthFrame) shares the
 // layout's cache. On the server each render gets its own client.
 function getQueryClient() {
   if (typeof window === 'undefined') return createQueryClient();

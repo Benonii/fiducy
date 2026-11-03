@@ -9,47 +9,46 @@ export const CODE_SAMPLES: CodeSampleTab[] = [
   {
     id: 'server',
     label: 'Server',
-    file: 'src/lib/fiducy.ts',
-    code: `import { getStorage } from '@farm.js/core/storage';
-import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
+    file: 'lib/fiducy.ts',
+    code: `import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { auth } from '@/lib/auth';
+import { auth } from '@/lib/auth'; // your auth (Better Auth shown)
+import { kv } from '@/lib/kv'; // any unstorage driver
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
 export async function getUserID(request: Request) {
+  // Use your own auth's server-side session lookup here.
   const session = await auth.api.getSession({ headers: request.headers });
   return session?.user.id ?? null;
 }
 
-export const fiducyServer = createFiducy({
+export const fiducy = createFiducy({
   gatewayURL: FIDUCY_GATEWAY_URL,
   appSecret: FIDUCY_APP_SECRET,
-  storage: keyValueStorage(getStorage('fiducy')),
+  storage: keyValueStorage(kv),
   getUserID
 });`
   },
   {
-    id: 'config',
-    label: 'Integration',
-    file: 'farm.config.ts',
-    code: `import { defineConfig } from '@farm.js/core';
-import { fiducy } from '@fiducy/farm';
+    id: 'routes',
+    label: 'Key route',
+    file: 'app/api/fiducy/[...path]/route.ts',
+    code: `import { fiducy } from '@/lib/fiducy';
 
-import { fiducyServer } from './src/lib/fiducy';
-
-export default defineConfig({
-  integrations: {
-    byok: fiducy({ instance: fiducyServer })
-  }
-});`
+// A standard Request => Response handler: works in any framework.
+export const GET = fiducy.handler;
+export const POST = fiducy.handler;
+export const DELETE = fiducy.handler;`
   },
   {
     id: 'widget',
     label: 'Widget',
-    file: 'src/app/settings/page.tsx',
-    code: `import { ConnectKeyWidget } from '@fiducy/sdk/react';
+    file: 'app/settings/page.tsx',
+    code: `'use client';
+
+import { ConnectKeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
 export default function Settings() {
@@ -69,16 +68,16 @@ export default function Settings() {
   {
     id: 'route',
     label: 'Model call',
-    file: 'src/app/api/chat/route.ts',
+    file: 'app/api/chat/route.ts',
     code: `import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
-import { fiducyServer, getUserID } from '@/lib/fiducy';
+import { fiducy, getUserID } from '@/lib/fiducy';
 
 export async function POST(request: Request) {
   const userID = await getUserID(request);
-  const settings = userID ? await fiducyServer.providerSettings('openai', { userID }) : null;
-  if (!settings) return new Response('Connect your API key first', { status: 400 });
+  const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
+  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });

@@ -33,7 +33,49 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-Without TanStack Query, list keys with a plain `fetch('/api/fiducy/keys')` and revoke with `DELETE /api/fiducy/keys/:keyID` (see [Server SDK](/docs/server)).
+Without TanStack Query, use plain `fetch`. The widget fires a `fiducy:keys-changed` window event (exported as `FIDUCY_KEYS_CHANGED`) after it saves a key, so the list can refresh itself:
+
+```tsx title="components/ConnectedKeys.tsx"
+'use client';
+
+import { FIDUCY_KEYS_CHANGED } from '@fiducy/sdk/react';
+import { useEffect, useState } from 'react';
+
+interface ConnectedKey { keyID: string; provider: string; createdAt: string }
+
+export function ConnectedKeys() {
+  const [keys, setKeys] = useState<ConnectedKey[]>([]);
+
+  const load = async () => {
+    const response = await fetch('/api/fiducy/keys');
+    const body = await response.json();
+    setKeys(body.data?.keys ?? []);
+  };
+
+  const remove = async (keyID: string) => {
+    await fetch(`/api/fiducy/keys/${keyID}`, { method: 'DELETE' });
+    await load();
+  };
+
+  useEffect(() => {
+    void load();
+    window.addEventListener(FIDUCY_KEYS_CHANGED, load);
+    return () => window.removeEventListener(FIDUCY_KEYS_CHANGED, load);
+  }, []);
+
+  return (
+    <ul>
+      {keys.map((key) => (
+        <li key={key.keyID}>
+          {key.provider} <button onClick={() => remove(key.keyID)}>Remove</button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+`GET /api/fiducy/keys` answers `{ data: { keys: [{ keyID, provider, createdAt }] } }`. See [Server SDK](/docs/server) for every route.
 
 ## ConnectKeyWidget
 
