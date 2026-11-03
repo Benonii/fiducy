@@ -60,6 +60,9 @@ for (const testDatabase of DRIZZLE_DATABASES) {
       expect(() =>
         drizzleStorage(drizzle.db, { schema: drizzle.schema, tableName: 'not_there' })
       ).toThrow(/could not find the "not_there" table/);
+      const beforeGenerate = drizzleStorage({}, { provider: 'pg' });
+      expect(beforeGenerate.schema?.generate().contents).toContain('pgTable');
+      await expect(beforeGenerate.listKeys('user_ada')).rejects.toThrow(/could not find/);
     });
   });
 }
