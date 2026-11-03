@@ -96,11 +96,9 @@ The check at the top throws the first time the module loads. Build tools that lo
 
 **`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Postgres, Cloudflare KV, the file system and more), or you can write four methods against your own database table. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
 
-### No auth or storage yet?
+### No storage yet?
 
-A fresh template (for example `npx assistant-ui create`) has neither.
-
-**Storage:** unstorage's file driver keeps handles on disk:
+A fresh template (for example `npx assistant-ui create`) has none. unstorage's file driver keeps handles on disk:
 
 ```bash
 npm install unstorage
@@ -114,8 +112,6 @@ export const kv = createStorage({ driver: fsDriver({ base: '.data/fiducy' }) });
 ```
 
 Add `.data/` to `.gitignore`. This works locally and on a long-running server. Serverless hosts such as Vercel wipe the disk, so there, switch the driver to Upstash, Vercel KV or Redis; nothing else changes.
-
-**Auth:** set it up first (see the top of this page), then come back to `getUserID`.
 
 ## 3. Mount the key route
 
