@@ -1,10 +1,10 @@
 import { ConnectKeyWidget } from '@fiducy/sdk/react';
 import { useState } from 'react';
 
-import { PROVIDER_LABELS } from './constants';
+import { PROVIDER_LABELS } from './constants.ts';
 
 import type { ToolCallMessagePartProps } from '@assistant-ui/react';
-import type { ConnectKeyArgs, ConnectKeyResult, FiducyToolkitOptions } from './types';
+import type { ConnectKeyArgs, ConnectKeyResult, FiducyToolkitOptions } from './types.ts';
 
 type ConnectKeyToolUIProps = ToolCallMessagePartProps<ConnectKeyArgs, ConnectKeyResult> &
   FiducyToolkitOptions;

@@ -1,9 +1,10 @@
-export type KeyAccessMode = 'gateway' | 'gateway_and_release';
+import type { Group, OrthographicCamera, PerspectiveCamera, Scene } from 'three';
+import type { Vector2, WebGLRenderTarget } from 'three';
+
 export type RecordStorage = 'fiducy' | 'app';
 
 export interface AppSettings {
   name: string;
-  accessMode: KeyAccessMode;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
@@ -51,6 +52,7 @@ export type StoredValue =
   | StoredKeyEntry
   | DailyUsage
   | GatewayHeartbeat
+  | string[]
   | true;
 
 export interface KeyValueStore {
@@ -71,6 +73,8 @@ export interface ControlStore {
   saveKeyEntry: (entry: StoredKeyEntry) => Promise<void>;
   findKeyEntry: (appID: string, keyID: string) => Promise<StoredKeyEntry | null>;
   listKeyEntries: (appID: string) => Promise<StoredKeyEntry[]>;
+  listRevokedKeyIDs: (appID: string) => Promise<string[]>;
+  addRevokedKeyID: (appID: string, keyID: string) => Promise<void>;
   readDailyUsage: (appID: string, date: string) => Promise<DailyUsage>;
   saveDailyUsage: (appID: string, usage: DailyUsage) => Promise<void>;
   readGatewayHeartbeat: () => Promise<GatewayHeartbeat | null>;
@@ -154,4 +158,16 @@ export interface KeyEvent {
   type: KeyEventType;
   appID: string;
   keyID: string;
+}
+
+export interface DitherKeyParts {
+  scene: Scene;
+  camera: PerspectiveCamera;
+  turntable: Group;
+  handleHalf: Group;
+  storedHalf: Group;
+  target: WebGLRenderTarget;
+  cells: Vector2;
+  quad: Scene;
+  quadCamera: OrthographicCamera;
 }

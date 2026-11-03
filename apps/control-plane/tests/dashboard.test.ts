@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 
 import { createApp, listGatewayApps } from '../src/lib/appService';
+import { createControlStore, createMemoryKeyValueStore } from '../src/lib/controlStore';
 import { noteGatewayContact, readGatewayStatus } from '../src/lib/gatewayStatusService';
 import { listAppKeys, noteKeyEvent, revokeAppKey } from '../src/lib/keyService';
 import { readUsageSeries, recordUsageBatch } from '../src/lib/usageService';
@@ -66,6 +67,28 @@ describe('revoking a key from the dashboard', () => {
     expect(keys).toMatchObject({ ok: true, value: [{ keyID: 'key_a', status: 'revoked' }] });
     const [gatewayApp] = await listGatewayApps(store);
     expect(gatewayApp?.revokedKeyIDs).toEqual(['key_a']);
+  });
+
+  it('feeds the gateway from the revoked index without reading every key entry', async () => {
+    const keyValueStore = createMemoryKeyValueStore();
+    const store = createControlStore(keyValueStore);
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    for (const keyID of ['key_a', 'key_b', 'key_c']) {
+      await noteKeyEvent(store, savedKey(app.appID, keyID));
+    }
+    await revokeAppKey(store, OWNER_ID, app.appID, 'key_b');
+    await revokeAppKey(store, OWNER_ID, app.appID, 'key_b');
+    const listedPrefixes: string[] = [];
+    const countingStore = createControlStore({
+      ...keyValueStore,
+      getKeys: async (base) => {
+        listedPrefixes.push(base ?? '');
+        return keyValueStore.getKeys(base);
+      }
+    });
+    const [gatewayApp] = await listGatewayApps(countingStore);
+    expect(gatewayApp?.revokedKeyIDs).toEqual(['key_b']);
+    expect(listedPrefixes).toEqual(['apps']);
   });
 
   it('refuses unknown keys and other owners', async () => {

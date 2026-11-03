@@ -1,7 +1,7 @@
 import { mountKeyWidget } from '@fiducy/widget';
 import { useEffect, useRef } from 'react';
 
-import type { KeyWidgetProps } from './types';
+import type { KeyWidgetProps } from './types.ts';
 
 export function KeyWidget({ gatewayURL, appID, onHandle, onError, className }: KeyWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);

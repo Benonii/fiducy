@@ -6,28 +6,51 @@ description: Add bring-your-own-key to a Farm.js app in four steps.
 
 # Quickstart
 
-This guide adds Fiducy to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler.
+This guide adds Fiducy to a Farm.js app. Other frameworks use the same server instance; see [Server SDK](/docs/server) for a plain route handler. Using assistant-ui? Follow this guide, then [assistant-ui](/docs/assistant-ui).
 
-> The packages are not on npm yet. Until then, use them from the monorepo workspace.
+Starting from nothing? Create a Farm.js app first:
+
+```bash
+npm create @farm.js/app@latest my-app -- --template basic --typescript
+```
+
+Install the SDK, the Farm.js integration, TanStack Query (used by the React parts) and the AI SDK for the chat route:
+
+```bash
+bun add @fiducy/sdk @fiducy/farm ai @ai-sdk/openai
+```
+
+## 0. Have a gateway to talk to
+
+Your app needs a running Fiducy gateway and dashboard. Two options:
+
+| Option | Dashboard | Gateway URL |
+| --- | --- | --- |
+| Local, for trying it out | `http://localhost:3000` | `http://localhost:8787` |
+| Your own deployment | Wherever you host it | Its public URL, for example `https://gateway.yourapp.com` |
+
+For the local option, clone the [Fiducy repo](https://github.com/Benonii/fiducy) and run `bun install && bun run prototype --mock`; see [Self-hosting](/docs/self-hosting#run-locally). It takes ports 3000, 3001 and 8787, so run your own app on another port, for example `farm dev --port 5173`.
 
 ## 1. Register your app
 
-Create an app in the Fiducy dashboard. You get:
+Sign up in the Fiducy dashboard and create an app. You get:
 
 - an **app ID**, public, used by the widget
 - an **app secret** (`fsk_...`), server only, used for every gateway call
 
-Add your site's origin (for example `https://myapp.com`) to the app's allowed origins, so the widget can be embedded there.
+Add your site's origin to the app's allowed origins, so the widget can be embedded there. Use the exact scheme, host and port, for example `http://localhost:5173` while developing and `https://myapp.com` in production.
+
+Put the values in `.env` (keep it out of git):
 
 ```bash
-FIDUCY_GATEWAY_URL=https://gw.fiducy.dev
+FIDUCY_GATEWAY_URL=http://localhost:8787
 FIDUCY_APP_ID=app_...
 FIDUCY_APP_SECRET=fsk_...
 ```
 
 ## 2. Create the server instance
 
-The examples import from `@/`, which points at `src/` through `paths` in your `tsconfig.json`.
+The examples import from `@/`, which points at `src/` through `paths` in your `tsconfig.json`. `@/lib/auth` stands for your app's auth (Farm Auth, Better Auth, anything with a server session).
 
 ```ts title="src/lib/fiducy.ts"
 import { getStorage } from '@farm.js/core/storage';
@@ -46,12 +69,19 @@ export async function getUserID(request: Request) {
 export const fiducyServer = createFiducy({
   gatewayURL: FIDUCY_GATEWAY_URL,
   appSecret: FIDUCY_APP_SECRET,
-  storage: keyValueStorage(getStorage('fiducy')),
+  storage: keyValueStorage({
+    getItem: (key) => getStorage('fiducy').getItem(key),
+    setItem: (key, value) => getStorage('fiducy').setItem(key, value),
+    removeItem: (key) => getStorage('fiducy').removeItem(key),
+    getKeys: (base) => getStorage('fiducy').getKeys(base)
+  }),
   getUserID
 });
 ```
 
-`getUserID` is how Fiducy knows who is asking. Return your own user ID from whatever auth you use, or `null` when nobody is signed in.
+`getUserID` is how Fiducy knows who is asking. Return your own user ID from your auth's server session, or `null` when nobody is signed in. Never take the ID from the request body or a header the browser sets.
+
+`storage` is where your app keeps each user's key handle (a reference to the sealed key, not the key). The functions call `getStorage('fiducy')` on every use rather than once at import: this file is also imported by `farm.config.ts`, which loads before Farm sets up its storage mounts, so a storage object captured at import time would not be the `fiducy` mount from step 3.
 
 ## 3. Add the integration
 
@@ -72,46 +102,36 @@ export default defineConfig({
 });
 ```
 
-This mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`.
+The `storage` block defines the `fiducy` mount the server instance reads. Farm's `localStorage` driver writes files on your server under `.data/fiducy` (it is not the browser's localStorage). That is fine while developing; in production, point the mount at a database, for example `postgresStorage({ url: process.env.DATABASE_URL })` from `@farm.js/core/storage`. See [Storage](/docs/storage).
+
+The integration mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`.
 
 ## 4. Drop in the widget and use the key
 
-The React parts run on TanStack Query, so install it and wrap your app in a `QueryClientProvider` (see [React](/docs/react#setup)):
-
-```bash
-bun add @tanstack/react-query
-```
-
-```tsx title="src/app/layout.tsx"
-import { Providers } from './providers';
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <Providers>{children}</Providers>;
-}
-```
+Add a settings page where users connect a key. The app ID is public, so it can go straight into client code:
 
 ```tsx title="src/app/settings/page.tsx"
 'use client';
 
-import { ConnectKeyWidget, useFiducyKeys } from '@fiducy/sdk/react';
+import { ConnectKeyWidget } from '@fiducy/sdk/react';
+import { useState } from 'react';
 
 export default function SettingsPage() {
-  const { keys, refresh, revoke } = useFiducyKeys();
-  const openAIKey = keys.find((key) => key.provider === 'openai');
+  const [connected, setConnected] = useState(false);
 
-  if (openAIKey) {
-    return <button onClick={() => revoke(openAIKey.keyID)}>Remove my OpenAI key</button>;
-  }
+  if (connected) return <p>Your OpenAI key is connected.</p>;
   return (
     <ConnectKeyWidget
-      gatewayURL="https://gw.fiducy.dev"
-      appID="app_..."
+      gatewayURL="http://localhost:8787" // your FIDUCY_GATEWAY_URL
+      appID="app_..." // your FIDUCY_APP_ID
       provider="openai"
-      onConnected={refresh}
+      onConnected={() => setConnected(true)}
     />
   );
 }
 ```
+
+To list and remove saved keys, use `useFiducyKeys` from `@fiducy/sdk/react-query` if your app uses TanStack Query, or call `GET` and `DELETE` on `/api/fiducy/keys` yourself. See [React](/docs/react).
 
 Then call the model from any server route:
 
@@ -132,4 +152,12 @@ export async function POST(request: Request) {
 }
 ```
 
-That is the whole integration. The plaintext key only ever exists inside the gateway's enclave.
+## 5. Try it
+
+1. Sign in to your app, open `/settings`, paste a key and save. With `--mock`, any string works, for example `sk-test-1234`.
+2. The page switches to "Remove my OpenAI key".
+3. Send a chat request. With `--mock`, the prototype's terminal logs `[fake OpenAI] ... received the decrypted key ...1234`.
+
+If the chat route answers "Connect your API key first" right after you connected one, check the `storage` functions in step 2.
+
+That is the whole integration. The plaintext key only ever exists inside the gateway.

@@ -80,20 +80,10 @@ describe('revoking a key', () => {
   });
 });
 
-describe('releasing a key to the app server', () => {
-  it('is refused for apps on gateway-only mode', async () => {
+describe('getting a plaintext key back', () => {
+  it('has no endpoint for it', async () => {
     const { body } = await harness.storeKey(CHAT_APP.appID, SAMPLE_API_KEY);
-    expect((await sendAuthorized('/release', CHAT_APP.appSecret, body.data.handle)).status).toBe(
-      403
-    );
-  });
-
-  it('returns the key with a time to live for apps that turned it on', async () => {
-    const { body } = await harness.storeKey(DESK_APP.appID, SAMPLE_API_KEY);
-    const response = await sendAuthorized('/release', DESK_APP.appSecret, body.data.handle);
-    expect(await response.json()).toEqual({
-      data: { apiKey: SAMPLE_API_KEY, expiresInSeconds: 300 },
-      message: 'Key released. Keep it in memory only'
-    });
+    const response = await sendAuthorized('/release', CHAT_APP.appSecret, body.data.handle);
+    expect(response.status).toBe(404);
   });
 });

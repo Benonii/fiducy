@@ -11,7 +11,7 @@ import {
 } from '@assistant-ui/react';
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { PROVIDER_LABELS, fiducyToolkit } from '@fiducy/assistant-ui';
-import { useFiducyKeys } from '@fiducy/sdk/react';
+import { useFiducyKeys } from '@fiducy/sdk/react-query';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useMemo, useRef, useState } from 'react';
 
@@ -63,7 +63,7 @@ export function Chat() {
     // After the user saves a key in the thread, send the conversation again so the model answers.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls
   });
-  // Saving a key refreshes useFiducyKeys through TanStack Query, so no callback is needed here.
+  // ConnectKeyWidget announces saved keys and useFiducyKeys refreshes itself, so no callback is needed here.
   const auiConfig = useMemo(() => {
     const environment = readPublicEnvironment();
     return AuiConfig({

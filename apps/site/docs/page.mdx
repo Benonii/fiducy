@@ -32,10 +32,10 @@ Fiducy fits into your app as four pieces: a server instance, a route handler, a 
 | `createFiducy()` | Server instance: route handler, `providerSettings`, list, save, revoke |
 | `fiducy()` for Farm.js | Mounts the handler at `/api/fiducy/*` as a Farm integration |
 | `<ConnectKeyWidget />` | Drops the gateway iframe into your page and saves the handle |
-| `useFiducyKeys()` | Lists and revokes the signed-in user's keys |
+| `useFiducyKeys()` | Optional TanStack Query hook (`@fiducy/sdk/react-query`) that lists and revokes the signed-in user's keys |
 
 Start with the [Quickstart](/docs/quickstart).
 
 ## Open source and managed
 
-The whole stack is open source. Self-hosting is free: you run the gateway enclave, KMS key and storage in your own AWS account. The managed service runs the enclave, KMS and dashboard for you.
+The whole stack is open source under the Apache-2.0 license. Self-hosting is free: you run the gateway enclave, KMS key and storage in your own AWS account. The managed service runs the enclave, KMS and dashboard for you.

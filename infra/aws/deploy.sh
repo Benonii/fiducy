@@ -77,7 +77,7 @@ sync_control_plane_token() {
   log "Handing the gateway token to the control plane on Vercel"
   local body
   body=$(jq -cn --arg value "$(read_gateway_token)" \
-    '{key: "FIDUCY_GATEWAY_TOKEN", value: $value, type: "encrypted", target: ["production", "preview"]}')
+    '{key: "FIDUCY_GATEWAY_TOKEN", value: $value, type: "sensitive", target: ["production"]}')
   curl -fsS -o /dev/null -X POST \
     "${VERCEL_API}/v10/projects/${VERCEL_CONTROL_PLANE_PROJECT_ID}/env?upsert=true$(vercel_query)" \
     -H "authorization: Bearer ${VERCEL_TOKEN}" -H 'content-type: application/json' -d "$body"
@@ -202,7 +202,7 @@ summary ""
 summary "- Gateway (in the enclave): https://gw.${DASHED_IP}.sslip.io"
 summary "- Dashboard (Vercel): ${CONTROL_PLANE_URL}"
 [ -z "${FIDUCY_DEMO_URL:-}" ] || summary "- Demo chat (Vercel): ${FIDUCY_DEMO_URL}"
-summary "- Site and docs: https://fiducy-nine.vercel.app"
+summary "- Site and docs: https://fiducy.dev"
 summary "- Enclave image PCR0: \`${PCR0}\`"
 if [ "$ROTATE_TOKEN" = true ]; then
   summary "- Gateway token rotated: the previous token no longer authenticates the gateway"

@@ -13,6 +13,27 @@ export interface FrameProps {
   children: ReactNode;
 }
 
+export type AuthMode = 'sign-in' | 'sign-up';
+
+export interface AuthFormProps {
+  mode: AuthMode;
+}
+
+export interface AuthPanelProps {
+  mode: AuthMode;
+}
+
+export interface AuthFrameProps {
+  mode: AuthMode;
+  children: ReactNode;
+}
+
+export interface Credentials {
+  email: string;
+  password: string;
+  name: string;
+}
+
 export interface DashboardShellProps {
   activeAppID?: string;
   children: ReactNode;

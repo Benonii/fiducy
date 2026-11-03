@@ -1,49 +1,68 @@
 {
   "name": "@fiducy/sdk",
   "version": "0.1.0",
-  "private": true,
+  "description": "Fiducy app SDK: server instance, gateway client and React key widget",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Benonii/fiducy.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://fiducy.dev/docs/server",
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
       "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./react": {
-      "types": "./src/react.ts",
       "bun": "./src/react.ts",
+      "types": "./dist/react.d.ts",
       "default": "./dist/react.js"
     },
+    "./react-query": {
+      "bun": "./src/reactQuery.ts",
+      "types": "./dist/reactQuery.d.ts",
+      "default": "./dist/reactQuery.js"
+    },
     "./server": {
-      "types": "./src/server.ts",
       "bun": "./src/server.ts",
+      "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
     }
   },
   "files": ["dist", "src"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "bun build src/react.ts --outdir dist --target browser --external react --external react/jsx-runtime --external @tanstack/react-query && bun build src/index.ts src/server.ts --outdir dist --target node"
+    "build": "rm -rf dist && bun build src/react.ts src/reactQuery.ts --outdir dist --target browser --packages external --sourcemap=linked && bun build src/index.ts src/server.ts --outdir dist --target node --packages external --sourcemap=linked && tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@fiducy/core": "workspace:*",
-    "@fiducy/widget": "workspace:*"
+    "@fiducy/core": "0.1.0",
+    "@fiducy/widget": "0.1.0"
   },
   "peerDependencies": {
-    "react": "19.2.0",
-    "@tanstack/react-query": "^5.104.2"
+    "@tanstack/react-query": "^5.104.2",
+    "react": "^19.2.0"
   },
   "peerDependenciesMeta": {
-    "react": {
+    "@tanstack/react-query": {
       "optional": true
     },
-    "@tanstack/react-query": {
+    "react": {
       "optional": true
     }
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "4.0.79",
     "@ai-sdk/openai": "4.0.93",
-    "@fiducy/testing": "workspace:*",
+    "@fiducy/testing": "0.1.0",
     "@tanstack/react-query": "5.104.2",
     "@types/react": "19.2.2",
     "ai": "7.0.139",

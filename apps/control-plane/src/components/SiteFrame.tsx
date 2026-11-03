@@ -1,5 +1,6 @@
 import { buttonVariants } from '@/components/ui/button';
 
+import { QueryProvider } from './QueryProvider';
 import { Wordmark } from './Wordmark';
 
 import type { FrameProps } from './types';
@@ -15,7 +16,8 @@ export function SiteFrame({ children }: FrameProps) {
           </a>
         </nav>
       </header>
-      {children}
+      {/* Farm renders only the page on client navigation, without the root layout's provider */}
+      <QueryProvider>{children}</QueryProvider>
     </div>
   );
 }
