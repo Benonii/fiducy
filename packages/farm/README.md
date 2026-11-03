@@ -12,4 +12,4 @@ import { fiducy } from '@fiducy/farm';
 export default defineConfig({ integrations: { byok: fiducy({ instance }) } });
 ```
 
-See the [Quickstart](https://fiducy-nine.vercel.app/docs/quickstart).
+See the [Quickstart](https://fiducy.dev/docs/quickstart).

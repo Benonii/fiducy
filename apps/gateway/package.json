@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "bun src/server.ts"
+    "start": "bun src/server.ts",
+    "build:vercel": "bun scripts/buildVercel.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1140.0",

@@ -8,7 +8,7 @@
     "url": "git+https://github.com/Benonii/fiducy.git",
     "directory": "packages/farm"
   },
-  "homepage": "https://fiducy-nine.vercel.app/docs/quickstart",
+  "homepage": "https://fiducy.dev/docs/quickstart",
   "type": "module",
   "sideEffects": false,
   "engines": {
