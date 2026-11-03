@@ -55,6 +55,20 @@ describe('setup from server env', () => {
     expect(result.text).toBe('Hello');
   });
 
+  it('reads an env object for frameworks that keep .env out of process.env', async () => {
+    const fiducy = createFiducy({
+      storage: memoryStorage(),
+      getUserID: readTestUser,
+      env: {
+        FIDUCY_GATEWAY_URL: harness.gatewayURL,
+        FIDUCY_APP_ID: CHAT_APP.appID,
+        FIDUCY_APP_SECRET: CHAT_APP.appSecret
+      }
+    });
+    const response = await fiducy.handler(appRequest('/config', null));
+    expect(response.status).toBe(200);
+  });
+
   it('serves the public config to the browser without sign-in or the secret', async () => {
     setConnectionEnvironment();
     const response = await createFromEnvironment().handler(appRequest('/config', null));

@@ -7,7 +7,8 @@ export type {
   CreateFiducyOptions,
   Fiducy
 } from './server/types.ts';
-export type { FiducyStorage, GetUserID, KeyValueDriver } from './server/types.ts';
+export type { EnvironmentVariables, FiducyStorage } from './server/types.ts';
+export type { GetUserID, KeyValueDriver } from './server/types.ts';
 export type { MissingKey, MissingKeyReason, ProviderSettingsResult } from './server/types.ts';
 export type { PublicFiducyConfig, SaveKeyInput, StoredUserKey } from './server/types.ts';
 export type { UserKeySummary, UserLookup } from './server/types.ts';

@@ -12,3 +12,9 @@ apps/site/.farm/
 .vercel
 .env*
 packages/sdk/tests/browser/.pages
+examples/*/AGENTS.md
+examples/*/.next
+examples/*/.nuxt
+examples/*/.svelte-kit
+examples/*/.react-router
+examples/*/.tanstack
