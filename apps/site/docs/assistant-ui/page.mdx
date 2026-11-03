@@ -8,7 +8,7 @@ description: Add bring-your-own-key to an assistant-ui chat, with the key box op
 
 `@fiducy/assistant-ui` adds a `connect_api_key` tool to an [assistant-ui](https://www.assistant-ui.com) thread. When a user has no key for the model, your chat route answers with that tool call, the thread shows the Fiducy key box, and the run continues once the user saves a key. Your app only ever stores a handle.
 
-This page assumes an assistant-ui app on the AI SDK runtime (`useChatRuntime` from `@assistant-ui/react-ai-sdk`), which is what `npx assistant-ui create` gives you.
+This page assumes an assistant-ui app on the AI SDK runtime (`useChatRuntime`), which is what `npx assistant-ui create` gives you. New templates import it from `@assistant-ui/ai-sdk`; older apps use `@assistant-ui/react-ai-sdk`. The examples use the older name; the imports are the same in both.
 
 ## 1. Install
 
@@ -123,7 +123,7 @@ export function Assistant() {
 
 ## 5. Try it
 
-Sign in, send a message. The thread answers "Connect your OpenAI key to keep going" with the key box. Save a key, and the original message is answered. With the local prototype and `--mock`, any string works as a key.
+Sign in, send a message. The thread answers "Connect your OpenAI key to keep going" with the key box. Save a key, and the original message is answered. With the local prototype and `--mock`, any string works as a key. The fake OpenAI answers both the Chat Completions API (`.chat(...)`) and the Responses API (`openai(...)` or `.responses(...)`, the template's default).
 
 ## Styling
 
