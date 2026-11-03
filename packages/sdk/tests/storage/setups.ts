@@ -25,7 +25,12 @@ async function openKyselyStorage(database: TestDatabase): Promise<OpenedStorage>
 
 async function openDrizzleStorage(database: TestDatabase): Promise<OpenedStorage> {
   const drizzle = await openDrizzle(database);
-  for (const statement of drizzle.statements) await database.execute(statement);
+  try {
+    for (const statement of drizzle.statements) await database.execute(statement);
+  } catch (error) {
+    drizzle.cleanUp();
+    throw error;
+  }
   const close = async () => {
     drizzle.cleanUp();
     await database.close();

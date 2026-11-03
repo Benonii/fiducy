@@ -101,7 +101,7 @@ export const fiducy = createFiducy({ gatewayURL, appSecret, storage, getUserID }
 | `table` | | The Drizzle table. Takes priority over `schema` |
 | `schema` | the schema given to `drizzle()` | An object of tables, such as `import * as schema` |
 | `tableName` | `fiducy_user_key` | Finds the table in `schema` by its SQL name. Pass the same name to `generateSchema` |
-| `provider` | read from the table | `'pg'`, `'mysql'` or `'sqlite'`, as in Better Auth's Drizzle adapter. Only needed for a table Drizzle can't identify |
+| `provider` | read from the table | `'pg'`, `'mysql'` or `'sqlite'`, as in Better Auth's Drizzle adapter. With it, the table is looked up on first use instead of at startup, so tools such as `fiducy generate` can load your server module before the table exists |
 
 ## Gotchas
 
