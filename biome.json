@@ -8,6 +8,7 @@
       ".output",
       ".vercel",
       ".prototype",
+      "**/tests/browser/.pages",
       "**/farm.d.ts",
       "**/*.generated.ts",
       "apps/site/src/components/ui",

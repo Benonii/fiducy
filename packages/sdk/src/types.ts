@@ -70,3 +70,47 @@ export interface FiducyKeysState {
   refresh: () => Promise<void>;
   revoke: (keyID: string) => Promise<void>;
 }
+
+export type FiducyKeyState = 'loading' | 'signed-out' | 'connect' | 'connected' | 'error';
+
+export interface FiducyBrowserConfig {
+  gatewayURL: string;
+  appID: string;
+}
+
+export interface FiducyKeyOptions {
+  provider: GatewayProvider;
+  basePath?: string;
+  gatewayURL?: string;
+  appID?: string;
+}
+
+export interface FiducyKeyHandlers {
+  onConnected?: (key: UserKeySummaryView) => void;
+  onRemoved?: (keyID: string) => void;
+  onError?: (message: string) => void;
+}
+
+export interface FiducyKeyProps extends FiducyKeyOptions, FiducyKeyHandlers {
+  className?: string;
+}
+
+export interface FiducyRemovedDetail {
+  keyID: string;
+}
+
+export interface FiducyErrorDetail {
+  message: string;
+}
+
+export interface KeyRouteLookup {
+  state: 'signed-out' | 'connect' | 'connected';
+  key: UserKeySummaryView | null;
+}
+
+export interface KeysChangedDetail {
+  basePath: string;
+  source: EventTarget | null;
+}
+
+export type FiducyKeyActionOptions = FiducyKeyOptions & FiducyKeyHandlers;

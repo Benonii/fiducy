@@ -11,3 +11,4 @@ enclave/enclaver.yaml
 apps/site/.farm/
 .vercel
 .env*
+packages/sdk/tests/browser/.pages
