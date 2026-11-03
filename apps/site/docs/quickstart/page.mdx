@@ -94,24 +94,24 @@ The check at the top throws the first time the module loads. Build tools that lo
 | Supabase | `(await supabase.auth.getUser()).data.user?.id` |
 | Farm Auth | `(await auth.user({ request }))?.id` |
 
-**`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Postgres, Cloudflare KV, the file system and more), or you can write four methods against your own database table. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
+**`storage`** is where your app keeps each user's key handle (a reference to the sealed key, never the key). `keyValueStorage` takes any [unstorage](https://unstorage.unjs.io) instance (Redis, Cloudflare KV, the file system and more). Have a SQL database? Use `kyselyStorage` from `@fiducy/sdk/storage/kysely` with the pool you already have. See [Storage](/docs/storage). In production, use storage that survives restarts; `memoryStorage()` is for tests only.
 
 ### No storage yet?
 
-A fresh template (for example `npx assistant-ui create`) has none. unstorage's file driver keeps handles on disk:
+A fresh template (for example `npx assistant-ui create`) has no database. Use SQLite, which Node 22.5+ and Bun have built in:
 
 ```bash
-npm install unstorage
+npm install kysely
 ```
 
-```ts title="lib/kv.ts"
-import { createStorage } from 'unstorage';
-import fsDriver from 'unstorage/drivers/fs';
+```ts title="lib/fiducy.ts"
+import { DatabaseSync } from 'node:sqlite'; // on Bun: import { Database } from 'bun:sqlite'
+import { kyselyStorage } from '@fiducy/sdk/storage/kysely';
 
-export const kv = createStorage({ driver: fsDriver({ base: '.data/fiducy' }) });
+const storage = kyselyStorage(new DatabaseSync('fiducy.db'));
 ```
 
-Add `.data/` to `.gitignore`. This works locally and on a long-running server. Serverless hosts such as Vercel wipe the disk, so there, switch the driver to Upstash, Vercel KV or Redis; nothing else changes.
+Pass `storage` to `createFiducy` in place of `keyValueStorage(kv)`, add `fiducy.db` to `.gitignore`, and create the table once with the script in [SQL databases](/docs/storage/sql#create-the-table). Serverless hosts such as Vercel wipe the disk, so there, pass a Postgres pool instead (Neon or Supabase); nothing else changes.
 
 ## 3. Mount the key route
 

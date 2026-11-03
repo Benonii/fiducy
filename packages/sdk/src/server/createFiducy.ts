@@ -1,10 +1,10 @@
-import { SEALED_RECORD_FIELDS, parseHandle } from '@fiducy/core';
+import { parseHandle } from '@fiducy/core';
 
-import { KEY_RECORD_HEADER, PROVIDER_BASE_PATHS } from '../constants.ts';
+import { KEY_RECORD_HEADER } from '../constants.ts';
 import { createGatewayClient } from '../gatewayClient.ts';
+import { isProvider, isSealedRecord } from './validators.ts';
 
 import type { SealedRecord } from '@fiducy/core';
-import type { GatewayProvider } from '../types.ts';
 import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from './types.ts';
 import type { UserKeySummary } from './types.ts';
 
@@ -20,16 +20,6 @@ function respondWith(status: number, data: unknown, message: string): Response {
 
 function toSummary({ keyID, provider, createdAt }: StoredUserKey): UserKeySummary {
   return { keyID, provider, createdAt };
-}
-
-function isProvider(value: unknown): value is GatewayProvider {
-  return typeof value === 'string' && value in PROVIDER_BASE_PATHS;
-}
-
-function isSealedRecord(value: unknown): value is SealedRecord {
-  if (typeof value !== 'object' || value === null) return false;
-  const fields = value as Record<string, unknown>;
-  return SEALED_RECORD_FIELDS.every((field) => typeof fields[field] === 'string');
 }
 
 function encodeRecord(record: SealedRecord): string {
@@ -136,5 +126,5 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
     }
   };
 
-  return { handler, providerSettings, listKeys, saveKey, revokeKey };
+  return { handler, providerSettings, listKeys, saveKey, revokeKey, storage };
 }
