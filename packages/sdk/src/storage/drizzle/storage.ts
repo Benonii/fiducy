@@ -1,5 +1,7 @@
 import { and, desc, eq, getTableName } from 'drizzle-orm';
 
+import type { Table } from 'drizzle-orm';
+
 import { explainMissingTable } from '../errors.ts';
 import { generateSchema } from '../generateSchema.ts';
 import { fromUserKeyRow } from '../rows.ts';
@@ -51,35 +53,42 @@ function selectUserKeys({ db, table }: DrizzleConnection, userID: string, provid
 const DRIZZLE_TABLE_HINT =
   "Add the table from generateSchema({ adapter: 'drizzle' }) to your schema and run drizzle-kit migrate or drizzle-kit push";
 
+function matchKey({ table }: DrizzleConnection, userID: string, keyID: string) {
+  return and(eq(table.userID, userID), eq(table.keyID, keyID));
+}
+
 function createUserKeyMethods(
-  connection: DrizzleConnection,
+  readConnection: () => DrizzleConnection,
   dialect: SQLDialect,
   tableName: string
 ): FiducyStorage {
-  const { db, table } = connection;
   const rethrowMissingTable = explainMissingTable(tableName, DRIZZLE_TABLE_HINT);
-  const matchKey = (userID: string, keyID: string) =>
-    and(eq(table.userID, userID), eq(table.keyID, keyID));
   return {
     saveKey: async (key) => {
-      await Promise.resolve(upsertKey(connection, dialect, key)).catch(rethrowMissingTable);
+      await Promise.resolve(upsertKey(readConnection(), dialect, key)).catch(rethrowMissingTable);
     },
     findKey: async (userID, provider) => {
-      const query = selectUserKeys(connection, userID, provider).limit(1);
+      const query = selectUserKeys(readConnection(), userID, provider).limit(1);
       const [row] = await Promise.resolve(query).catch(rethrowMissingTable);
       return row ? fromDrizzleRow(row) : null;
     },
     listKeys: async (userID) => {
-      const rows = await Promise.resolve(selectUserKeys(connection, userID)).catch(
+      const rows = await Promise.resolve(selectUserKeys(readConnection(), userID)).catch(
         rethrowMissingTable
       );
       return rows.map(fromDrizzleRow);
     },
     deleteKey: async (userID, keyID) => {
-      const query = db.select().from(table).where(matchKey(userID, keyID)).limit(1);
+      const connection = readConnection();
+      const { db, table } = connection;
+      const query = db
+        .select()
+        .from(table)
+        .where(matchKey(connection, userID, keyID))
+        .limit(1);
       const existing = await Promise.resolve(query).catch(rethrowMissingTable);
       if (existing.length === 0) return false;
-      await db.delete(table).where(matchKey(userID, keyID));
+      await db.delete(table).where(matchKey(connection, userID, keyID));
       return true;
     }
   };
@@ -90,12 +99,18 @@ export function drizzleStorage(
   options: DrizzleStorageOptions = {}
 ): FiducyStorage {
   const db = database as DrizzleDatabase;
-  const drizzleTable = resolveDrizzleTable(db, options);
-  const tableName = resolveTableName(getTableName(drizzleTable));
-  const dialect = readTableDialect(drizzleTable, options.provider);
-  const connection = { db, table: assertUserKeyTable(drizzleTable) };
+  let connection: DrizzleConnection | null = null;
+  const readConnection = () => {
+    connection ??= { db, table: assertUserKeyTable(resolveDrizzleTable(db, options)) };
+    return connection;
+  };
+  const readTable = () => readConnection().table as unknown as Table;
+  const tableName = resolveTableName(
+    options.provider ? options.tableName : getTableName(readTable())
+  );
+  const dialect = readTableDialect(options.provider ? undefined : readTable(), options.provider);
   return {
-    ...createUserKeyMethods(connection, dialect, tableName),
+    ...createUserKeyMethods(readConnection, dialect, tableName),
     schema: {
       adapter: 'drizzle',
       dialect,
