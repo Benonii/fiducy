@@ -26,23 +26,17 @@ In `app` mode the gateway keeps nothing per key. A record is ciphertext plus a K
 
 ### keyValueStorage(driver)
 
-Works with any unstorage-style driver, including Farm.js storage mounts.
+Takes any [unstorage](https://unstorage.unjs.io)-style driver: an object with `getItem`, `setItem`, `removeItem` and `getKeys`.
 
 ```ts
-import { getStorage } from '@farm.js/core/storage';
-import { keyValueStorage } from '@fiducy/sdk/server';
+import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
+import { createStorage } from 'unstorage';
+import redisDriver from 'unstorage/drivers/redis';
 
-const storage = keyValueStorage({
-  getItem: (key) => getStorage('fiducy').getItem(key),
-  setItem: (key, value) => getStorage('fiducy').setItem(key, value),
-  removeItem: (key) => getStorage('fiducy').removeItem(key),
-  getKeys: (base) => getStorage('fiducy').getKeys(base)
-});
+const storage = keyValueStorage(createStorage({ driver: redisDriver({ url: process.env.REDIS_URL }) }));
 ```
 
-Look the mount up on each call, as above. The module that creates the Fiducy instance is usually imported by `farm.config.ts`, which runs before Farm registers its storage mounts, so `keyValueStorage(getStorage('fiducy'))` would capture a different store than the one your routes use.
-
-Outside Farm, pass any [unstorage](https://unstorage.unjs.io) instance directly, for example `keyValueStorage(createStorage({ driver: redisDriver({ url }) }))`.
+unstorage has drivers for Redis, Postgres (via `db0`), Cloudflare KV, Vercel KV, the file system and more. On Farm.js, use a storage mount; see [Farm.js](/docs/farm).
 
 Keys are stored as `fiducy:<userID>:<keyID>`.
 
@@ -65,4 +59,18 @@ export const storage: FiducyStorage = {
 };
 ```
 
-A stored key is `{ userID, provider, keyID, handle, record?, createdAt }`. Treat the handle like a password hash: it is not secret enough to publish, but it is useless without the gateway.
+A stored key is `{ userID, provider, keyID, handle, record?, createdAt }`. One table is enough:
+
+```sql
+create table fiducy_user_key (
+  key_id     text primary key,
+  user_id    text not null references "user"(id) on delete cascade,
+  provider   text not null,
+  handle     text not null,
+  record     text,            -- JSON, only when records live in your app
+  created_at text not null,
+  unique (user_id, provider)
+);
+```
+
+Store `record` as JSON text and parse it back in `findKey` and `listKeys`. The foreign key removes a user's handles when the user is deleted. Treat the handle like a password hash: it is not secret enough to publish, but it is useless without the gateway.
