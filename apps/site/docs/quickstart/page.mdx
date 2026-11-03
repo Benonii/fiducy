@@ -203,11 +203,11 @@ mountKeyWidget({
 
 </CodeGroup>
 
-Put the widget on a settings page, or wherever users first need a key. To list and remove saved keys, call `GET /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`. See [React](/docs/react) for the list helpers.
+Step 6 shows where to put it.
 
 ## 5. Call the model with the user's key
 
-`fiducy.providerSettings(provider, { userID })` returns `{ baseURL, apiKey, headers }` pointing at your gateway, or `null` when the user has no key for that provider. Pass it to whatever you call the model with. When it is `null`, ask the user to connect a key; never fall back to a key of your own.
+`fiducy.providerSettings(provider, { userID })` returns `{ baseURL, apiKey, headers }` pointing at your gateway, or `null` when the user has no key for that provider. Pass it to whatever you call the model with. When it is `null`, answer `409` with the missing provider so the page can ask for that key (step 6); never fall back to a key of your own.
 
 Examples for the [AI SDK](https://ai-sdk.dev), the official OpenAI SDK (also works for `openrouter`) and plain `fetch`:
 
@@ -223,7 +223,8 @@ import { fiducy, getUserID } from '@/lib/fiducy';
 export async function POST(request: Request) {
   const userID = await getUserID(request);
   const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
-  if (!settings) return new Response('Connect your API key first', { status: 400 });
+  // Tell the browser which key is missing, so it can show the widget (step 6).
+  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });
@@ -251,12 +252,112 @@ const response = await fetch(`${baseURL}/chat/completions`, {
 
 For Anthropic, the AI SDK's `createAnthropic(settings)` works as is. The official Anthropic SDK adds `/v1` itself, so give it `baseURL.replace(/\/v1$/, '')`.
 
-## 6. Try it
+## 6. Put the widget where users need it
 
-1. Sign in to your app, open the page with the widget, paste a key and save. With `--mock`, any string works, for example `sk-test-1234`.
-2. The page shows that the key is connected.
-3. Send a chat request. With `--mock`, the prototype's terminal logs `[fake OpenAI] ... received the decrypted key ...1234`.
+Most apps want the widget in two places.
 
-If the chat route answers "Connect your API key first" right after you connected one, check `getUserID` (same user in both routes?) and your storage.
+### In the chat, when a key is missing
+
+This is what the [demo](https://demo.fiducy.dev) does. The user sends a message without a key. Instead of an error, the widget appears where the reply would be. Once the key is saved, the message is sent again and the answer streams in. Nobody has to find a settings page first.
+
+It takes three parts:
+
+1. The chat route answers `409` with `{ connectKey: provider }` when the user has no key (step 5 already does this).
+2. The page reads that answer and renders the widget at the end of the message list, above the input.
+3. When the widget reports the key is saved, the page clears the error and sends the last message again.
+
+<CodeGroup>
+
+```tsx title="React + AI SDK"
+// components/Chat.tsx
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { ConnectKeyWidget, type GatewayProvider } from '@fiducy/sdk/react';
+
+// useChat puts the failed response body in error.message.
+function missingKey(error: Error | undefined): GatewayProvider | null {
+  try {
+    return JSON.parse(error?.message ?? '').connectKey ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function Chat() {
+  const { messages, sendMessage, error, clearError, regenerate } = useChat();
+  const provider = missingKey(error);
+
+  return (
+    <div>
+      {/* your message list, rendered from `messages` */}
+
+      {provider && (
+        <ConnectKeyWidget
+          gatewayURL="http://localhost:8787" // your FIDUCY_GATEWAY_URL
+          appID="app_..." // your FIDUCY_APP_ID
+          provider={provider}
+          onConnected={() => {
+            clearError();
+            regenerate(); // sends the last message again
+          }}
+        />
+      )}
+
+      {/* your input, calling sendMessage */}
+    </div>
+  );
+}
+```
+
+```ts title="Any framework"
+import { mountKeyWidget } from '@fiducy/widget';
+
+// keySlot: an empty element at the end of your message list, above the input.
+async function send(messages: unknown[]) {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+
+  if (response.status === 409) {
+    const { connectKey } = await response.json();
+    mountKeyWidget({
+      gatewayURL: 'http://localhost:8787',
+      appID: 'app_...',
+      container: keySlot,
+      onHandle: async (handle, record) => {
+        await fetch('/api/fiducy/keys', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ provider: connectKey, handle, record })
+        });
+        keySlot.replaceChildren(); // remove the widget
+        send(messages); // and try again
+      }
+    });
+    return;
+  }
+
+  // ...read the reply as you do today
+}
+```
+
+</CodeGroup>
+
+Using assistant-ui? `@fiducy/assistant-ui` does all three parts for you; see [assistant-ui](/docs/assistant-ui).
+
+### In settings, to see and remove keys
+
+Users also need a place to check which keys are connected and remove one. A settings page works, or a small panel next to the chat like the demo's sidebar. List keys with `GET /api/fiducy/keys`, remove one with `DELETE /api/fiducy/keys/:keyID`, and put a widget there too for adding keys ahead of time. [React](/docs/react) has a ready-made list.
+
+## 7. Try it
+
+1. Sign in to your app and send a chat message. The widget appears in the chat.
+2. Paste a key and save. With `--mock`, any string works, for example `sk-test-1234`.
+3. The message is sent again and the reply arrives. With `--mock`, the prototype's terminal logs `[fake OpenAI] ... received the decrypted key ...1234`.
+
+If the widget comes back right after you connected a key, check `getUserID` (same user in both routes?) and your storage.
 
 That is the whole integration. The plaintext key only ever exists inside the gateway.
