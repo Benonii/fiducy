@@ -62,14 +62,15 @@ Create the Fiducy instance once, in a file only server code imports:
 ```ts title="lib/fiducy.ts"
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { getSessionUserID } from './auth'; // your auth
+import { auth } from './auth'; // your Better Auth instance
 import { kv } from './kv'; // your storage
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
 export async function getUserID(request: Request) {
-  return (await getSessionUserID(request)) ?? null;
+  const session = await auth.api.getSession({ headers: request.headers });
+  return session?.user.id ?? null;
 }
 
 export const fiducy = createFiducy({
@@ -82,11 +83,10 @@ export const fiducy = createFiducy({
 
 The check at the top throws the first time the module loads. Build tools that load routes at build time (`next build`, for example) need the env vars at build time too.
 
-**`getUserID`** tells Fiducy who is asking. Read the user from your auth's server session and return `null` when nobody is signed in. Never take the ID from the request body, the query or a header the browser sets. For example:
+**`getUserID`** tells Fiducy who is asking. Read the user from your auth's server session and return `null` when nobody is signed in. Never take the ID from the request body, the query or a header the browser sets. The example uses Better Auth; with other auth, replace the body of `getUserID`:
 
 | Auth | `getUserID` body |
 | --- | --- |
-| Better Auth | `(await auth.api.getSession({ headers: request.headers }))?.user.id` |
 | Auth.js | `(await auth())?.user?.id` |
 | Clerk (Next.js) | `(await auth()).userId` |
 | Supabase | `(await supabase.auth.getUser()).data.user?.id` |
