@@ -291,6 +291,23 @@
         "react": "^19.2.0",
       },
     },
+    "packages/cli": {
+      "name": "fiducy",
+      "version": "0.2.0",
+      "bin": {
+        "fiducy": "./dist/index.js",
+      },
+      "dependencies": {
+        "jiti": "2.7.0",
+      },
+      "devDependencies": {
+        "@fiducy/core": "0.2.0",
+        "@fiducy/gateway": "workspace:*",
+        "@fiducy/providers": "0.2.0",
+        "@fiducy/sdk": "0.2.0",
+        "@fiducy/testing": "0.1.0",
+      },
+    },
     "packages/core": {
       "name": "@fiducy/core",
       "version": "0.2.0",
@@ -2033,6 +2050,8 @@
     "fetchdts": ["fetchdts@0.2.0", "", {}, "sha512-PJb4ZTGT2/wK78RmVrxZITStWabhZlKBsL52VOgq+c7clEkdHdEB+0rtzrXCbZJqeYJj+IwNWYqB5/G6vouA6A=="],
 
     "fflate": ["fflate@0.8.3", "", {}, "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA=="],
+
+    "fiducy": ["fiducy@workspace:packages/cli"],
 
     "file-uri-to-path": ["file-uri-to-path@1.0.0", "", {}, "sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw=="],
 
