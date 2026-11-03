@@ -8,7 +8,7 @@ description: Add bring-your-own-key to an assistant-ui chat, with the key box op
 
 `@fiducy/assistant-ui` adds a `connect_api_key` tool to an [assistant-ui](https://www.assistant-ui.com) thread. When a user has no key for the model, your chat route answers with that tool call, the thread shows the Fiducy key box, and the run continues once the user saves a key. Your app only ever stores a handle.
 
-This page assumes an assistant-ui app on the AI SDK runtime (`useChatRuntime` from `@assistant-ui/react-ai-sdk`), which is what `npx assistant-ui create` gives you.
+This page assumes an assistant-ui app on the AI SDK runtime (`useChatRuntime`), which is what `npx assistant-ui create` gives you. New templates import it from `@assistant-ui/ai-sdk`; older apps use `@assistant-ui/react-ai-sdk`. The examples use the older name; the imports are the same in both.
 
 ## 1. Install
 
@@ -25,12 +25,13 @@ Create the server instance once. In Next.js:
 ```ts title="lib/fiducy.ts"
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-import { getSessionUserID } from '@/lib/auth'; // your auth
+import { getSessionUserID } from '@/lib/auth'; // placeholder: your own auth's session lookup
 
 const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
 if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
 
-export const getUserID = (request: Request) => getSessionUserID(request); // null when signed out
+// Write getSessionUserID with your auth provider; see the Quickstart table. Return null when signed out.
+export const getUserID = (request: Request) => getSessionUserID(request);
 
 export const fiducy = createFiducy({
   gatewayURL: FIDUCY_GATEWAY_URL,
@@ -123,7 +124,7 @@ export function Assistant() {
 
 ## 5. Try it
 
-Sign in, send a message. The thread answers "Connect your OpenAI key to keep going" with the key box. Save a key, and the original message is answered. With the local prototype and `--mock`, any string works as a key.
+Sign in, send a message. The thread answers "Connect your OpenAI key to keep going" with the key box. Save a key, and the original message is answered. With the local prototype and `--mock`, any string works as a key. The fake OpenAI answers both the Chat Completions API (`.chat(...)`) and the Responses API (`openai(...)` or `.responses(...)`, the template's default).
 
 ## Styling
 

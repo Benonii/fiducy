@@ -10,32 +10,22 @@ import { DashboardShell } from '@/components/DashboardShell';
 import { ErrorAlert } from '@/components/ErrorAlert';
 import { PageStatus } from '@/components/PageStatus';
 import { Panel } from '@/components/Panel';
-import { isSignedOut } from '@/lib/client';
+import { useSignInRedirect } from '@/components/useSignInRedirect';
 import { useApps, useCreateApp } from '@/lib/queries';
 
 import type { AppSettings } from '@/lib/types';
-
-function SignInPrompt() {
-  return (
-    <PageStatus>
-      <a className="text-foreground underline" href="/sign-in">
-        Sign in
-      </a>
-      to manage your apps.
-    </PageStatus>
-  );
-}
 
 export default function DashboardPage() {
   const apps = useApps();
   const createApp = useCreateApp();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const signedOut = useSignInRedirect(apps.error);
 
   function create(settings: AppSettings) {
     createApp.mutate(settings, { onSuccess: () => setIsDialogOpen(false) });
   }
 
-  if (isSignedOut(apps.error)) return <SignInPrompt />;
+  if (signedOut) return <PageStatus isLoading>Taking you to sign in</PageStatus>;
   const hasApps = Boolean(apps.data?.length);
   const formProps = { isPending: createApp.isPending, error: createApp.error, onCreate: create };
 

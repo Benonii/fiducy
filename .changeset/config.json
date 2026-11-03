@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "Benonii/fiducy"
+      "repo": "fiducy-dev/fiducy"
     }
   ],
   "commit": false,

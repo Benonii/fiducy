@@ -9,10 +9,6 @@ import type {
 } from '@/lib/types';
 import type { ReactElement, ReactNode } from 'react';
 
-export interface FrameProps {
-  children: ReactNode;
-}
-
 export type AuthMode = 'sign-in' | 'sign-up';
 
 export interface AuthFormProps {

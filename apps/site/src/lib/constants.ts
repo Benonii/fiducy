@@ -1,7 +1,7 @@
-export const GITHUB_URL = 'https://github.com/Benonii/fiducy';
+export const GITHUB_URL = 'https://github.com/fiducy-dev/fiducy';
 export const DEMO_URL: string | null = import.meta.env.VITE_FIDUCY_DEMO_URL ?? null;
 export const DASHBOARD_URL: string | null = import.meta.env.VITE_FIDUCY_DASHBOARD_URL ?? null;
-export const INSTALL_COMMAND = 'bun add @fiducy/sdk @fiducy/farm';
+export const INSTALL_COMMAND = 'npm install @fiducy/sdk';
 export const PROVIDERS = ['OpenAI', 'Anthropic', 'Gemini', 'OpenRouter'] as const;
 export const REQUEST_TRACE = [
   { step: 'handle received', detail: 'kh_9f2c…' },

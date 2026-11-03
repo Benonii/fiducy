@@ -8,7 +8,8 @@ import type { LayoutProps } from '@farm.js/core';
 
 export const metadata = {
   title: 'Acme Chat, a Fiducy demo',
-  description: 'An assistant-ui chat where users bring their own model keys through Fiducy'
+  description: 'An assistant-ui chat where users bring their own model keys through Fiducy',
+  icons: { icon: '/favicon.svg', apple: '/apple-touch-icon.png' }
 };
 
 export default function RootLayout({ children }: LayoutProps) {

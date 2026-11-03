@@ -14,8 +14,8 @@ function readNumber(source: unknown, keys: string[]): number {
 }
 
 function findUsageObject(payload: Record<string, unknown>): unknown {
-  const message = payload.message;
-  if (isRecord(message) && isRecord(message.usage)) return message.usage;
+  const wrapper = payload.message ?? payload.response;
+  if (isRecord(wrapper) && isRecord(wrapper.usage)) return wrapper.usage;
   return payload.usage ?? payload.usageMetadata;
 }
 

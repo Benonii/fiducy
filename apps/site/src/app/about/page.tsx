@@ -25,7 +25,7 @@ export default function AboutPage() {
               Fiducy is built and run by {MAINTAINER_NAME}, an independent software engineer based
               in {MAINTAINER_CITY}. The code is open source under the Apache 2.0 license at{' '}
               <a href={GITHUB_URL} {...NEW_TAB}>
-                github.com/Benonii/fiducy
+                github.com/fiducy-dev/fiducy
               </a>
               , so you can read every line that touches a key before you trust it with one.
             </p>
