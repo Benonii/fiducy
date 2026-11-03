@@ -4,14 +4,13 @@ import { chromium } from 'playwright';
 import { SAMPLE_API_KEY } from '@fiducy/testing';
 import { startGatewayHarness } from '../../../../apps/gateway/tests/harness';
 import { createFiducy } from '../../src/server';
-import { getMigrations, kyselyStorage } from '../../src/storage/kysely';
 import { startAppServer } from './appServer';
-import { TEST_DATABASES } from './databases';
+import { STORAGE_SETUPS } from './setups';
 
 import type { Browser } from 'playwright';
 import type { AppRegistration } from '../../../../apps/gateway/src/types';
 import type { FiducyStorage } from '../../src/server';
-import type { TestDatabase } from './types';
+import type { OpenedStorage, TestDatabase } from './types';
 
 const BROWSER_APP: AppRegistration = {
   appID: 'app_notes_storage',
@@ -34,18 +33,17 @@ afterAll(async () => {
   harness.stop();
 });
 
-for (const testDatabase of TEST_DATABASES) {
-  describe.skipIf(!testDatabase.isAvailable)(`the key widget on ${testDatabase.label}`, () => {
+for (const setup of STORAGE_SETUPS) {
+  describe.skipIf(!setup.isAvailable)(`the key widget with ${setup.label}`, () => {
     let database: TestDatabase;
     let storage: FiducyStorage;
+    let opened: OpenedStorage;
     let appServer: Awaited<ReturnType<typeof startAppServer>>;
 
     beforeAll(async () => {
-      database = testDatabase.open();
-      await (
-        await getMigrations(database.connection, { tableName: database.tableName })
-      ).runMigrations();
-      storage = kyselyStorage(database.connection, { tableName: database.tableName });
+      database = setup.openDatabase();
+      opened = await setup.openStorage(database);
+      storage = opened.storage;
       const fiducy = createFiducy({
         gatewayURL: harness.gatewayURL,
         appSecret: BROWSER_APP.appSecret,
@@ -58,6 +56,7 @@ for (const testDatabase of TEST_DATABASES) {
 
     afterAll(async () => {
       appServer.stop(true);
+      opened.cleanUp();
       await database.close();
     });
 
