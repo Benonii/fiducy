@@ -5,6 +5,7 @@ import { generateAppID, generateAppSecret, hashSecret, previewAppSecret } from '
 
 import type { AppSettings, AppView, ControlResult, ControlStore } from './types';
 import type { CreatedApp, GatewayApp, StoredApp } from './types';
+import type { GatewayClient } from './types';
 
 export function toAppView({ appSecretHash, ownerID, ...app }: StoredApp): AppView {
   return app;
@@ -86,13 +87,30 @@ export async function rotateAppSecret(
   return succeed({ app: toAppView(updated), appSecret });
 }
 
+async function deleteStoredRecords(
+  store: ControlStore,
+  gateway: GatewayClient,
+  app: StoredApp
+): Promise<ControlResult<null>> {
+  if (app.recordStorage === 'app') return succeed(null);
+  const entries = await store.listKeyEntries(app.appID);
+  for (const entry of entries.filter((candidate) => candidate.status === 'active')) {
+    const deleted = await gateway.deleteRecord(app.appID, entry.keyID);
+    if (!deleted.ok) return deleted;
+  }
+  return succeed(null);
+}
+
 export async function deleteApp(
   store: ControlStore,
+  gateway: GatewayClient,
   ownerID: string,
   appID: string
 ): Promise<ControlResult<string>> {
   const owned = await findOwnedApp(store, ownerID, appID);
   if (!owned.ok) return owned;
+  const recordsDeleted = await deleteStoredRecords(store, gateway, owned.value);
+  if (!recordsDeleted.ok) return recordsDeleted;
   await store.deleteApp(owned.value);
   return succeed(appID);
 }

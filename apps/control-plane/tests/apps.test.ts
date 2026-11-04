@@ -3,9 +3,12 @@ import { describe, expect, it } from 'bun:test';
 import { hashSecret as hashSecretInGateway } from '../../gateway/src/hashing';
 import { createApp, deleteApp, listApps, listGatewayApps } from '../src/lib/appService';
 import { rotateAppSecret, updateApp } from '../src/lib/appService';
+import { noteKeyEvent, revokeAppKey } from '../src/lib/keyService';
 import { hashSecret } from '../src/lib/secrets';
+import { recordUsageBatch } from '../src/lib/usageService';
 import { appSettingsSchema, appSettingsUpdateSchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID, createTestStore } from './fixtures';
+import { createFakeGateway, createUsageEvent } from './fixtures';
 
 describe('creating an app', () => {
   it('returns the secret once and stores only its hash', async () => {
@@ -46,7 +49,7 @@ describe('keeping accounts apart', () => {
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
     const update = await updateApp(store, OTHER_OWNER_ID, app.appID, { name: 'Taken' });
     const rotation = await rotateAppSecret(store, OTHER_OWNER_ID, app.appID);
-    const deletion = await deleteApp(store, OTHER_OWNER_ID, app.appID);
+    const deletion = await deleteApp(store, createFakeGateway().client, OTHER_OWNER_ID, app.appID);
     for (const result of [update, rotation, deletion]) {
       expect(result).toMatchObject({ ok: false, error: { status: 404 } });
     }
@@ -98,9 +101,38 @@ describe('changing an app', () => {
   it('removes a deleted app from the owner list and the gateway feed', async () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
-    expect(await deleteApp(store, OWNER_ID, app.appID)).toMatchObject({ ok: true });
+    const gateway = createFakeGateway();
+    expect(await deleteApp(store, gateway.client, OWNER_ID, app.appID)).toMatchObject({ ok: true });
     expect(await listApps(store, OWNER_ID)).toEqual([]);
     expect(await listGatewayApps(store)).toEqual([]);
+  });
+
+  it('removes its keys, usage and revoked index and deletes the records at the gateway', async () => {
+    const store = createTestStore();
+    const gateway = createFakeGateway();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    await noteKeyEvent(store, { type: 'saved', appID: app.appID, keyID: 'key_a' });
+    await noteKeyEvent(store, { type: 'saved', appID: app.appID, keyID: 'key_b' });
+    await revokeAppKey(store, gateway.client, OWNER_ID, app.appID, 'key_b');
+    await recordUsageBatch(store, [
+      createUsageEvent(app.appID, 'key_a', '2026-10-02T08:00:00.000Z')
+    ]);
+    expect(await deleteApp(store, gateway.client, OWNER_ID, app.appID)).toMatchObject({ ok: true });
+    expect(gateway.deletedRecords.map((record) => record.keyID)).toEqual(['key_b', 'key_a']);
+    expect(await store.listKeyEntries(app.appID)).toEqual([]);
+    expect(await store.listRevokedKeyIDs(app.appID)).toEqual([]);
+    expect((await store.readUsage(app.appID, '2026-10')).requestCount).toBe(0);
+    expect((await store.readDailyUsage(app.appID, '2026-10-02')).requestCount).toBe(0);
+  });
+
+  it('keeps everything when the gateway cannot delete the records', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    await noteKeyEvent(store, { type: 'saved', appID: app.appID, keyID: 'key_a' });
+    const result = await deleteApp(store, createFakeGateway(false).client, OWNER_ID, app.appID);
+    expect(result).toMatchObject({ ok: false, error: { status: 502 } });
+    expect((await store.findApp(app.appID))?.name).toBe('Chatforge');
+    expect(await store.listKeyEntries(app.appID)).toHaveLength(1);
   });
 });
 

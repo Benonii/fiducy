@@ -29,6 +29,11 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
   const listRevokedKeyIDs = async (appID: string) =>
     ((await keyValueStore.getItem(`${REVOKED_KEYS_NAMESPACE}:${appID}`)) as string[] | null) ?? [];
 
+  const removeNamespace = async (base: string) => {
+    const keys = await keyValueStore.getKeys(base);
+    await Promise.all(keys.map((key) => keyValueStore.removeItem(key)));
+  };
+
   const findKeyEntry = async (appID: string, keyID: string) =>
     ((await keyValueStore.getItem(
       `${KEY_ENTRY_NAMESPACE}:${appID}:${keyID}`
@@ -43,6 +48,10 @@ export function createControlStore(keyValueStore: KeyValueStore): ControlStore {
     deleteApp: async (app) => {
       await keyValueStore.removeItem(`${APP_NAMESPACE}:${app.appID}`);
       await keyValueStore.removeItem(`${OWNER_NAMESPACE}:${app.ownerID}:${app.appID}`);
+      await keyValueStore.removeItem(`${REVOKED_KEYS_NAMESPACE}:${app.appID}`);
+      for (const namespace of [KEY_ENTRY_NAMESPACE, USAGE_NAMESPACE, DAILY_USAGE_NAMESPACE]) {
+        await removeNamespace(`${namespace}:${app.appID}`);
+      }
     },
     listAppsByOwner: async (ownerID) => {
       const keys = await keyValueStore.getKeys(`${OWNER_NAMESPACE}:${ownerID}`);
