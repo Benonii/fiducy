@@ -38,6 +38,8 @@ Most of what used to go wrong is now handled for you: `init` writes the files, `
 
 **"No Fiducy route answers at /api/fiducy/config."** The key route is not mounted where the widget looks. Mount it (see [Frameworks](/docs/frameworks)) or, if you mounted it elsewhere, set `basePath` on both `createFiducy` and the widget.
 
+**The widget says "Test gateway" or "No enclave".** It says "Sealed in an enclave" only when the gateway can prove it runs in one (it serves `/attestation`). `npx fiducy dev --mock` and other gateways with mock providers show "Test gateway" and ask for a made-up key. Any other gateway without an enclave shows "No enclave". Deploy the gateway in an enclave for production; see [Self-hosting](/docs/self-hosting).
+
 **"Set provider on `<fiducy-key>`."** The element needs `provider="openai"` (or `anthropic`, `gemini`, `openrouter`).
 
 **Vue warns about an unknown `fiducy-key` element.** You used the raw tag. Use `FiducyKey` from `@fiducy/sdk/vue` instead, which registers it.
