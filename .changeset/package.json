@@ -1,0 +1,5 @@
+{
+  "name": "@fiducy/changesets",
+  "private": true,
+  "description": "Not a real package. Listing .changeset as a workspace lets Vercel treat changeset files as their own package, so adding one does not rebuild every app."
+}

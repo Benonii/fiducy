@@ -2,7 +2,7 @@
   "name": "fiducy",
   "private": true,
   "license": "Apache-2.0",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": ["packages/*", "apps/*", ".changeset"],
   "scripts": {
     "test": "bun test",
     "lint": "biome check .",

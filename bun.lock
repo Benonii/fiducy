@@ -15,6 +15,9 @@
         "typescript": "7.0.2",
       },
     },
+    ".changeset": {
+      "name": "@fiducy/changesets",
+    },
     "apps/control-plane": {
       "name": "@fiducy/control-plane",
       "version": "0.1.0",
@@ -517,6 +520,8 @@
     "@farming-labs/theme": ["@farming-labs/theme@0.2.132", "", { "dependencies": { "fumadocs-core": "16.17.1", "fumadocs-ui": "16.17.1", "gray-matter": "^4.0.3", "sugar-high": "^0.9.5", "zod": "^4.3.6" }, "peerDependencies": { "@farming-labs/docs": ">=0.0.1", "next": ">=16.0.0", "react": ">=19.2.0", "react-dom": ">=19.2.0" }, "optionalPeers": ["next", "react", "react-dom"] }, "sha512-fbATQNAvtgJJXL61TRkNkp2rbkW5gUCKnKXrbCn7RCXsL0EV45tjvHokQa1K6kjJ9tmqDN85j93+GOkB0FMG8Q=="],
 
     "@fiducy/assistant-ui": ["@fiducy/assistant-ui@workspace:packages/assistant-ui"],
+
+    "@fiducy/changesets": ["@fiducy/changesets@workspace:.changeset"],
 
     "@fiducy/control-plane": ["@fiducy/control-plane@workspace:apps/control-plane"],
 
