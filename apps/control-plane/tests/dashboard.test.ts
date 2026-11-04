@@ -46,6 +46,17 @@ describe('listing an app keys', () => {
     });
   });
 
+  it('tags keys that came in through import', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    await noteKeyEvent(store, savedKey(app.appID, 'key_widget'));
+    await noteKeyEvent(store, { ...savedKey(app.appID, 'key_imported'), source: 'import' });
+    const keys = await listAppKeys(store, OWNER_ID, app.appID);
+    if (!keys.ok) throw new Error('listing failed');
+    const sources = Object.fromEntries(keys.value.map((key) => [key.keyID, key.source]));
+    expect(sources).toEqual({ key_widget: 'widget', key_imported: 'import' });
+  });
+
   it('hides another owner app', async () => {
     const store = createTestStore();
     const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);

@@ -7,3 +7,5 @@ export const PROVIDER_BASE_PATHS = {
   gemini: '/gemini/v1beta',
   openrouter: '/openrouter/api/v1'
 } as const;
+
+export const MAX_IMPORT_BATCH_SIZE = 100;

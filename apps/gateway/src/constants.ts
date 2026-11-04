@@ -1,4 +1,6 @@
 export const MAX_API_KEY_LENGTH = 512;
+export const MAX_IMPORT_BATCH_SIZE = 100;
+export const KEY_IMPORT_PATH = '/keys/import';
 export const PROVIDER_ROUTE_PATTERN = /^\/(openai|anthropic|gemini|openrouter)(\/.*)$/;
 export const KEY_ROUTE_PATTERN = /^\/keys\/([A-Za-z0-9_-]{22})$/;
 export const APP_SECRET_HEADERS = ['authorization', 'x-api-key', 'x-goog-api-key'];
@@ -22,6 +24,9 @@ export const IMDS_URL = 'http://169.254.169.254';
 export const IMDS_TOKEN_PATH = '/latest/api/token';
 export const IMDS_ROLE_PATH = '/latest/meta-data/iam/security-credentials/';
 export const IMDS_TOKEN_TTL_SECONDS = 300;
+export const KEY_UPLOAD_BUCKET_CAPACITY = 10;
+export const KEY_UPLOAD_REFILL_PER_SECOND = 10 / 60;
+export const KEY_UPLOAD_MAXIMUM_TRACKED_CLIENTS = 10000;
 export const SHARE_CACHE_TIME_TO_LIVE_MILLISECONDS = 300000;
 export const SHARE_CACHE_MAXIMUM_ENTRIES = 10000;
 export const POSTGRES_KEYS_TABLE = 'fiducy_sealed_records';

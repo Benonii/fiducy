@@ -13,15 +13,20 @@ function laterTime(first: string | null, second: string): string {
   return first && first > second ? first : second;
 }
 
-export async function noteSavedKey(store: ControlStore, { appID, keyID }: KeyEvent) {
-  if (await store.findKeyEntry(appID, keyID)) return;
+export async function noteSavedKey(store: ControlStore, { appID, keyID, source }: KeyEvent) {
+  const existing = await store.findKeyEntry(appID, keyID);
+  if (existing) {
+    if (source && !existing.source) await store.saveKeyEntry({ ...existing, source });
+    return;
+  }
   await store.saveKeyEntry({
     keyID,
     appID,
     provider: UNKNOWN_PROVIDER,
     createdAt: new Date().toISOString(),
     lastUsedAt: null,
-    status: 'active'
+    status: 'active',
+    source: source ?? 'widget'
   });
 }
 
