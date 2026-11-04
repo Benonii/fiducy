@@ -1,12 +1,13 @@
 import { parseHandle } from '@fiducy/core';
 
-import { KEY_RECORD_HEADER } from '../constants.ts';
+import { KEY_RECORD_HEADER, MAX_IMPORT_BATCH_SIZE } from '../constants.ts';
 import { createGatewayClient } from '../gatewayClient.ts';
 import { isProvider, isSealedRecord } from './validators.ts';
 
 import type { SealedRecord } from '@fiducy/core';
 import type { CreateFiducyOptions, Fiducy, SaveKeyInput, StoredUserKey } from './types.ts';
-import type { UserKeySummary } from './types.ts';
+import type { ImportKeyInput, ImportKeysResult, ImportedUserKey } from './types.ts';
+import type { KeySource, UserKeySummary } from './types.ts';
 
 const DEFAULT_BASE_PATH = '/api/fiducy';
 
@@ -24,6 +25,14 @@ function toSummary({ keyID, provider, createdAt }: StoredUserKey): UserKeySummar
 
 function encodeRecord(record: SealedRecord): string {
   return Buffer.from(JSON.stringify(record)).toString('base64url');
+}
+
+function chunk<Item>(items: Item[], size: number): Item[][] {
+  const chunks: Item[][] = [];
+  for (let start = 0; start < items.length; start += size) {
+    chunks.push(items.slice(start, start + size));
+  }
+  return chunks;
 }
 
 function isCrossSite(request: Request): boolean {
@@ -61,7 +70,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
     return storage.deleteKey(userID, keyID);
   };
 
-  const saveKey = async (userID: string, input: SaveKeyInput) => {
+  const saveKey = async (userID: string, input: SaveKeyInput, source: KeySource = 'widget') => {
     const parsedHandle = parseHandle(input.handle);
     if (!parsedHandle.ok) throw new FiducyInputError('The key handle is malformed');
     const { keyID } = parsedHandle.value;
@@ -75,6 +84,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
       keyID,
       handle: input.handle,
       record: input.record,
+      source,
       createdAt: new Date().toISOString()
     };
     await storage.saveKey(stored);
@@ -82,6 +92,43 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
       await revokeKey(userID, previous.keyID).catch(() => false);
     }
     return toSummary(stored);
+  };
+
+  const importBatch = async (batch: ImportKeyInput[]): Promise<ImportedUserKey[]> => {
+    const sealed = await gateway.importKeys(batch.map(({ apiKey }) => apiKey));
+    if (!sealed.ok) {
+      throw new FiducyGatewayError(`The keys could not be imported: ${sealed.error.message}`);
+    }
+    const imported: ImportedUserKey[] = [];
+    for (const [index, { userID, provider }] of batch.entries()) {
+      const key = sealed.value.keys[index];
+      if (!key) throw new FiducyGatewayError('The gateway returned fewer keys than were sent');
+      const summary = await saveKey(userID, { provider, ...key }, 'import');
+      imported.push({ ...summary, userID });
+    }
+    return imported;
+  };
+
+  const importKeys = async (keys: ImportKeyInput[]): Promise<ImportKeysResult> => {
+    const result: ImportKeysResult = { imported: [], skipped: [] };
+    const pending: ImportKeyInput[] = [];
+    for (const key of keys) {
+      if (!isProvider(key.provider))
+        throw new FiducyInputError(`Unknown provider: ${key.provider}`);
+      const alreadyConnected = await storage.findKey(key.userID, key.provider);
+      const alreadyPending = pending.some(
+        (other) => other.userID === key.userID && other.provider === key.provider
+      );
+      if (alreadyConnected || alreadyPending) {
+        result.skipped.push({ userID: key.userID, provider: key.provider });
+      } else {
+        pending.push(key);
+      }
+    }
+    for (const batch of chunk(pending, MAX_IMPORT_BATCH_SIZE)) {
+      result.imported.push(...(await importBatch(batch)));
+    }
+    return result;
   };
 
   const listKeys = async (userID: string) => (await storage.listKeys(userID)).map(toSummary);
@@ -126,5 +173,13 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
     }
   };
 
-  return { handler, providerSettings, listKeys, saveKey, revokeKey, storage };
+  return {
+    handler,
+    providerSettings,
+    listKeys,
+    saveKey: (userID, input) => saveKey(userID, input),
+    revokeKey,
+    importKeys,
+    storage
+  };
 }

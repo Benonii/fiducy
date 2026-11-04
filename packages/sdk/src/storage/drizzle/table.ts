@@ -11,7 +11,15 @@ import type { DrizzleUserKeyTable } from './types.ts';
 
 const DEFAULT_EXPORT_NAME = 'fiducyUserKey';
 
-const TABLE_FIELDS = ['userID', 'keyID', 'provider', 'handle', 'record', 'createdAt'] as const;
+const TABLE_FIELDS = [
+  'userID',
+  'keyID',
+  'provider',
+  'handle',
+  'record',
+  'source',
+  'createdAt'
+] as const;
 
 const PROVIDER_DIALECTS: Record<DrizzleProvider, SQLDialect> = {
   pg: 'postgres',

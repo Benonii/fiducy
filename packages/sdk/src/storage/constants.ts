@@ -6,6 +6,7 @@ export const USER_KEY_COLUMNS = [
   'provider',
   'handle',
   'record',
+  'source',
   'created_at'
 ] as const;
 

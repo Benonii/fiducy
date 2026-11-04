@@ -17,6 +17,7 @@ function upsertKey({ db, dialect }: KyselyConnection, tableName: string, key: St
     provider: row.provider,
     handle: row.handle,
     record: row.record,
+    source: row.source,
     created_at: row.created_at
   };
   const insert = db.insertInto(tableName).values(row);

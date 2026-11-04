@@ -16,6 +16,7 @@ export function createPrismaSchema(dialect: SQLDialect, tableName: string): stri
   provider  String
   handle    String
   record    ${recordType}
+  source    String?
   createdAt String   @map("created_at")
 
   @@id([userID, keyID])
