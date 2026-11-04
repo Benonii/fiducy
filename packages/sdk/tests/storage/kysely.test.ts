@@ -98,6 +98,12 @@ for (const testDatabase of TEST_DATABASES) {
       expect(await storage.findKey('user_record', 'openai')).toEqual(key);
     });
 
+    it('keeps where an imported key came from', async () => {
+      const key = createStoredKey({ userID: 'user_source', source: 'import' });
+      await storage.saveKey(key);
+      expect(await storage.findKey('user_source', 'openai')).toEqual(key);
+    });
+
     it('updates a key saved twice instead of adding a second row', async () => {
       const key = createStoredKey({ userID: 'user_twice' });
       await storage.saveKey(key);

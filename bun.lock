@@ -209,10 +209,12 @@
       },
       "peerDependencies": {
         "@tanstack/react-query": "^5.104.2",
+        "kysely": "^0.28.17 || ^0.29.0",
         "react": "^19.2.0",
       },
       "optionalPeers": [
         "@tanstack/react-query",
+        "kysely",
         "react",
       ],
     },
