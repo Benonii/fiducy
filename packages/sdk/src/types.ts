@@ -1,4 +1,4 @@
-import type { Result } from '@fiducy/core';
+import type { Result, SealedRecord } from '@fiducy/core';
 import type { WidgetSealedRecord } from '@fiducy/widget';
 import type { PROVIDER_BASE_PATHS } from './constants.ts';
 
@@ -29,9 +29,19 @@ export interface RevokedKey {
   keyID: string;
 }
 
+export interface ImportedKey {
+  handle: string;
+  record?: SealedRecord;
+}
+
+export interface ImportedKeys {
+  keys: ImportedKey[];
+}
+
 export interface GatewayClient {
   providerSettings: (provider: GatewayProvider, handle: string) => ProviderSettings;
   revokeKey: (handle: string) => Promise<GatewayResult<RevokedKey>>;
+  importKeys: (apiKeys: string[]) => Promise<GatewayResult<ImportedKeys>>;
 }
 
 export interface GatewayResponseBody<T> {

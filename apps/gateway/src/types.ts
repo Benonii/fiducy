@@ -7,12 +7,15 @@ import type { ProviderName, ProviderRegistry, TokenUsage } from '@fiducy/provide
 
 export type RecordStorage = 'fiducy' | 'app';
 
+export type KeySource = 'widget' | 'import';
+
 export interface RegisteredApp {
   appID: string;
   name: string;
   monthlyRequestLimitPerKey: number;
   allowedOrigins: string[];
   recordStorage?: RecordStorage;
+  allowKeyImport?: boolean;
   revokedKeyIDs?: string[];
 }
 
@@ -54,11 +57,21 @@ export interface GatewayDependencies {
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
   keyEvents?: KeyEventReporter;
+  rateLimiter?: RateLimiter;
 }
 
 export interface StoreKeyBody {
   appID: string;
   apiKey: string;
+}
+
+export interface ImportKeysBody {
+  apiKeys: string[];
+}
+
+export interface SealedKey {
+  handle: string;
+  record?: SealedRecord;
 }
 
 export interface GatewayFailure {
@@ -168,10 +181,32 @@ export interface KeyEvent {
   type: 'saved' | 'revoked';
   appID: string;
   keyID: string;
+  source?: KeySource;
 }
 
 export interface KeyEventReporter {
   report: (event: KeyEvent) => Promise<void>;
+}
+
+export interface RateLimitDecision {
+  isAllowed: boolean;
+  retryAfterSeconds: number;
+}
+
+export interface RateLimiter {
+  consumeToken: (clientID: string) => RateLimitDecision;
+}
+
+export interface TokenBucketOptions {
+  capacity: number;
+  refillPerSecond: number;
+  maximumTrackedClients: number;
+  readCurrentTime?: () => number;
+}
+
+export interface TokenBucket {
+  tokens: number;
+  refilledAt: number;
 }
 
 export interface CachingKeyWrapperOptions {
