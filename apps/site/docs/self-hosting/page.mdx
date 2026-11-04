@@ -79,6 +79,6 @@ Run the app you are testing on another port (for example 5173) and add that orig
 | `FIDUCY_KEYS_TABLE` | DynamoDB table for sealed key records. When unset, records stay in memory (local only) |
 | `AWS_REGION` | Region for KMS and DynamoDB. Default `us-east-1` |
 | `FIDUCY_GATEWAY_TOKEN_CIPHERTEXT` | Control plane token, KMS-encrypted |
-| `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation` |
+| `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation`. The key widget says "Sealed in an enclave" only when this is set. Without it, the widget says "No enclave", or "Test gateway" with `FIDUCY_MOCK_PROVIDERS=true` |
 | `FIDUCY_APPS_JSON` | Static app list when there is no control plane |
 | `PORT` | Default `8787` |
