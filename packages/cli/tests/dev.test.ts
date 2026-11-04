@@ -57,6 +57,10 @@ describe('fiducy dev', () => {
 
     const second = await startDevGateway(root, { origins: [], mock: true }, silent);
     expect(second.state).toEqual(first.state);
+    const widget = await fetch(
+      `${second.url}/widget?app=${second.state.appID}&origin=http://localhost:5173`
+    );
+    expect(await widget.text()).toContain('Enter a made-up key, not a real one.');
     const response = await chat(second.url, second.state.appSecret, data.handle);
     expect(response.status).toBe(200);
     const wrongSecret = await chat(second.url, 'fsk_dev_wrong', data.handle);
@@ -101,6 +105,7 @@ describe('fiducy dev', () => {
     expect(lines.join('\n')).toContain('--origin http://localhost:5999');
     const allowed = await fetch(`${gateway.url}/widget?${app}&origin=http://localhost:4999`);
     expect(allowed.status).toBe(200);
+    expect(await allowed.text()).toContain('No enclave');
     const common = await fetch(`${gateway.url}/widget?${app}&origin=http://localhost:5173`);
     expect(common.status).toBe(200);
     await gateway.close();

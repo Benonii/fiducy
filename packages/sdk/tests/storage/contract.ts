@@ -55,6 +55,12 @@ export function itBehavesLikeFiducyStorage(readStorage: () => FiducyStorage) {
     expect(await readStorage().findKey('user_record', 'openai')).toEqual(key);
   });
 
+  it('keeps where an imported key came from', async () => {
+    const key = createStoredKey({ userID: 'user_source', source: 'import' });
+    await readStorage().saveKey(key);
+    expect(await readStorage().findKey('user_source', 'openai')).toEqual(key);
+  });
+
   it('updates a key saved twice instead of adding a second row', async () => {
     const key = createStoredKey({ userID: 'user_twice' });
     await readStorage().saveKey(key);
