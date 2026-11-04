@@ -1,12 +1,12 @@
 ---
 title: Self-hosting
 order: 10
-description: Run the gateway enclave and KMS key in your own AWS account, with the dashboard on Vercel.
+description: Run the gateway enclave and KMS key in your own AWS account.
 ---
 
 # Self-hosting
 
-Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about $50 a month for `c6g.large`) and a KMS key ($1 a month). The dashboard and the demo run on Vercel with a Neon Postgres database; both have free tiers.
+Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about $50 a month for `c6g.large`) and a KMS key ($1 a month).
 
 ## What gets created
 
@@ -18,43 +18,44 @@ Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about
 - a DynamoDB table (`KeysTable`) for sealed key records, on demand billing, with deletion protection and point-in-time recovery
 - an IAM role limited to the bucket, the key, the table and the `/fiducy/*` parameters
 
-The host runs only the gateway enclave. TLS ends inside the enclave: Caddy runs in the enclave image next to the gateway, requests the certificate from Let's Encrypt, and keeps its certificate and account state sealed with the KMS key in `KeysTable`, so a restarted enclave reuses the certificate and the parent host never holds a private key or sees plaintext traffic. The gateway reads and writes sealed records in `KeysTable` directly and talks to the dashboard over HTTPS with a token that lives in Parameter Store (`/fiducy/gateway-token`).
+The host runs only the gateway enclave. TLS ends inside the enclave: Caddy runs next to the gateway and keeps its certificate sealed with the KMS key, so the parent host never sees plaintext traffic or a private key. The gateway reads and writes sealed records in `KeysTable` directly and talks to the dashboard over HTTPS with a token kept in Parameter Store (`/fiducy/gateway-token`).
 
-The dashboard (`apps/control-plane`), the demo (`apps/demo`) and the landing page with these docs (`apps/site`) are Vercel projects, not part of the stack.
+## Host the dashboard
 
-## Dashboard and demo on Vercel
+The dashboard (`apps/control-plane`) is a Node app that needs Postgres. Host it wherever you run Node apps. It needs these environment variables:
 
-Create a Neon Postgres database, then two Vercel projects from this repository. Each app ships a `vercel.json` with its install and build commands.
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | Your Postgres connection string |
+| `FARM_AUTH_SECRET` | 32 random bytes |
+| `FARM_AUTH_URL` | The dashboard's public URL |
+| `FIDUCY_GATEWAY_URL` | `https://gw.<your-ip>.sslip.io`, from the deploy below |
+| `FIDUCY_GATEWAY_TOKEN` | The value of `/fiducy/gateway-token` in Parameter Store, created by the first deploy |
 
-| Project | Root directory | Environment |
-| --- | --- | --- |
-| Dashboard | `apps/control-plane` | `DATABASE_URL`, `FARM_AUTH_SECRET` (32 random bytes), `FARM_AUTH_URL` (the project URL), `FIDUCY_GATEWAY_URL` (`https://gw.<your-ip>.sslip.io`), `FIDUCY_GATEWAY_TOKEN` (written by the deploy, see below) |
-| Demo | `apps/demo` | `DATABASE_URL` (the same database works), `FIDUCY_GATEWAY_URL`, `FIDUCY_APP_ID` and `FIDUCY_APP_SECRET` of an app you created in the dashboard with the demo URL as an allowed origin |
-
-The dashboard build runs `farm auth migrate` against `DATABASE_URL` before `farm build`, so the auth tables exist on the first deploy.
+Run `bunx farm auth migrate` in `apps/control-plane` once, with `DATABASE_URL` set, before the first start.
 
 ## Deploy with GitHub Actions
 
 1. Create an IAM user with admin rights for the first deploy.
 2. Add repository secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optionally `AWS_REGION` (default `us-east-1`).
-3. Add the repository variable `FIDUCY_CONTROL_PLANE_URL` (the dashboard's Vercel URL) and optionally `FIDUCY_DEMO_URL`.
-4. To let the deploy hand the gateway token to the dashboard, add the secret `VERCEL_TOKEN`, the variables `VERCEL_CONTROL_PLANE_PROJECT_ID` and `VERCEL_TEAM_ID` (team accounts only), and the secret `VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL` (a deploy hook on the dashboard project). Without them the deploy prints where to copy the token from.
-5. Run the **AWS deploy** workflow.
+3. Add the repository variable `FIDUCY_CONTROL_PLANE_URL`: the dashboard's URL.
+4. Run the **AWS deploy** workflow.
 
-The workflow creates the gateway token in Parameter Store on the first run, sets it as `FIDUCY_GATEWAY_TOKEN` on the dashboard project and redeploys it, builds the enclave on the host, reads its `PCR0`, locks the KMS key to it, starts the enclave, and checks the endpoints. The run summary lists your URLs:
+The workflow creates the gateway token on the first run, builds the enclave on the host, locks the KMS key to its `PCR0`, starts it, and prints the gateway URL. Then copy the token into the dashboard's `FIDUCY_GATEWAY_TOKEN` and restart it:
 
-```
-Gateway (in the enclave): https://gw.<your-ip>.sslip.io
-Dashboard (Vercel):       https://<your-dashboard>.vercel.app
+```bash
+aws ssm get-parameter --name /fiducy/gateway-token --with-decryption --query Parameter.Value --output text
 ```
 
-Tick **rotate_token** on a manual run to replace the gateway token. The new token reaches the dashboard and the enclave in the same run, and the old one stops working.
+If the dashboard is on Vercel, the deploy can set it for you; the options are at the top of `infra/aws/deploy.sh`.
+
+To replace the token, run the workflow by hand with **rotate_token** ticked. The old token stops working.
 
 ## Deploy from your machine
 
 ```bash
 export AWS_REGION=us-east-1
-export FIDUCY_CONTROL_PLANE_URL=https://<your-dashboard>.vercel.app
+export FIDUCY_CONTROL_PLANE_URL=https://<your-dashboard>
 bash infra/aws/deploy.sh
 ```
 
