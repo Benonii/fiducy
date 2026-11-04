@@ -157,6 +157,15 @@ export interface GatewayHeartbeat {
   lastSeenAt: string;
 }
 
+export interface GatewayConnection {
+  gatewayURL: string;
+  gatewayToken: string | null;
+}
+
+export interface GatewayClient {
+  deleteRecord: (appID: string, keyID: string) => Promise<ControlResult<null>>;
+}
+
 export type KeyEventType = 'saved' | 'revoked';
 
 export interface KeyEvent {

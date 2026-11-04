@@ -57,6 +57,7 @@ export interface GatewayDependencies {
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
   keyEvents?: KeyEventReporter;
+  controlPlaneToken?: string;
   rateLimiter?: RateLimiter;
 }
 
@@ -205,6 +206,11 @@ export interface KeyEvent {
   appID: string;
   keyID: string;
   source?: KeySource;
+}
+
+export interface RevokeCaller {
+  appID: string;
+  isControlPlane: boolean;
 }
 
 export interface KeyEventReporter {
