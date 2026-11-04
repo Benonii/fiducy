@@ -36,5 +36,6 @@ export interface UserKeyRow {
   provider: string;
   handle: string;
   record: string | null;
+  source: string | null;
   created_at: string;
 }

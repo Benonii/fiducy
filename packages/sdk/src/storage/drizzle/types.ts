@@ -15,6 +15,7 @@ export interface DrizzleUserKeyRow {
   provider: string;
   handle: string;
   record: string | null;
+  source: string | null;
   createdAt: string;
 }
 

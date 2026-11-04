@@ -16,26 +16,27 @@ import type { DrizzleUserKeyRow } from './types.ts';
 function toDrizzleRow(key: StoredUserKey): DrizzleUserKeyRow {
   const { userID, keyID, provider, handle, createdAt } = key;
   const record = key.record ? JSON.stringify(key.record) : null;
-  return { userID, keyID, provider, handle, record, createdAt };
+  return { userID, keyID, provider, handle, record, source: key.source ?? null, createdAt };
 }
 
 function fromDrizzleRow(row: DrizzleUserKeyRow): StoredUserKey {
-  const { userID, keyID, provider, handle, record, createdAt } = row;
+  const { userID, keyID, provider, handle, record, source, createdAt } = row;
   return fromUserKeyRow({
     user_id: userID,
     key_id: keyID,
     provider,
     handle,
     record,
+    source,
     created_at: createdAt
   });
 }
 
 function upsertKey({ db, table }: DrizzleConnection, dialect: SQLDialect, key: StoredUserKey) {
   const row = toDrizzleRow(key);
-  const { provider, handle, record, createdAt } = row;
+  const { provider, handle, record, source, createdAt } = row;
   const insert = db.insert(table).values(row);
-  const set = { provider, handle, record, createdAt };
+  const set = { provider, handle, record, source, createdAt };
   if (dialect === 'mysql') return insert.onDuplicateKeyUpdate({ set });
   return insert.onConflictDoUpdate({ target: [table.userID, table.keyID], set });
 }

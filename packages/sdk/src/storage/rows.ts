@@ -1,4 +1,4 @@
-import { isProvider, isSealedRecord } from '../server/validators.ts';
+import { isKeySource, isProvider, isSealedRecord } from '../server/validators.ts';
 
 import type { StoredUserKey } from '../server/types.ts';
 import type { UserKeyRow } from './types.ts';
@@ -10,6 +10,11 @@ function parseRecord(record: string | null): StoredUserKey['record'] {
   return parsed;
 }
 
+function parseSource(source: string): StoredUserKey['source'] {
+  if (isKeySource(source)) return source;
+  throw new Error('A stored key has an unknown source');
+}
+
 export function toUserKeyRow(key: StoredUserKey): UserKeyRow {
   return {
     user_id: key.userID,
@@ -17,6 +22,7 @@ export function toUserKeyRow(key: StoredUserKey): UserKeyRow {
     provider: key.provider,
     handle: key.handle,
     record: key.record ? JSON.stringify(key.record) : null,
+    source: key.source ?? null,
     created_at: key.createdAt
   };
 }
@@ -32,5 +38,6 @@ export function fromUserKeyRow(row: UserKeyRow): StoredUserKey {
   };
   const record = parseRecord(row.record);
   if (record) key.record = record;
+  if (row.source !== null) key.source = parseSource(row.source);
   return key;
 }

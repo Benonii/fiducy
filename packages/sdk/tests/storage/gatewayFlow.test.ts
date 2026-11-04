@@ -19,12 +19,20 @@ const OWNED_APP: AppRegistration = {
   allowedOrigins: ['https://chat.example'],
   recordStorage: 'app'
 };
+const IMPORT_APP: AppRegistration = {
+  appID: 'app_import_storage',
+  name: 'Importer',
+  appSecret: 'app_sk_import_storage_4Lp9Wq',
+  monthlyRequestLimitPerKey: 50,
+  allowedOrigins: ['https://chat.example'],
+  allowKeyImport: true
+};
 const APP_URL = 'https://chat.example';
 
 let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
 
 beforeAll(async () => {
-  harness = await startGatewayHarness([OWNED_APP]);
+  harness = await startGatewayHarness([OWNED_APP, IMPORT_APP]);
 });
 
 afterAll(() => harness.stop());
@@ -91,6 +99,23 @@ for (const setup of STORAGE_SETUPS) {
       await connectKey(fiducy, OWNED_APP, 'user_owned');
       const settings = await fiducy.providerSettings('openai', { userID: 'user_owned' });
       expect(settings?.headers['x-key-record']).toBeString();
+      const result = await generateText({
+        model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
+        prompt: 'hi'
+      });
+      expect(result.text).toBe('Hello');
+    });
+
+    it('imports existing keys, keeps their source, and skips users who already have one', async () => {
+      const fiducy = createApp(IMPORT_APP);
+      const input = [
+        { userID: 'user_imported', provider: 'openai' as const, apiKey: SAMPLE_API_KEY }
+      ];
+      expect((await fiducy.importKeys(input)).imported).toHaveLength(1);
+      expect((await fiducy.importKeys(input)).skipped).toHaveLength(1);
+      const [stored] = await opened.storage.listKeys('user_imported');
+      expect(stored?.source).toBe('import');
+      const settings = await fiducy.providerSettings('openai', { userID: 'user_imported' });
       const result = await generateText({
         model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
         prompt: 'hi'

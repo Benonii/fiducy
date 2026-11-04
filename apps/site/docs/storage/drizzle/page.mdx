@@ -31,6 +31,7 @@ export const fiducyUserKey = pgTable(
     provider: text('provider').notNull(),
     handle: text('handle').notNull(),
     record: text('record'),
+    source: text('source'),
     createdAt: text('created_at').notNull()
   },
   (table) => [
@@ -104,7 +105,7 @@ export const fiducy = createFiducy({ gatewayURL, appSecret, storage, getUserID }
 ## Gotchas
 
 - **"The Fiducy table does not exist yet."** The table is in your schema but not in the database. Run `drizzle-kit migrate` (or `push`) against the same `DATABASE_URL` your app uses.
-- **Keep the field names.** Fiducy reads `userID`, `keyID`, `provider`, `handle`, `record` and `createdAt`. You can rename the SQL table (pass `tableName` to `generateSchema`), but not the fields.
+- **Keep the field names.** Fiducy reads `userID`, `keyID`, `provider`, `handle`, `record`, `source` and `createdAt`. You can rename the SQL table (pass `tableName` to `generateSchema`), but not the fields.
 - **Don't add a unique constraint on `userID` and `provider`.** Fiducy saves a user's new key before it revokes the old one; see [the table](/docs/storage#the-table).
 - **No transactions needed.** Every write is a single statement, so drivers without transactions, such as `neon-http` and D1, work.
 - **Drizzle 1.0 no longer takes `schema` in `drizzle()`.** Pass `{ table }` or `{ schema }` to `drizzleStorage` instead.

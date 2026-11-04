@@ -47,6 +47,7 @@ The SQL adapters all use one table, `fiducy_user_key` by default:
 | `provider` | `openai`, `anthropic`, `gemini` or `openrouter` |
 | `handle` | The key handle |
 | `record` | The sealed record as JSON, only in `app` mode |
+| `source` | `widget` or `import` (keys added with `fiducy.importKeys`) |
 | `created_at` | ISO timestamp, used to pick the newest key |
 
 The primary key is `(user_id, key_id)`, with an index on `(user_id, provider)`. Two details matter if you write the table yourself:
@@ -74,7 +75,7 @@ In-memory, for tests and local experiments. Everything is lost on restart, and e
 
 ## Your own storage
 
-Implement four methods. A stored key is `{ userID, provider, keyID, handle, record?, createdAt }`.
+Implement four methods. A stored key is `{ userID, provider, keyID, handle, record?, source?, createdAt }`.
 
 ```ts
 import type { FiducyStorage } from '@fiducy/sdk/server';
@@ -87,7 +88,7 @@ export const storage: FiducyStorage = {
 };
 ```
 
-Store `record` as JSON text and parse it back in `findKey` and `listKeys`.
+Store `record` as JSON text and parse it back in `findKey` and `listKeys`. Store `source` as it is.
 
 ## Common gotchas
 

@@ -9,6 +9,7 @@ const COLUMN_TYPES: Record<SQLDialect, Record<string, string>> = {
     provider: 'text',
     handle: 'text',
     record: 'text',
+    source: 'text',
     created_at: 'text'
   },
   postgres: {
@@ -17,6 +18,7 @@ const COLUMN_TYPES: Record<SQLDialect, Record<string, string>> = {
     provider: 'text',
     handle: 'text',
     record: 'text',
+    source: 'text',
     created_at: 'text'
   },
   mysql: {
@@ -25,9 +27,12 @@ const COLUMN_TYPES: Record<SQLDialect, Record<string, string>> = {
     provider: 'varchar(32)',
     handle: 'varchar(255)',
     record: 'text',
+    source: 'varchar(16)',
     created_at: 'varchar(32)'
   }
 };
+
+const NULLABLE_COLUMNS = ['record', 'source'];
 
 function quoteIdentifier(dialect: SQLDialect, identifier: string): string {
   return dialect === 'mysql' ? `\`${identifier}\`` : `"${identifier}"`;
@@ -46,7 +51,7 @@ export function resolveTableName(tableName?: string): string {
 function describeColumns(dialect: SQLDialect): string[] {
   const types = COLUMN_TYPES[dialect];
   return Object.entries(types).map(([column, type]) => {
-    const nullability = column === 'record' ? '' : ' not null';
+    const nullability = NULLABLE_COLUMNS.includes(column) ? '' : ' not null';
     return `  ${quoteIdentifier(dialect, column)} ${type}${nullability}`;
   });
 }
