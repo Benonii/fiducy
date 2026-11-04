@@ -26,3 +26,5 @@ export const PUBLIC_ENVIRONMENT_PREFIXES = [
   'EXPO_PUBLIC_',
   'REACT_APP_'
 ];
+
+export const MAX_IMPORT_BATCH_SIZE = 100;
