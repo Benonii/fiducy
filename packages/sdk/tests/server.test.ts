@@ -19,12 +19,20 @@ const OWNED_APP: AppRegistration = {
   allowedOrigins: ['https://ownstore.example'],
   recordStorage: 'app'
 };
+const IMPORT_APP: AppRegistration = {
+  appID: 'app_import_sdk',
+  name: 'Importer',
+  appSecret: 'app_sk_import_sdk_8Rv2Kd5Yp',
+  monthlyRequestLimitPerKey: 50,
+  allowedOrigins: ['https://importer.example'],
+  allowKeyImport: true
+};
 const APP_URL = 'https://chat.example';
 
 let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
 
 beforeAll(async () => {
-  harness = await startGatewayHarness([OWNED_APP]);
+  harness = await startGatewayHarness([OWNED_APP, IMPORT_APP]);
 });
 
 afterAll(() => harness.stop());
@@ -168,6 +176,57 @@ describe('the app-side Fiducy handler', () => {
       })
     );
     expect(response.status).toBe(400);
+  });
+});
+
+describe('importing keys an app already stores', () => {
+  it('seals keys at the gateway, saves handles and chats with them', async () => {
+    const storage = memoryStorage();
+    const fiducy = createApp(IMPORT_APP, storage);
+    const result = await fiducy.importKeys([
+      { userID: 'legacy_1', provider: 'openai', apiKey: SAMPLE_API_KEY },
+      { userID: 'legacy_2', provider: 'anthropic', apiKey: 'sk-ant-legacy-0002' }
+    ]);
+    expect(result.imported.map((key) => key.userID)).toEqual(['legacy_1', 'legacy_2']);
+    expect(result.skipped).toEqual([]);
+    const [stored] = await storage.listKeys('legacy_1');
+    expect(stored?.source).toBe('import');
+    expect(stored?.handle).toStartWith('kh_');
+
+    const settings = await fiducy.providerSettings('openai', { userID: 'legacy_1' });
+    if (!settings) throw new Error('missing settings');
+    const { text } = await generateText({
+      model: createOpenAI(settings).chat('gpt-4o-mini'),
+      prompt: 'Hi'
+    });
+    expect(text).toBe('Hello');
+    const forwarded = harness.mockProvider.recordedRequests.at(-1);
+    expect(forwarded?.headers.get('authorization')).toBe(`Bearer ${SAMPLE_API_KEY}`);
+  });
+
+  it('skips users who already connected a key, so it is safe to run again', async () => {
+    const fiducy = createApp(IMPORT_APP);
+    const first = await fiducy.importKeys([
+      { userID: 'rerun_1', provider: 'openai', apiKey: 'sk-rerun-0001' }
+    ]);
+    const second = await fiducy.importKeys([
+      { userID: 'rerun_1', provider: 'openai', apiKey: 'sk-rerun-0001' },
+      { userID: 'rerun_2', provider: 'openai', apiKey: 'sk-rerun-0002' },
+      { userID: 'rerun_2', provider: 'openai', apiKey: 'sk-rerun-0003' }
+    ]);
+    expect(first.imported).toHaveLength(1);
+    expect(second.imported.map((key) => key.userID)).toEqual(['rerun_2']);
+    expect(second.skipped).toEqual([
+      { userID: 'rerun_1', provider: 'openai' },
+      { userID: 'rerun_2', provider: 'openai' }
+    ]);
+  });
+
+  it('fails loudly when the app has not turned import on', async () => {
+    const fiducy = createApp(CHAT_APP);
+    await expect(
+      fiducy.importKeys([{ userID: 'blocked', provider: 'openai', apiKey: 'sk-blocked' }])
+    ).rejects.toThrow('Key import is off');
   });
 });
 
