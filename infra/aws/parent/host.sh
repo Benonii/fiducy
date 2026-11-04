@@ -4,7 +4,7 @@
 #   host.sh start  -> (re)start the enclave, which terminates TLS itself
 # Required env: AWS_REGION, FIDUCY_BUCKET, FIDUCY_KMS_KEY_ID, FIDUCY_KEYS_TABLE, FIDUCY_PUBLIC_IP,
 #               FIDUCY_CONTROL_PLANE_URL
-# The dashboard and the demo run on Vercel, so the host only runs the gateway enclave. TLS ends
+# The dashboard and the demo run elsewhere, so the host only runs the gateway enclave. TLS ends
 # inside the enclave, so the parent never holds a certificate key or sees plaintext traffic.
 set -euo pipefail
 

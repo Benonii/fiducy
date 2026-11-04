@@ -2,12 +2,11 @@
 # Deploys the gateway enclave from a machine with AWS admin credentials (GitHub Actions or a laptop).
 #   1. Create or update the CloudFormation stack
 #   2. Make sure the gateway token exists in Parameter Store (replace it with --rotate-token)
-#   3. Hand the token to the control plane on Vercel and redeploy it
+#   3. Remind you to give the token to the dashboard (wherever it runs)
 #   4. Ship the repo to the host and build the enclave image there
 #   5. Lock the KMS key to the new enclave image hash (PCR0)
 #   6. Start the enclave and check the public endpoints
-# Required env: FIDUCY_CONTROL_PLANE_URL. Optional: FIDUCY_DEMO_URL, VERCEL_TOKEN,
-# VERCEL_CONTROL_PLANE_PROJECT_ID, VERCEL_TEAM_ID, VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL.
+# Required env: FIDUCY_CONTROL_PLANE_URL. Optional: FIDUCY_DEMO_URL.
 set -euo pipefail
 
 ROTATE_TOKEN=false
@@ -25,8 +24,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 TEMPLATE="$ROOT_DIR/infra/aws/stack.yaml"
 AMI_PARAMETER=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
 GATEWAY_TOKEN_PARAMETER=/fiducy/gateway-token
-CONTROL_PLANE_URL="${FIDUCY_CONTROL_PLANE_URL:?Set FIDUCY_CONTROL_PLANE_URL to the dashboard URL on Vercel}"
-VERCEL_API=https://api.vercel.com
+CONTROL_PLANE_URL="${FIDUCY_CONTROL_PLANE_URL:?Set FIDUCY_CONTROL_PLANE_URL to the dashboard URL}"
 
 log() { echo "[deploy $(date -u +%H:%M:%S)] $*"; }
 summary() { [ -n "${GITHUB_STEP_SUMMARY:-}" ] && echo "$*" >> "$GITHUB_STEP_SUMMARY" || true; }
@@ -64,27 +62,9 @@ read_gateway_token() {
     --query Parameter.Value --output text
 }
 
-vercel_query() {
-  [ -n "${VERCEL_TEAM_ID:-}" ] && echo "&teamId=${VERCEL_TEAM_ID}" || true
-}
-
-sync_control_plane_token() {
-  if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_CONTROL_PLANE_PROJECT_ID:-}" ]; then
-    log "VERCEL_TOKEN or VERCEL_CONTROL_PLANE_PROJECT_ID is not set. Copy the value of"
-    log "$GATEWAY_TOKEN_PARAMETER into the control plane's FIDUCY_GATEWAY_TOKEN on Vercel yourself."
-    return 0
-  fi
-  log "Handing the gateway token to the control plane on Vercel"
-  local body
-  body=$(jq -cn --arg value "$(read_gateway_token)" \
-    '{key: "FIDUCY_GATEWAY_TOKEN", value: $value, type: "sensitive", target: ["production"]}')
-  curl -fsS -o /dev/null -X POST \
-    "${VERCEL_API}/v10/projects/${VERCEL_CONTROL_PLANE_PROJECT_ID}/env?upsert=true$(vercel_query)" \
-    -H "authorization: Bearer ${VERCEL_TOKEN}" -H 'content-type: application/json' -d "$body"
-  if [ -n "${VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL:-}" ]; then
-    log "Redeploying the control plane"
-    curl -fsS -o /dev/null -X POST "$VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL"
-  fi
+remind_token_handoff() {
+  log "The dashboard needs this token as FIDUCY_GATEWAY_TOKEN. Read it with:"
+  log "  aws ssm get-parameter --name $GATEWAY_TOKEN_PARAMETER --with-decryption --query Parameter.Value --output text"
 }
 
 wait_for_ssm() {
@@ -178,7 +158,7 @@ KEYS_TABLE=$(stack_output KeysTableName)
 log "Host $INSTANCE_ID at $PUBLIC_IP, key $KEY_ARN"
 
 ensure_gateway_token
-sync_control_plane_token
+remind_token_handoff
 
 log "Uploading release"
 (cd "$ROOT_DIR" && git archive --format=tar.gz -o /tmp/fiducy-release.tar.gz HEAD)
@@ -200,11 +180,11 @@ check_endpoint "${CONTROL_PLANE_URL}/api/config"
 summary "## Fiducy gateway deployed"
 summary ""
 summary "- Gateway (in the enclave): https://gw.${DASHED_IP}.sslip.io"
-summary "- Dashboard (Vercel): ${CONTROL_PLANE_URL}"
-[ -z "${FIDUCY_DEMO_URL:-}" ] || summary "- Demo chat (Vercel): ${FIDUCY_DEMO_URL}"
+summary "- Dashboard: ${CONTROL_PLANE_URL}"
+[ -z "${FIDUCY_DEMO_URL:-}" ] || summary "- Demo chat: ${FIDUCY_DEMO_URL}"
 summary "- Site and docs: https://fiducy.dev"
 summary "- Enclave image PCR0: \`${PCR0}\`"
 if [ "$ROTATE_TOKEN" = true ]; then
-  summary "- Gateway token rotated: the previous token no longer authenticates the gateway"
+  summary "- Gateway token rotated: set the new value as FIDUCY_GATEWAY_TOKEN on the dashboard now. Until you do, the gateway cannot load app settings from it"
 fi
 log "Done"

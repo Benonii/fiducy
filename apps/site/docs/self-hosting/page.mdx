@@ -47,9 +47,7 @@ The workflow creates the gateway token on the first run, builds the enclave on t
 aws ssm get-parameter --name /fiducy/gateway-token --with-decryption --query Parameter.Value --output text
 ```
 
-If the dashboard is on Vercel, the deploy can set it for you; the options are at the top of `infra/aws/deploy.sh`.
-
-To replace the token, run the workflow by hand with **rotate_token** ticked. The old token stops working.
+To replace the token, run the workflow by hand with **rotate_token** ticked, then put the new value in the dashboard's `FIDUCY_GATEWAY_TOKEN` and restart it. The old token stops working, and the gateway can't load app settings until the dashboard has the new one.
 
 ## Deploy from your machine
 

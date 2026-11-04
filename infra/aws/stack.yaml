@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Fiducy gateway - one Graviton host running the gateway inside a Nitro enclave; the dashboard and demo run on Vercel
+Description: Fiducy gateway - one Graviton host running the gateway inside a Nitro enclave
 
 Parameters:
   AmiId:

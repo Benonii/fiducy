@@ -24,10 +24,6 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
       FIDUCY_CONTROL_PLANE_URL: ${{ vars.FIDUCY_CONTROL_PLANE_URL }}
       FIDUCY_DEMO_URL: ${{ vars.FIDUCY_DEMO_URL }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
-      VERCEL_CONTROL_PLANE_PROJECT_ID: ${{ vars.VERCEL_CONTROL_PLANE_PROJECT_ID }}
-      VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_CONTROL_PLANE_DEPLOY_HOOK_URL }}
     steps:
       - uses: actions/checkout@v4
       - name: Check AWS credentials
