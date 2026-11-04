@@ -11,7 +11,7 @@ Please report privately. Do not open a public issue, pull request or discussion.
 
 Include what you found, the affected package or app and version, steps to reproduce, and the impact you expect. A proof of concept helps. Never use real user keys or someone else's deployment to test.
 
-You will get an answer within 3 days. We aim to ship a fix for critical and high severity issues within 14 days, and we publish a GitHub security advisory once a fix is out. You are credited in the advisory unless you ask not to be.
+You will get an answer within 72 hours. Confirmed issues are fixed as fast as possible, and critical ones come before any other work, with a fix or a documented mitigation within 7 days. We publish a GitHub security advisory once a fix is out, and within 90 days of your report at the latest. You are credited in the advisory unless you ask not to be.
 
 ## Supported versions
 
