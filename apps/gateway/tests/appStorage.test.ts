@@ -78,7 +78,10 @@ describe('apps that store their own sealed records', () => {
 
   it('refuses a tampered record', async () => {
     const { handle, record } = await sealForApp();
-    const tampered = { ...record, ciphertext: `${record.ciphertext.slice(0, -2)}AA` };
+    // Change the first character: it always maps to the first ciphertext byte, while the last
+    // characters can carry padding bits that decode to the same bytes.
+    const first = record.ciphertext.startsWith('A') ? 'B' : 'A';
+    const tampered = { ...record, ciphertext: `${first}${record.ciphertext.slice(1)}` };
     expect((await callProvider(handle, encodeRecord(tampered))).status).toBe(403);
   });
 
