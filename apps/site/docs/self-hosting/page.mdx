@@ -1,6 +1,6 @@
 ---
 title: Self-hosting
-order: 9
+order: 10
 description: Run the gateway enclave and KMS key in your own AWS account, with the dashboard on Vercel.
 ---
 
@@ -81,7 +81,7 @@ This starts:
 | `3001` | Demo chat | Starts once you add `demoAppID` and `demoAppSecret` for an app with origin `http://localhost:3001` to `.prototype/secrets.json` |
 | `8787` | Gateway | `FIDUCY_GATEWAY_URL=http://localhost:8787` in the app you are testing |
 
-Run the app you are testing on another port (for example 5173) and add that origin, such as `http://localhost:5173`, to its allowed origins in the dashboard. `--mock` uses a fake OpenAI that logs the last four characters of the key it received, so you can see decryption happen.
+Run the app you are testing on another port (for example 5173) and add that origin, such as `http://localhost:5173`, to its allowed origins in the dashboard. `--mock` uses a fake OpenAI that logs the last four characters of the key it received, so you can see decryption happen. Sealed records are saved to `.prototype/key-records.json`, so keys survive a restart. Delete `.prototype/` to start fresh.
 
 ## Gateway environment
 
