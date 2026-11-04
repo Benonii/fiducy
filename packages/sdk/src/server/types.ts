@@ -2,12 +2,15 @@ import type { SealedRecord } from '@fiducy/core';
 import type { StorageSchema } from '../storage/types.ts';
 import type { FetchGateway, GatewayProvider, ProviderSettings } from '../types.ts';
 
+export type KeySource = 'widget' | 'import';
+
 export interface StoredUserKey {
   userID: string;
   provider: GatewayProvider;
   keyID: string;
   handle: string;
   record?: SealedRecord;
+  source?: KeySource;
   createdAt: string;
 }
 
@@ -15,6 +18,21 @@ export interface UserKeySummary {
   keyID: string;
   provider: GatewayProvider;
   createdAt: string;
+}
+
+export interface ImportKeyInput {
+  userID: string;
+  provider: GatewayProvider;
+  apiKey: string;
+}
+
+export interface ImportedUserKey extends UserKeySummary {
+  userID: string;
+}
+
+export interface ImportKeysResult {
+  imported: ImportedUserKey[];
+  skipped: Array<{ userID: string; provider: GatewayProvider }>;
 }
 
 export interface FiducyStorage {
@@ -94,6 +112,7 @@ export interface Fiducy {
   listKeys: (userID: string) => Promise<UserKeySummary[]>;
   saveKey: (userID: string, input: SaveKeyInput) => Promise<UserKeySummary>;
   revokeKey: (userID: string, keyID: string) => Promise<boolean>;
+  importKeys: (keys: ImportKeyInput[]) => Promise<ImportKeysResult>;
   basePath: string;
   storage: FiducyStorage;
 }

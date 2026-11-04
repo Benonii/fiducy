@@ -78,10 +78,11 @@ Providers: `openai`, `anthropic`, `gemini`, `openrouter`.
 await fiducy.listKeys(userID);                         // UserKeySummary[]
 await fiducy.saveKey(userID, { provider, handle });    // UserKeySummary
 await fiducy.revokeKey(userID, keyID);                 // boolean
+await fiducy.importKeys([{ userID, provider, apiKey }]); // { imported, skipped }
 ```
 
-`UserKeySummary` is `{ keyID, provider, createdAt }`. Handles never leave your server through these methods.
+`UserKeySummary` is `{ keyID, provider, createdAt }`. Handles never leave your server through these methods. `importKeys` moves keys you already store into Fiducy; see [Migrate existing keys](/docs/migrate).
 
 ## Low-level client
 
-For scripts or custom flows, `@fiducy/sdk` exports `createGatewayClient({ gatewayURL, appSecret })` with `providerSettings(provider, handle)` and `revokeKey(handle)`.
+For scripts or custom flows, `@fiducy/sdk` exports `createGatewayClient({ gatewayURL, appSecret })` with `providerSettings(provider, handle)`, `revokeKey(handle)` and `importKeys(apiKeys)`.
