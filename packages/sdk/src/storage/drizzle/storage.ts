@@ -14,9 +14,9 @@ import type { DrizzleConnection, DrizzleDatabase, DrizzleStorageOptions } from '
 
 function upsertKey({ db, table }: DrizzleConnection, dialect: SQLDialect, key: StoredUserKey) {
   const row = toUserKeyModel(key);
-  const { provider, handle, record, createdAt } = row;
+  const { provider, handle, record, source, createdAt } = row;
   const insert = db.insert(table).values(row);
-  const set = { provider, handle, record, createdAt };
+  const set = { provider, handle, record, source, createdAt };
   if (dialect === 'mysql') return insert.onDuplicateKeyUpdate({ set });
   return insert.onConflictDoUpdate({ target: [table.userID, table.keyID], set });
 }

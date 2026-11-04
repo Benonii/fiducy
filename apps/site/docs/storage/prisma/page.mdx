@@ -29,6 +29,7 @@ model FiducyUserKey {
   provider  String
   handle    String
   record    String?
+  source    String?
   createdAt String   @map("created_at")
 
   @@id([userID, keyID])
@@ -82,6 +83,6 @@ export const fiducy = createFiducy({ gatewayURL, appSecret, storage, getUserID }
 
 - **"The Prisma client has no FiducyUserKey model."** You added the model but didn't regenerate the client. Run `npx prisma generate` (or `migrate dev`, which runs it).
 - **"The Fiducy table does not exist yet."** The client has the model but the database doesn't have the table. Run `npx prisma migrate deploy` against the same `DATABASE_URL` your app uses.
-- **Keep the field names.** Fiducy reads `userID`, `keyID`, `provider`, `handle`, `record` and `createdAt`, and upserts on the compound ID `userID_keyID`. Rename the model or table if you like, but keep the fields and `@@id([userID, keyID])`.
+- **Keep the field names.** Fiducy reads `userID`, `keyID`, `provider`, `handle`, `record`, `source` and `createdAt`, and upserts on the compound ID `userID_keyID`. Rename the model or table if you like, but keep the fields and `@@id([userID, keyID])`.
 - **Don't add `@@unique([userID, provider])`.** Fiducy saves a user's new key before it revokes the old one; see [the table](/docs/storage#the-table).
 - **Create one `PrismaClient`.** Reuse the client your app already exports, especially in Next.js dev mode, where hot reload can otherwise open a new connection pool on every change.

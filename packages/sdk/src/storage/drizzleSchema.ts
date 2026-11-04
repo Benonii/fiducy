@@ -20,11 +20,16 @@ const COLUMNS = [
   { field: 'provider', column: 'provider' },
   { field: 'handle', column: 'handle' },
   { field: 'record', column: 'record' },
+  { field: 'source', column: 'source' },
   { field: 'createdAt', column: 'created_at' }
 ];
 
 function describeColumn(dialect: SQLDialect, field: string, column: string): string {
   if (column === 'record') return `  ${field}: text('${column}')`;
+  if (column === 'source' && dialect === 'mysql') {
+    return `  ${field}: varchar('${column}', { length: 16 })`;
+  }
+  if (column === 'source') return `  ${field}: text('${column}')`;
   if (dialect !== 'mysql') return `  ${field}: text('${column}').notNull()`;
   return `  ${field}: varchar('${column}', { length: ${MYSQL_LENGTHS[column]} }).notNull()`;
 }

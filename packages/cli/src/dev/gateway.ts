@@ -55,7 +55,8 @@ export async function createDevGatewayHandler(input: DevGatewayInput): Promise<R
     usageLedger: createMemoryUsageLedger(),
     providerRegistry: createProviderRegistry(
       mock ? { openai: gatewayURL, anthropic: gatewayURL } : undefined
-    )
+    ),
+    mockProviders: mock
   });
   return async (request) => {
     const url = new URL(request.url);

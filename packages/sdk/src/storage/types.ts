@@ -36,6 +36,7 @@ export interface UserKeyRow {
   provider: string;
   handle: string;
   record: string | null;
+  source: string | null;
   created_at: string;
 }
 
@@ -45,5 +46,6 @@ export interface UserKeyModel {
   provider: string;
   handle: string;
   record: string | null;
+  source: string | null;
   createdAt: string;
 }
