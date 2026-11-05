@@ -58,7 +58,10 @@ export interface CreateFiducyOptions {
   appSecret?: string;
   basePath?: string;
   fetch?: FetchGateway;
+  env?: EnvironmentVariables;
 }
+
+export type EnvironmentVariables = Record<string, string | undefined>;
 
 export interface FiducyConnection {
   gatewayURL: string;
