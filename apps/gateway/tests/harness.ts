@@ -20,6 +20,8 @@ export const CHAT_APP: AppRegistration = {
   allowedOrigins: ['https://chatforge.example']
 };
 
+export const CONTROL_PLANE_TOKEN = 'gateway_token_harness_3Kd8Pz1Qw6';
+
 export const DESK_APP: AppRegistration = {
   appID: 'app_promptdesk',
   name: 'Promptdesk',
@@ -44,6 +46,7 @@ export async function startGatewayHarness(
       openai: mockProvider.baseURL,
       anthropic: mockProvider.baseURL
     }),
+    controlPlaneToken: CONTROL_PLANE_TOKEN,
     rateLimiter
   });
   const server = Bun.serve({ port: 0, fetch: gateway });
