@@ -1,0 +1,13 @@
+{
+  "name": "@fiducy/example-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./styles.css"
+  },
+  "dependencies": {
+    "@fiducy/sdk": "workspace:*"
+  }
+}
