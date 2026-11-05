@@ -143,7 +143,8 @@ const gateway = Bun.serve({
     usageLedger,
     providerRegistry: createProviderRegistry(
       mockProvider ? { openai: mockProvider.baseURL } : undefined
-    )
+    ),
+    mockProviders: mockProvider !== null
   })
 });
 
