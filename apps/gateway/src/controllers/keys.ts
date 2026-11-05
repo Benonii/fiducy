@@ -1,6 +1,6 @@
 import { sealSecret } from '@fiducy/core';
 
-import { authenticateApp } from '../authentication';
+import { authenticateApp, identifyRevokeCaller } from '../authentication';
 import { respondWith, respondWithFailure, respondWithRateLimit } from '../responses';
 import { identifyClient } from '../tokenBucketRateLimiter';
 import { readJSONBody, validateImportKeysBody, validateStoreKeyBody } from '../validators';
@@ -75,15 +75,23 @@ export async function revokeKey(
   keyID: string,
   dependencies: GatewayDependencies
 ) {
-  const app = await authenticateApp(dependencies.appDirectory, request.headers);
-  if (!app.ok) return respondWithFailure(app.error);
-  if (app.value.recordStorage === 'app') {
+  const caller = await identifyRevokeCaller(
+    request,
+    dependencies.appDirectory,
+    dependencies.controlPlaneToken
+  );
+  if (!caller.ok) return respondWithFailure(caller.error);
+  const app = await dependencies.appDirectory.findApp(caller.value.appID);
+  if (!app) return respondWith(404, null, 'No app is registered with this appID');
+  if (app.recordStorage === 'app') {
     return respondWith(409, null, 'This app stores its own records. Delete the record to revoke');
   }
   const record = await dependencies.keyStore.findRecord(keyID);
-  if (record?.appID !== app.value.appID) return respondWith(404, null, 'No key found with this ID');
+  if (record?.appID !== app.appID) return respondWith(404, null, 'No key found with this ID');
 
   await dependencies.keyStore.deleteRecord(keyID);
-  await dependencies.keyEvents?.report({ type: 'revoked', appID: app.value.appID, keyID });
+  if (!caller.value.isControlPlane) {
+    await dependencies.keyEvents?.report({ type: 'revoked', appID: app.appID, keyID });
+  }
   return respondWith(200, { keyID }, 'Key revoked');
 }
