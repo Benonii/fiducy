@@ -57,6 +57,7 @@ export interface GatewayDependencies {
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
   keyEvents?: KeyEventReporter;
+  controlPlaneToken?: string;
   rateLimiter?: RateLimiter;
 }
 
@@ -145,6 +146,7 @@ export interface KmsSettings {
 export interface GatewayRuntime {
   handleRequest: RequestHandler;
   usageLedger: FlushableUsageLedger | null;
+  keyWrapper: KeyWrapper;
   keyWrapperName: string;
 }
 
@@ -169,6 +171,29 @@ export interface DynamoKeyStoreOptions {
   tableName: string;
 }
 
+export interface BlobStore {
+  readBlob: (name: string) => Promise<Bytes | null>;
+  writeBlob: (name: string, bytes: Bytes) => Promise<void>;
+}
+
+export type DirectorySnapshot = Record<string, string>;
+
+export interface TlsStateOptions {
+  directory: string;
+  blobStore: BlobStore;
+  keyWrapper: KeyWrapper;
+}
+
+export interface TlsStateKeeper {
+  restore: () => Promise<boolean>;
+  persist: () => Promise<boolean>;
+  start: (intervalMilliseconds: number) => () => void;
+}
+
+export interface TlsFrontOptions extends TlsStateOptions {
+  caddyConfigPath: string;
+}
+
 export interface InstanceRoleCredentials {
   accessKeyId: string;
   secretAccessKey: string;
@@ -181,6 +206,11 @@ export interface KeyEvent {
   appID: string;
   keyID: string;
   source?: KeySource;
+}
+
+export interface RevokeCaller {
+  appID: string;
+  isControlPlane: boolean;
 }
 
 export interface KeyEventReporter {
