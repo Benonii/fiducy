@@ -56,6 +56,7 @@ export interface GatewayDependencies {
   usageLedger: UsageLedger;
   providerRegistry: ProviderRegistry;
   attest?: AttestationSource;
+  mockProviders?: boolean;
   keyEvents?: KeyEventReporter;
   controlPlaneToken?: string;
   rateLimiter?: RateLimiter;
@@ -78,6 +79,7 @@ export interface SealedKey {
 export interface GatewayFailure {
   status: number;
   message: string;
+  code?: string;
 }
 
 export interface ResolvedKey {
@@ -87,11 +89,14 @@ export interface ResolvedKey {
 
 export type GatewayResult<Value> = Result<Value, GatewayFailure>;
 
+export type WidgetProtection = 'enclave' | 'test' | 'unattested';
+
 export interface WidgetPageInput {
   appID: string;
   appName: string;
   parentOrigin: string;
   nonce: string;
+  protection: WidgetProtection;
 }
 
 export type RequestHandler = (request: Request) => Promise<Response>;
