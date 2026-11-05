@@ -153,7 +153,8 @@ wait_for_gateway() {
     curl -fsS -o /dev/null --resolve "${GATEWAY_HOST}:443:127.0.0.1" "$url" && return 0
     sleep 2
   done
-  log "The enclave gateway did not come up at $url"
+  log "The enclave gateway did not come up at $url. Last lines from the enclave:"
+  docker logs --tail 50 fiducy-enclave 2>&1 | sed 's/^/    /' || true
   return 1
 }
 

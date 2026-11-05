@@ -18,8 +18,10 @@ export function createTlsStateKeeper({
     const opened = await openBlob(keyWrapper, TLS_STATE_SCOPE, sealed);
     const snapshot = opened ? decodeSnapshot(opened) : null;
     if (!snapshot) {
-      console.error('The stored TLS state could not be opened; Caddy starts without it');
-      return false;
+      // Starting Caddy without the state would request a new certificate on every restart and
+      // run into the CA's issuance limits. Stop instead: the supervisor retries, and a blob that
+      // is truly dead has to be deleted by hand.
+      throw new Error(`The stored TLS state (${TLS_STATE_BLOB_NAME}) could not be opened`);
     }
     await restoreDirectory(directory, snapshot);
     persistedFingerprint = await fingerprintSnapshot(snapshot);
