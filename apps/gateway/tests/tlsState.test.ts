@@ -1,5 +1,5 @@
 import { mkdtempSync, rmSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -72,7 +72,7 @@ describe('the TLS state keeper', () => {
     expect(await restoredKeeper.persist()).toBe(false);
   });
 
-  it('starts fresh when the stored state was sealed for another key', async () => {
+  it('refuses to start when the stored state was sealed for another key', async () => {
     const blobStore = createMemoryBlobStore();
     const directory = createDirectory();
     await writeCaddyState(directory, 'CERT-1');
@@ -82,6 +82,7 @@ describe('the TLS state keeper', () => {
     const otherWrapper = createLocalKeyWrapper(crypto.getRandomValues(new Uint8Array(32)));
     const target = createDirectory();
     const keeper = createTlsStateKeeper({ directory: target, blobStore, keyWrapper: otherWrapper });
-    expect(await keeper.restore()).toBe(false);
+    await expect(keeper.restore()).rejects.toThrow('could not be opened');
+    expect(await readdir(target)).toEqual([]);
   });
 });

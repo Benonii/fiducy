@@ -1,4 +1,4 @@
-import { TLS_STATE_BLOB_NAME, TLS_STATE_SCOPE } from './constants';
+import { BLOB_KEY_PREFIX, TLS_STATE_BLOB_NAME, TLS_STATE_SCOPE } from './constants';
 import { decodeSnapshot, encodeSnapshot, fingerprintSnapshot } from './directorySnapshot';
 import { restoreDirectory, snapshotDirectory } from './directorySnapshot';
 import { openBlob, sealBlob } from './sealedBlob';
@@ -18,8 +18,9 @@ export function createTlsStateKeeper({
     const opened = await openBlob(keyWrapper, TLS_STATE_SCOPE, sealed);
     const snapshot = opened ? decodeSnapshot(opened) : null;
     if (!snapshot) {
-      console.error('The stored TLS state could not be opened; Caddy starts without it');
-      return false;
+      throw new Error(
+        `The stored TLS state could not be opened. Delete the ${BLOB_KEY_PREFIX}${TLS_STATE_BLOB_NAME} item to request a new certificate`
+      );
     }
     await restoreDirectory(directory, snapshot);
     persistedFingerprint = await fingerprintSnapshot(snapshot);

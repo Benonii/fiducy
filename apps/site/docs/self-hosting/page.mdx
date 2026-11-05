@@ -95,7 +95,7 @@ Run the app you are testing on another port (for example 5173) and add that orig
 | `FIDUCY_GATEWAY_TOKEN_CIPHERTEXT` | Control plane token, KMS-encrypted |
 | `FIDUCY_ENCLAVE_API_URL` | Enclaver API, for `/attestation` |
 | `FIDUCY_CADDY_CONFIG` | Caddyfile for the TLS front inside the enclave. When unset, the gateway serves plain HTTP on `PORT` |
-| `FIDUCY_TLS_STATE_DIR` | Caddy's data directory, sealed into `KeysTable` once a minute and restored on start |
+| `FIDUCY_TLS_STATE_DIR` | Caddy's data directory, sealed into `KeysTable` within 10 seconds of a change and restored on start. If the gateway keeps stopping with "The stored TLS state could not be opened", delete the `blob:tls-state` item from the table; the next start requests a new certificate |
 | `FIDUCY_PUBLIC_HOST` | The hostname Caddy serves and requests a certificate for |
 | `FIDUCY_APPS_JSON` | Static app list when there is no control plane |
 | `PORT` | Default `8787` |
