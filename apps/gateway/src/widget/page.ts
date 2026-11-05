@@ -23,7 +23,7 @@ function describeProtection(protection: WidgetProtection, appName: string): stri
     return 'This is a test gateway without an enclave. Enter a made-up key, not a real one.';
   }
   if (protection === 'unattested') {
-    return `${appName} never sees your key, but this gateway is not running in an enclave, so whoever runs it could.`;
+    return `${appName} never sees your key, but this gateway is not running in an enclave, your keys are not secure.`;
   }
   return `${appName} never sees your key. It is sealed and only opened to call your AI provider.`;
 }
