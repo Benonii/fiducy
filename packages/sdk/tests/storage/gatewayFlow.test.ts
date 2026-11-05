@@ -87,8 +87,9 @@ for (const setup of STORAGE_SETUPS) {
         second.keyID
       ]);
       const settings = await fiducy.providerSettings('openai', { userID: 'user_replace' });
+      if (!settings.ok) throw new Error(settings.message);
       const result = await generateText({
-        model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
+        model: createOpenAI(settings).chat('gpt-4o-mini'),
         prompt: 'hi'
       });
       expect(result.text).toBe('Hello');
@@ -98,9 +99,10 @@ for (const setup of STORAGE_SETUPS) {
       const fiducy = createApp(OWNED_APP);
       await connectKey(fiducy, OWNED_APP, 'user_owned');
       const settings = await fiducy.providerSettings('openai', { userID: 'user_owned' });
-      expect(settings?.headers['x-key-record']).toBeString();
+      if (!settings.ok) throw new Error(settings.message);
+      expect(settings.headers['x-key-record']).toBeString();
       const result = await generateText({
-        model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
+        model: createOpenAI(settings).chat('gpt-4o-mini'),
         prompt: 'hi'
       });
       expect(result.text).toBe('Hello');
@@ -116,8 +118,9 @@ for (const setup of STORAGE_SETUPS) {
       const [stored] = await opened.storage.listKeys('user_imported');
       expect(stored?.source).toBe('import');
       const settings = await fiducy.providerSettings('openai', { userID: 'user_imported' });
+      if (!settings.ok) throw new Error(settings.message);
       const result = await generateText({
-        model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
+        model: createOpenAI(settings).chat('gpt-4o-mini'),
         prompt: 'hi'
       });
       expect(result.text).toBe('Hello');

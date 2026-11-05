@@ -54,7 +54,7 @@ async function bundleWidget() {
 
 async function answerChat(fiducy: Fiducy, userID: string) {
   const settings = await fiducy.providerSettings('openai', { userID });
-  if (!settings) return Response.json({ data: null, message: 'Connect a key first' });
+  if (!settings.ok) return Response.json({ data: null, message: settings.message });
   const result = await generateText({
     model: createOpenAI(settings).chat('gpt-4o-mini'),
     prompt: 'hi'

@@ -4,12 +4,14 @@ import { generateText } from 'ai';
 
 import { SAMPLE_API_KEY } from '@fiducy/testing';
 import { CHAT_APP, startGatewayHarness } from '../../../apps/gateway/tests/harness';
-import { createFiducy, keyValueStorage, memoryStorage } from '../src/server';
+import { keyValueStorage, memoryStorage } from '../src/server';
+import { APP_URL, appRequest, connectKey, createTestApp } from './fixtures';
 
 import type { SealedRecord } from '@fiducy/core';
 import type { AppRegistration } from '../../../apps/gateway/src/types';
 import type { FiducyStorage, KeyValueDriver, StoredUserKey } from '../src/server';
 import type { FetchGateway } from '../src/types';
+import type { GatewayHarness } from './fixtures';
 
 const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore_sdk',
@@ -27,9 +29,8 @@ const IMPORT_APP: AppRegistration = {
   allowedOrigins: ['https://importer.example'],
   allowKeyImport: true
 };
-const APP_URL = 'https://chat.example';
 
-let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
+let harness: GatewayHarness;
 
 beforeAll(async () => {
   harness = await startGatewayHarness([OWNED_APP, IMPORT_APP]);
@@ -42,33 +43,11 @@ function createApp(
   storage: FiducyStorage = memoryStorage(),
   fetchGateway: FetchGateway = fetch
 ) {
-  return createFiducy({
-    gatewayURL: harness.gatewayURL,
-    appSecret: app.appSecret,
-    storage,
-    getUserID: (request) => request.headers.get('x-user'),
-    fetch: fetchGateway
-  });
+  return createTestApp(harness, app, storage, fetchGateway);
 }
 
-function appRequest(path: string, user: string | null, init: RequestInit = {}) {
-  const headers = new Headers(init.headers);
-  if (user) headers.set('x-user', user);
-  headers.set('host', 'chat.example');
-  return new Request(`${APP_URL}/api/fiducy${path}`, { ...init, headers });
-}
-
-async function connect(fiducy: ReturnType<typeof createApp>, app: AppRegistration, user: string) {
-  const { body } = await harness.storeKey(app.appID, SAMPLE_API_KEY);
-  const sealed = body.data;
-  const response = await fiducy.handler(
-    appRequest('/keys', user, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', origin: APP_URL },
-      body: JSON.stringify({ provider: 'openai', ...sealed })
-    })
-  );
-  return { response, sealed };
+function connect(fiducy: ReturnType<typeof createApp>, app: AppRegistration, user: string) {
+  return connectKey(harness, fiducy, app, user);
 }
 
 describe('the app-side Fiducy handler', () => {
@@ -87,7 +66,7 @@ describe('the app-side Fiducy handler', () => {
     const fiducy = createApp(CHAT_APP);
     await connect(fiducy, CHAT_APP, 'user_2');
     const settings = await fiducy.providerSettings('openai', { userID: 'user_2' });
-    if (!settings) throw new Error('missing settings');
+    if (!settings.ok) throw new Error(settings.message);
     const result = await generateText({
       model: createOpenAI(settings).chat('gpt-4o-mini'),
       prompt: 'hi'
@@ -102,9 +81,10 @@ describe('the app-side Fiducy handler', () => {
     const { sealed } = await connect(fiducy, OWNED_APP, 'user_3');
     expect(sealed.record).toBeDefined();
     const settings = await fiducy.providerSettings('openai', { userID: 'user_3' });
-    expect(settings?.headers['x-key-record']).toBeString();
+    if (!settings.ok) throw new Error(settings.message);
+    expect(settings.headers['x-key-record']).toBeString();
     const result = await generateText({
-      model: createOpenAI(settings ?? {}).chat('gpt-4o-mini'),
+      model: createOpenAI(settings).chat('gpt-4o-mini'),
       prompt: 'hi'
     });
     expect(result.text).toBe('Hello');
@@ -119,7 +99,10 @@ describe('the app-side Fiducy handler', () => {
     );
     expect(response.status).toBe(200);
     expect(await harness.keyStore.findRecord(keyID)).toBeNull();
-    expect(await fiducy.providerSettings('openai', { userID: 'user_4' })).toBeNull();
+    expect(await fiducy.providerSettings('openai', { userID: 'user_4' })).toMatchObject({
+      ok: false,
+      reason: 'no-key'
+    });
   });
 
   it('keeps the key when the gateway fails to revoke it', async () => {
@@ -148,7 +131,7 @@ describe('the app-side Fiducy handler', () => {
   it('keeps users apart and refuses anonymous and cross-site requests', async () => {
     const fiducy = createApp(CHAT_APP);
     const { sealed } = await connect(fiducy, CHAT_APP, 'user_5');
-    expect(await fiducy.providerSettings('openai', { userID: 'someone_else' })).toBeNull();
+    expect((await fiducy.providerSettings('openai', { userID: 'someone_else' })).ok).toBe(false);
     expect((await fiducy.handler(appRequest('/keys', null))).status).toBe(401);
     const crossSite = await fiducy.handler(
       appRequest('/keys', 'user_5', {
@@ -194,7 +177,7 @@ describe('importing keys an app already stores', () => {
     expect(stored?.handle).toStartWith('kh_');
 
     const settings = await fiducy.providerSettings('openai', { userID: 'legacy_1' });
-    if (!settings) throw new Error('missing settings');
+    if (!settings.ok) throw new Error('missing settings');
     const { text } = await generateText({
       model: createOpenAI(settings).chat('gpt-4o-mini'),
       prompt: 'Hi'

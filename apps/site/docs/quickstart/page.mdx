@@ -207,7 +207,7 @@ Step 6 shows where to put it.
 
 ## 5. Call the model with the user's key
 
-`fiducy.providerSettings(provider, { userID })` returns `{ baseURL, apiKey, headers }` pointing at your gateway, or `null` when the user has no key for that provider. Pass it to whatever you call the model with. When it is `null`, answer `409` with the missing provider so the page can ask for that key (step 6); never fall back to a key of your own.
+`fiducy.providerSettings(provider, { request })` returns `{ ok: true, baseURL, apiKey, headers, fetch }` pointing at your gateway, or `{ ok: false, reason }` where `reason` is `'signed-out'` or `'no-key'`. Pass the settings to whatever you call the model with. When `ok` is false, `respondToMissingKey(settings)` answers `401` or `409` with the missing provider so the page can ask for that key (step 6); never fall back to a key of your own.
 
 Examples for the [AI SDK](https://ai-sdk.dev), the official OpenAI SDK (also works for `openrouter`) and plain `fetch`:
 
@@ -218,13 +218,14 @@ Examples for the [AI SDK](https://ai-sdk.dev), the official OpenAI SDK (also wor
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
-import { fiducy, getUserID } from '@/lib/fiducy';
+import { respondToMissingKey } from '@fiducy/sdk/server';
+
+import { fiducy } from '@/lib/fiducy';
 
 export async function POST(request: Request) {
-  const userID = await getUserID(request);
-  const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
-  // Tell the browser which key is missing, so it can show the widget (step 6).
-  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
+  const settings = await fiducy.providerSettings('openai', { request });
+  // 401 when signed out, 409 with the missing provider when there is no key (step 6).
+  if (!settings.ok) return respondToMissingKey(settings);
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });

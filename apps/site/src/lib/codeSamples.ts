@@ -15,20 +15,13 @@ export const CODE_SAMPLES: CodeSampleTab[] = [
 import { auth } from '@/lib/auth'; // your auth (Better Auth shown)
 import { kv } from '@/lib/kv'; // any unstorage driver
 
-const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
-if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
-
-export async function getUserID(request: Request) {
-  // Use your own auth's server-side session lookup here.
-  const session = await auth.api.getSession({ headers: request.headers });
-  return session?.user.id ?? null;
-}
-
+// Reads FIDUCY_GATEWAY_URL, FIDUCY_APP_ID and FIDUCY_APP_SECRET from server env.
 export const fiducy = createFiducy({
-  gatewayURL: FIDUCY_GATEWAY_URL,
-  appSecret: FIDUCY_APP_SECRET,
   storage: keyValueStorage(kv),
-  getUserID
+  getUserID: async (request) => {
+    const session = await auth.api.getSession({ headers: request.headers });
+    return session?.user.id ?? null;
+  }
 });`
   },
   {
@@ -72,12 +65,13 @@ export default function Settings() {
     code: `import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
-import { fiducy, getUserID } from '@/lib/fiducy';
+import { respondToMissingKey } from '@fiducy/sdk/server';
+
+import { fiducy } from '@/lib/fiducy';
 
 export async function POST(request: Request) {
-  const userID = await getUserID(request);
-  const settings = userID ? await fiducy.providerSettings('openai', { userID }) : null;
-  if (!settings) return Response.json({ connectKey: 'openai' }, { status: 409 });
+  const settings = await fiducy.providerSettings('openai', { request });
+  if (!settings.ok) return respondToMissingKey(settings);
 
   const { messages } = await request.json();
   const result = streamText({ model: createOpenAI(settings).chat('gpt-4o-mini'), messages });
