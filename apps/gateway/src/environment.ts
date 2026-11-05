@@ -125,6 +125,7 @@ export async function createGatewayFromEnvironment(): Promise<GatewayRuntime> {
       mockProviderURL ? { openai: mockProviderURL, anthropic: mockProviderURL } : undefined
     ),
     attest: enclaveAPIURL ? createEnclaverAttestation(enclaveAPIURL) : undefined,
+    mockProviders: mockProviderURL !== null,
     controlPlaneToken: connection?.gatewayToken,
     rateLimiter: createTokenBucketRateLimiter({
       capacity: KEY_UPLOAD_BUCKET_CAPACITY,
