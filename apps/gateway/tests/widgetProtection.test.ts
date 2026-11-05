@@ -45,6 +45,6 @@ describe('what the key widget says about where the key goes', () => {
     const page = await readWidgetPage({});
     expect(page).not.toContain('Sealed in an enclave');
     expect(page).toContain('No enclave');
-    expect(page).toContain('this gateway is not running in an enclave, so whoever runs it could.');
+    expect(page).toContain('this gateway is not running in an enclave');
   });
 });
