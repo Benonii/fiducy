@@ -1,6 +1,6 @@
 import * as env from '$app/env/private';
-import { fileStorage, readSessionUser, useExampleEnvironment } from '@fiducy/example-kit';
 import { createFiducy } from '@fiducy/sdk/server';
+import { fileStorage, readSessionUser, useExampleEnvironment } from '#lib/example-kit/index';
 
 useExampleEnvironment(env);
 

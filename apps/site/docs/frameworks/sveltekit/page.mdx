@@ -12,6 +12,26 @@ npx fiducy init
 
 Or by hand: `npm install @fiducy/sdk`, then the files below. The working version (SvelteKit 3) is [`examples/sveltekit`](https://github.com/fiducy-dev/fiducy/tree/main/examples/sveltekit).
 
+## Run the example
+
+Copy the example app and run it with a local gateway:
+
+```bash
+npx degit fiducy-dev/fiducy/examples/sveltekit my-app
+cd my-app
+npm install
+npx fiducy dev --mock
+```
+
+`fiducy dev` writes `.env` and keeps running. In a second terminal, add the example's session secret and start the app:
+
+```bash
+echo "EXAMPLE_SESSION_SECRET=$(openssl rand -hex 32)" >> .env
+npm run dev
+```
+
+Sign in as the test user, paste any string as the key (`--mock` answers with a fake model), and ask a question. The example signs users in with a test cookie and keeps handles in a JSON file (`example-kit`); swap both for your own auth and [storage](/docs/storage).
+
 ## Env: pass it in
 
 SvelteKit loads `.env` into its own env modules, **not** into `process.env`. Pass the env module to `createFiducy` as `env`, or Fiducy cannot see your values.

@@ -12,9 +12,27 @@ One small app per framework, each wired the way the docs describe. The same flow
 | `express` | `toNodeHandler` from `@fiducy/sdk/node` | `<fiducy-key>` from `@fiducy/sdk/element` |
 | `farm` | `fiducy()` from `@fiducy/farm` | `FiducyKey` from `@fiducy/sdk/react` |
 
-`@fiducy/example-kit` stands in for your own auth and storage: a signed test-user cookie and a JSON file. Replace both with your real ones.
+Each example has its own `example-kit` folder that stands in for your own auth and storage: a signed test-user cookie and a JSON file. Replace both with your real ones. The examples depend on the published `@fiducy/*` packages, so each folder works on its own.
 
-## Run one
+## Run one on its own
+
+```bash
+npx degit fiducy-dev/fiducy/examples/next my-app
+cd my-app
+npm install
+npx fiducy dev --mock
+```
+
+`fiducy dev` writes `.env` and keeps running. In a second terminal:
+
+```bash
+echo "EXAMPLE_SESSION_SECRET=$(openssl rand -hex 32)" >> .env
+npm run dev
+```
+
+## Run one inside this repository
+
+Inside the repository, the same ranges resolve to the local packages, so the examples run against your changes.
 
 1. `bun install` and `bun run build` at the repository root.
 2. In the example folder, start a local gateway: `node ../../packages/cli/dist/index.js dev --mock` (in your own app this is `npx fiducy dev --mock`). It writes `.env` with the three `FIDUCY_` values.

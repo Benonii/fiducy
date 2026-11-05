@@ -1,7 +1,7 @@
-import { signInTestUser } from '@fiducy/example-kit';
 import { sendWebResponse, toNodeHandler, toWebRequest } from '@fiducy/sdk/node';
 import express from 'express';
 import { createServer } from 'vite';
+import { signInTestUser } from './example-kit';
 
 import { answerQuestion } from './ask.ts';
 import { fiducy } from './fiducy.ts';

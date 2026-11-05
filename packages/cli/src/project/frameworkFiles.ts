@@ -68,7 +68,7 @@ function reactRouterFiles(project: ProjectInfo, serverModulePath: string): Frame
   const path = usesFileRoutes ? 'app/routes/api.fiducy.$.ts' : 'app/routes/fiducy.ts';
   const routeFile = {
     path,
-    contents: `import { toReactRouterHandlers } from '@fiducy/sdk/react-router';\n\n${importServer(project, path, serverModulePath)}\n\nexport const { loader, action } = toReactRouterHandlers(fiducy);\n`
+    contents: `import { toReactRouterHandlers } from '@fiducy/sdk/react-router';\n\n${importServer(project, path, serverModulePath)}\n\nconst handlers = toReactRouterHandlers(fiducy);\n\nexport const loader = handlers.loader;\nexport const action = handlers.action;\n`
   };
   const snippets = usesFileRoutes
     ? []

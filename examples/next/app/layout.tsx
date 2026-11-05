@@ -1,4 +1,4 @@
-import '@fiducy/example-kit/styles.css';
+import '@/lib/example-kit/styles.css';
 
 import type { ReactNode } from 'react';
 

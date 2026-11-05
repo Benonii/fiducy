@@ -1,6 +1,6 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 
-import stylesURL from '@fiducy/example-kit/styles.css?url';
+import stylesURL from '@/lib/example-kit/styles.css?url';
 
 import type { ReactNode } from 'react';
 
