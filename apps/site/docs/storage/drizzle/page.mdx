@@ -6,6 +6,8 @@ description: Store handles with Drizzle ORM. Generate the table, add it to your 
 
 # Drizzle
 
+**Quickest:** `npx fiducy generate` writes `fiducy-schema.ts` next to the schema named in your `drizzle.config`; export it from your schema and run `drizzle-kit generate` and `drizzle-kit migrate`. Pass `provider` to `drizzleStorage` so the CLI can load your server module before the table exists. The steps below do the same by hand.
+
 `drizzleStorage` keeps handles in a table of your [Drizzle](https://orm.drizzle.team) schema, using the `db` you already have. It is tested with node-postgres, mysql2 and bun:sqlite on Drizzle 0.45 and 1.0. It only uses plain selects, inserts and deletes, so other Drizzle drivers for Postgres, MySQL and SQLite (postgres.js, Neon, PlanetScale, libSQL, D1) should work as well. Migrations go through drizzle-kit, like the rest of your schema.
 
 ## 1. Add the table to your schema

@@ -88,6 +88,12 @@ export const fiducy = createFiducy({ gatewayURL, appSecret, storage, getUserID }
 
 Fiducy needs one table, `fiducy_user_key` (see [the table](/docs/storage#the-table)). Create it once, before the first request, the same way you run your other migrations.
 
+**The CLI:** `npx fiducy migrate` loads your server module, shows the SQL and creates what is missing. `npx fiducy generate` writes the same SQL to `fiducy_migrations/` for your own migration tool. See [CLI](/docs/cli#migrate).
+
+```bash
+npx fiducy migrate
+```
+
 **Option 1: run it from a script.** `getMigrations` looks at the database and only creates what is missing:
 
 ```ts title="scripts/fiducy-migrate.ts"
@@ -154,11 +160,11 @@ import { kyselyStorage } from '@fiducy/sdk/storage/kysely';
 export const storage = kyselyStorage(new DatabaseSync('fiducy.db'));
 ```
 
-Add `fiducy.db` to `.gitignore` and create the table with the script above. This works locally and on any long-running server with a disk. On serverless hosts (Vercel, Netlify), the disk is wiped, so switch to hosted Postgres such as [Neon](https://neon.tech) or [Supabase](https://supabase.com) and change only this line.
+Add `fiducy.db` to `.gitignore` and create the table with `npx fiducy migrate`. (`npx fiducy init` sets this up for you at `.fiducy/keys.sqlite` when it finds no database.) This works locally and on any long-running server with a disk. On serverless hosts (Vercel, Netlify), the disk is wiped, so switch to hosted Postgres such as [Neon](https://neon.tech) or [Supabase](https://supabase.com) and change only this line.
 
 ## Gotchas
 
-- **"The Fiducy table does not exist yet."** The table hasn't been created in this database. Run the migration script against the same `DATABASE_URL` your app uses.
+- **"The Fiducy table does not exist yet."** The table hasn't been created in this database. Run `npx fiducy migrate` (or the migration script) against the same `DATABASE_URL` your app uses.
 - **Don't migrate on every request.** Run `getMigrations` from a script or your deploy step, not inside a route, so a serverless cold start never runs DDL.
 - **Neon's HTTP driver.** `neon()` from `@neondatabase/serverless` is not a pool. Pass `new Pool({ connectionString })` from the same package instead.
 - **Postgres schemas.** The table is created in the connection's default schema (usually `public`). To use another schema, set it on the pool, for example `new Pool({ connectionString, options: '-c search_path=app' })`.

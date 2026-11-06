@@ -8,8 +8,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.93",
-    "@fiducy/example-kit": "workspace:*",
-    "@fiducy/sdk": "workspace:*",
+    "@fiducy/sdk": "^0.2.0",
     "ai": "7.0.139",
     "express": "5.3.0"
   },

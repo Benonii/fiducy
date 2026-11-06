@@ -10,12 +10,11 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.93",
-    "@fiducy/example-kit": "workspace:*",
-    "@fiducy/sdk": "workspace:*",
+    "@fiducy/sdk": "^0.2.0",
     "ai": "7.0.139",
     "next": "16.4.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

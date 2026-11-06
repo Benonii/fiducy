@@ -1,16 +1,38 @@
 ---
 title: Farm.js
-order: 5.6
+order: 7
 description: The @fiducy/farm integration mounts the key routes and uses a Farm storage mount.
 ---
 
 # Farm.js
 
-On [Farm.js](https://farmjs.dev), `@fiducy/farm` replaces step 3 of the [Quickstart](/docs/quickstart): it mounts the key routes for you and reads handles from a Farm storage mount.
+On [Farm.js](https://farmjs.dev), the `@fiducy/farm` integration mounts the key routes for you. The working version is [`examples/farm`](https://github.com/fiducy-dev/fiducy/tree/main/examples/farm).
 
 ```bash
-npm install @fiducy/sdk @fiducy/farm
+npx fiducy init
 ```
+
+Or by hand: `npm install @fiducy/sdk @fiducy/farm`, then the files below. The example below keeps handles in a Farm storage mount; any [storage adapter](/docs/storage) works too.
+
+## Run the example
+
+Copy the example app and run it with a local gateway:
+
+```bash
+npx degit fiducy-dev/fiducy/examples/farm my-app
+cd my-app
+npm install
+npx fiducy dev --mock
+```
+
+`fiducy dev` writes `.env` and keeps running. In a second terminal, add the example's session secret and start the app:
+
+```bash
+echo "EXAMPLE_SESSION_SECRET=$(openssl rand -hex 32)" >> .env
+npm run dev
+```
+
+Sign in as the test user, paste any string as the key (`--mock` answers with a fake model), and ask a question. The example signs users in with a test cookie and keeps handles in a JSON file (`example-kit`); swap both for your own auth and [storage](/docs/storage).
 
 ## Server module
 
@@ -19,17 +41,12 @@ import { auth } from '@farm.js/auth/server';
 import { getStorage } from '@farm.js/core/storage';
 import { createFiducy, keyValueStorage } from '@fiducy/sdk/server';
 
-const { FIDUCY_GATEWAY_URL, FIDUCY_APP_SECRET } = process.env;
-if (!FIDUCY_GATEWAY_URL || !FIDUCY_APP_SECRET) throw new Error('Set the Fiducy env vars');
-
 export async function getUserID(request: Request) {
   const user = await auth.user({ request });
   return user?.id ?? null;
 }
 
 export const fiducyServer = createFiducy({
-  gatewayURL: FIDUCY_GATEWAY_URL,
-  appSecret: FIDUCY_APP_SECRET,
   storage: keyValueStorage({
     getItem: (key) => getStorage('fiducy').getItem(key),
     setItem: (key, value) => getStorage('fiducy').setItem(key, value),
@@ -67,4 +84,32 @@ export default defineConfig({
 
 Farm's `localStorage` driver writes files on your server under `.data/fiducy` (it is not the browser's localStorage). That is fine while developing; in production, point the mount at a database, for example `postgresStorage({ url: process.env.DATABASE_URL })` from `@farm.js/core/storage`.
 
-The integration mounts `GET /api/fiducy/keys`, `POST /api/fiducy/keys` and `DELETE /api/fiducy/keys/:keyID`. Continue with steps 4 and 5 of the [Quickstart](/docs/quickstart#4-add-the-key-widget).
+The integration mounts the [key route](/docs/frameworks#what-every-framework-needs) at `/api/fiducy`. Name the instance `fiducyServer` (or anything but `fiducy`) so it does not clash with the integration's import in `farm.config.ts`.
+
+## Widget
+
+```tsx title="src/components/KeySettings.tsx"
+import { FiducyKey } from '@fiducy/sdk/react';
+
+export const KeySettings = () => <FiducyKey provider="openai" />;
+```
+
+## Model route
+
+```ts title="src/app/api/chat/route.ts"
+import { createOpenAI } from '@ai-sdk/openai';
+import { respondToMissingKey } from '@fiducy/sdk/server';
+import { streamText } from 'ai';
+
+import { fiducyServer } from '@/lib/fiducy';
+
+export async function POST(request: Request) {
+  const settings = await fiducyServer.providerSettings('openai', { request });
+  if (!settings.ok) return respondToMissingKey(settings);
+  const { messages } = await request.json();
+  const model = createOpenAI(settings).chat('gpt-4o-mini');
+  return streamText({ model, messages }).toUIMessageStreamResponse();
+}
+```
+
+Put the three `FIDUCY_` values in `.env`; Farm loads it for server code.

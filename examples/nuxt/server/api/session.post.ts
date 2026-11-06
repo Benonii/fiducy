@@ -1,3 +1,3 @@
-import { signInTestUser } from '@fiducy/example-kit';
+import { signInTestUser } from '../../lib/example-kit';
 
 export default defineEventHandler(() => signInTestUser());

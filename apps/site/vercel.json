@@ -9,5 +9,11 @@
       "**": false,
       "main": true
     }
-  }
+  },
+  "redirects": [
+    { "source": "/docs/farm", "destination": "/docs/frameworks/farm", "permanent": true },
+    { "source": "/docs/farm.md", "destination": "/docs/frameworks/farm.md", "permanent": true },
+    { "source": "/docs/react", "destination": "/docs/widget/react", "permanent": true },
+    { "source": "/docs/react.md", "destination": "/docs/widget/react.md", "permanent": true }
+  ]
 }

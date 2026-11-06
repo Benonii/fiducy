@@ -68,7 +68,7 @@ import redisDriver from 'unstorage/drivers/redis';
 const storage = keyValueStorage(createStorage({ driver: redisDriver({ url: process.env.REDIS_URL }) }));
 ```
 
-unstorage has drivers for Redis, Upstash, Cloudflare KV, Vercel KV, the file system and more. On Farm.js, use a storage mount; see [Farm.js](/docs/farm). Keys are stored as `fiducy:<userID>:<keyID>`.
+unstorage has drivers for Redis, Upstash, Cloudflare KV, Vercel KV, the file system and more. On Farm.js, use a storage mount; see [Farm.js](/docs/frameworks/farm). Keys are stored as `fiducy:<userID>:<keyID>`.
 
 ## memoryStorage()
 
@@ -93,7 +93,7 @@ Store `record` as JSON text and parse it back in `findKey` and `listKeys`. Store
 
 ## Common gotchas
 
-- **Create the storage once, in your server module.** Don't build a new connection per request. On Farm.js, look the mount up inside each method instead; see [Farm.js](/docs/farm).
+- **Create the storage once, in your server module.** Don't build a new connection per request. On Farm.js, look the mount up inside each method instead; see [Farm.js](/docs/frameworks/farm).
 - **Serverless hosts wipe the disk.** SQLite files, the unstorage file driver and `memoryStorage` all lose keys on Vercel, Netlify and similar hosts. Use a hosted database there (Postgres from Neon or Supabase, Turso, Upstash Redis).
 - **Deleting a user.** A foreign key with `on delete cascade` removes the rows, but skips the gateway, so in `fiducy` mode the sealed records stay there. Before you delete a user, call `fiducy.revokeKey(userID, keyID)` for each key from `fiducy.listKeys(userID)`.
 - **The handle is not the key, but keep it private.** It is useless without your app secret and the gateway, so treat it like a password hash: never send it to the browser or log it. `fiducy.handler` never returns it.

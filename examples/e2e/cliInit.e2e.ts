@@ -52,7 +52,13 @@ function runCli(argv: string[]) {
 function createExistingApp(appPort: number) {
   rmSync(APP_DIRECTORY, { recursive: true, force: true });
   mkdirSync(APP_DIRECTORY);
-  for (const path of ['app/layout.tsx', 'app/page.tsx', 'app/api/ask', 'components']) {
+  for (const path of [
+    'app/layout.tsx',
+    'app/page.tsx',
+    'app/api/ask',
+    'components',
+    'lib/example-kit'
+  ]) {
     cpSync(join(NEXT_EXAMPLE, path), join(APP_DIRECTORY, path), { recursive: true });
   }
   for (const file of ['next.config.ts', 'tsconfig.json']) {
@@ -63,7 +69,6 @@ function createExistingApp(appPort: number) {
   packageJSON.dependencies['better-auth'] = '1.7.7';
   writeFileSync(join(APP_DIRECTORY, 'package.json'), JSON.stringify(packageJSON, null, 2));
   writeFileSync(join(APP_DIRECTORY, '.gitignore'), '.env*\n');
-  mkdirSync(join(APP_DIRECTORY, 'lib'));
   writeFileSync(join(APP_DIRECTORY, 'lib/auth.ts'), AUTH_MODULE);
   mkdirSync(join(APP_DIRECTORY, 'app/api/auth/[...all]'), { recursive: true });
   writeFileSync(join(APP_DIRECTORY, 'app/api/auth/[...all]/route.ts'), AUTH_ROUTE);

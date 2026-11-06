@@ -10,12 +10,11 @@
   "dependencies": {
     "@ai-sdk/openai": "4.0.93",
     "@farm.js/core": "0.1.40",
-    "@fiducy/example-kit": "workspace:*",
-    "@fiducy/farm": "workspace:*",
-    "@fiducy/sdk": "workspace:*",
+    "@fiducy/farm": "^0.2.0",
+    "@fiducy/sdk": "^0.2.0",
     "ai": "7.0.139",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@farm.js/cli": "0.1.40"
