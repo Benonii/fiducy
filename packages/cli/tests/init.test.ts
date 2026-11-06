@@ -157,6 +157,6 @@ describe('fiducy init', () => {
     expect(result.text).toContain('fiducy.handler(context.req.raw)');
     const bad = await run(root, ['init', '--framework', 'rails']);
     expect(bad.code).toBe(1);
-    expect(bad.text).toContain('--framework rails is not supported');
+    expect(bad.text).toContain('--framework rails is not supported (yet)');
   });
 });

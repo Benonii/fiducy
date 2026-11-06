@@ -18,15 +18,15 @@ already have. It never edits an existing file and never creates a new app.
 
   --dry-run        Show what would happen without writing or installing
   --skip-install   Do not run your package manager
-  --framework      next, tanstack-start, react-router, sveltekit, nuxt, farm, express, hono or node
+  --framework      next, tanstack-start, react-router, sveltekit, nuxt, farmjs, express, hono or node
   --auth           better-auth, authjs, clerk or none (none writes a placeholder to fill in)`;
 
 function applyOverrides(project: ProjectInfo, framework?: string, auth?: string): ProjectInfo {
   if (framework !== undefined && !isFrameworkName(framework)) {
-    throw new UsageError(`--framework ${framework} is not supported`);
+    throw new UsageError(`--framework ${framework} is not supported (yet)`);
   }
   if (auth !== undefined && !isAuthName(auth))
-    throw new UsageError(`--auth ${auth} is not supported`);
+    throw new UsageError(`--auth ${auth} is not supported (yet)`);
   return {
     ...project,
     framework: framework ?? project.framework,

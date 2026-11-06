@@ -195,7 +195,7 @@ const BUILDERS: Record<string, (project: ProjectInfo, path: string) => Framework
   'react-router': reactRouterFiles,
   sveltekit: svelteKitFiles,
   nuxt: nuxtFiles,
-  farm: farmFiles
+  farmjs: farmFiles
 };
 
 export function buildFrameworkFiles(project: ProjectInfo, serverModulePath: string) {

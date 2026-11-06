@@ -32,7 +32,7 @@ function requireGatewayURL(value: string): string {
   const parsed = URL.parse(value);
   if (parsed?.protocol === 'http:' || parsed?.protocol === 'https:') return value;
   throw new FiducyConfigurationError(
-    `FIDUCY_GATEWAY_URL must be a full http(s) URL such as http://localhost:8787, not "${value}".`
+    `FIDUCY_GATEWAY_URL must be a full http(s) URL such as http://localhost:3438, not "${value}".`
   );
 }
 
