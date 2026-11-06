@@ -29,6 +29,7 @@ deploy_stack() {
     overrides+=("GitHubOIDCProviderArn=${FIDUCY_GITHUB_OIDC_PROVIDER_ARN:-}")
     log "Creating stack $STACK_NAME with AMI $ami"
   fi
+  [ -z "${FIDUCY_ALERT_EMAIL:-}" ] || overrides+=("AlertEmail=$FIDUCY_ALERT_EMAIL")
   aws cloudformation deploy --stack-name "$STACK_NAME" --template-file "$TEMPLATE" \
     --capabilities CAPABILITY_NAMED_IAM --no-fail-on-empty-changeset \
     ${overrides[@]:+--parameter-overrides "${overrides[@]}"}
