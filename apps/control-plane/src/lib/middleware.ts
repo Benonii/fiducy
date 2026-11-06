@@ -1,5 +1,6 @@
 import { auth } from '@farm.js/auth/server';
 
+import { readBearerToken } from './common';
 import { noteGatewayContact } from './gatewayStatusService';
 import { respondWith } from './responses';
 import { matchesToken } from './secrets';
@@ -17,8 +18,7 @@ export async function requireGateway({ request }: EndpointMiddlewareContext) {
   const gatewayToken = process.env.FIDUCY_GATEWAY_TOKEN;
   if (!gatewayToken)
     return respondWith(503, null, 'Set FIDUCY_GATEWAY_TOKEN to accept the gateway');
-  const authorization = request.headers.get('authorization') ?? '';
-  const receivedToken = authorization.replace(/^Bearer\s+/i, '');
+  const receivedToken = readBearerToken(request.headers);
   if (!matchesToken(receivedToken, gatewayToken)) {
     return respondWith(401, null, 'This gateway token is not valid');
   }

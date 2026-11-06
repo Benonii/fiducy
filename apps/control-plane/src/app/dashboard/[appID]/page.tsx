@@ -9,6 +9,8 @@ import { AppSettingsForm } from '@/components/AppSettingsForm';
 import { DangerZone } from '@/components/DangerZone';
 import { DashboardShell } from '@/components/DashboardShell';
 import { ErrorAlert } from '@/components/ErrorAlert';
+import { FreezeNotice } from '@/components/FreezeNotice';
+import { IncidentControls } from '@/components/IncidentControls';
 import { PageStatus } from '@/components/PageStatus';
 import { QuickStart } from '@/components/QuickStart';
 import { Tabs, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs';
@@ -41,6 +43,7 @@ export default function AppPage({ params = {} }: PageProps) {
       {app.data ? (
         <main className="grid grid-cols-[minmax(0,1fr)] gap-6">
           <AppHeader app={app.data} />
+          {app.data.isFrozen ? <FreezeNotice frozenAt={app.data.frozenAt ?? null} /> : null}
           <Tabs value={tab} onValueChange={(value) => setTab(value as AppTab)}>
             <TabsList className="w-full justify-start overflow-x-auto border-b" variant="underline">
               {TABS.map((option) => (
@@ -56,6 +59,7 @@ export default function AppPage({ params = {} }: PageProps) {
               <AppKeys app={app.data} />
             </TabsPanel>
             <TabsPanel className="grid gap-6 pt-4" value="settings">
+              <IncidentControls app={app.data} />
               <AppSettingsForm app={app.data} />
               <DangerZone appID={appID} />
             </TabsPanel>

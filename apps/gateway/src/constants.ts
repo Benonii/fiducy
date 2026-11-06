@@ -56,3 +56,5 @@ export const DAILY_APP_LIMIT_MESSAGE = 'This app reached its daily spend limit';
 export const MINUTE_APP_LIMIT_MESSAGE =
   'This app reached its spend limit for this minute. Try again shortly';
 export const UNMETERED_METHODS = ['GET', 'HEAD'];
+export const APP_REFRESH_PATH = '/apps/refresh';
+export const FROZEN_APP_MESSAGE = 'This app is frozen. Its owner can unfreeze it in the dashboard';
