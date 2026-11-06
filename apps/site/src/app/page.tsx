@@ -33,7 +33,7 @@ export default function HomePage() {
 
         <main className="divide-y divide-dashed divide-frame">
           <section className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 px-gutter py-16 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:py-20">
-            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
+            <div className="@container grid min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
               <HeroHeadline />
               <div className="grid grid-cols-[minmax(0,1fr)] gap-6 animate-rise-in [animation-delay:240ms]">
                 <p className={`${DESCRIPTION_CLASS} max-w-[46ch] text-[0.9375rem]`}>

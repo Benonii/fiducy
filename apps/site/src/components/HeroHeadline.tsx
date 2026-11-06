@@ -32,7 +32,7 @@ export function HeroHeadline() {
   }, [isMotionAllowed]);
 
   return (
-    <h1 className="grid text-[clamp(2.125rem,4.6vw,4rem)] leading-none font-bold tracking-[-0.05em] text-balance">
+    <h1 className="grid text-[min(4rem,10.6cqi)] leading-none font-bold tracking-[-0.05em] whitespace-nowrap">
       <span className="animate-rise-in text-ink">Users bring keys.</span>
       <span className="animate-rise-in text-ink-quiet [animation-delay:120ms]">
         {SEALED_WORDS.map((word, index) => (
