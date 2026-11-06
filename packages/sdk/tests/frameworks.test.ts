@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 
 import { CHAT_APP, startGatewayHarness } from '../../../apps/gateway/tests/harness';
 import { toNextJsHandler } from '../src/next';
-import { toNodeHandler, toWebRequest } from '../src/node';
+import { sendWebResponse, toNodeHandler, toWebRequest } from '../src/node';
 import { toNuxtHandler } from '../src/nuxt';
 import { toReactRouterHandlers } from '../src/reactRouter';
 import { svelteKitHandler } from '../src/sveltekit';
@@ -82,6 +82,54 @@ describe('Node req/res servers (Express, Fastify, Nest)', () => {
     );
     expect(request.url).toBe('http://notes.example/api/fiducy/keys');
     expect(request.headers.get('x-list')).toBe('one, two');
+  });
+});
+
+describe('sendWebResponse', () => {
+  it('streams chunks as they come and keeps every cookie', async () => {
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const encoder = new TextEncoder();
+    const server = createServer((_request, response) => {
+      const body = new ReadableStream<Uint8Array>({
+        start: async (controller) => {
+          controller.enqueue(encoder.encode('first '));
+          await held;
+          controller.enqueue(encoder.encode('second'));
+          controller.close();
+        }
+      });
+      const headers = new Headers({ 'content-type': 'text/plain' });
+      headers.append('set-cookie', 'a=1; Path=/');
+      headers.append('set-cookie', 'b=2; Path=/');
+      sendWebResponse(new Response(body, { headers }), response);
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/`);
+      expect(response.headers.getSetCookie()).toEqual(['a=1; Path=/', 'b=2; Path=/']);
+      const reader = (response.body as ReadableStream<Uint8Array>).getReader();
+      const first = await reader.read();
+      expect(new TextDecoder().decode(first.value)).toBe('first ');
+      release();
+      expect(
+        await new Response(
+          new ReadableStream({
+            pull: async (controller) => {
+              const chunk = await reader.read();
+              if (chunk.done) controller.close();
+              else controller.enqueue(chunk.value);
+            }
+          })
+        ).text()
+      ).toBe('second');
+    } finally {
+      server.close();
+    }
   });
 });
 

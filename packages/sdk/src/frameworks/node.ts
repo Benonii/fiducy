@@ -53,10 +53,37 @@ export function toWebRequest(request: NodeRequest, parsedBody?: unknown): Reques
   return new Request(url, init);
 }
 
+function copyResponseHeaders(response: Response, target: ServerResponse) {
+  response.headers.forEach((value, name) => {
+    if (name !== 'set-cookie') target.setHeader(name, value);
+  });
+  const cookies = response.headers.getSetCookie();
+  if (cookies.length > 0) target.setHeader('set-cookie', cookies);
+}
+
+function writeChunk(target: ServerResponse, chunk: Uint8Array) {
+  return new Promise<void>((resolve) => {
+    if (target.write(chunk)) resolve();
+    else target.once('drain', resolve);
+  });
+}
+
 export async function sendWebResponse(response: Response, target: ServerResponse): Promise<void> {
   target.statusCode = response.status;
-  response.headers.forEach((value, name) => target.setHeader(name, value));
-  target.end(Buffer.from(await response.arrayBuffer()));
+  copyResponseHeaders(response, target);
+  if (!response.body) {
+    target.end();
+    return;
+  }
+  const reader = response.body.getReader();
+  target.once('close', () => {
+    reader.cancel().catch(() => undefined);
+  });
+  for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+    if (target.destroyed) return;
+    await writeChunk(target, chunk.value);
+  }
+  target.end();
 }
 
 export function toNodeHandler(fiducy: FiducyRequestHandler) {
