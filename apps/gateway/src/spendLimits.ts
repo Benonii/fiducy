@@ -35,7 +35,7 @@ function listSpendScopes(app: RegisteredApp, keyID: string, now: Date): SpendSco
       limitMessage: MINUTE_APP_LIMIT_MESSAGE
     }
   ];
-  return scopes.filter((scope) => scope.dollarLimit !== undefined);
+  return scopes.filter((scope) => typeof scope.dollarLimit === 'number');
 }
 
 function toCharge(scope: SpendScope, amount: number, now: Date): SpendCharge {

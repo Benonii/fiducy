@@ -76,6 +76,10 @@ async function reserveWithSlot(
   }
 }
 
+function hasSpendLimits(limits: SpendLimits | undefined): limits is SpendLimits {
+  return Object.values(limits ?? {}).some((limit) => typeof limit === 'number');
+}
+
 export async function startMeteredCall(
   request: Request,
   provider: ProviderName,
@@ -84,8 +88,9 @@ export async function startMeteredCall(
   keyID: string,
   dependencies: ResolvedGatewayDependencies
 ): Promise<GatewayResult<MeteredCall | null>> {
-  if (!app.spendLimits || UNMETERED_METHODS.includes(request.method)) return succeed(null);
-  const maximumOutputTokens = app.spendLimits.maximumOutputTokens ?? DEFAULT_MAXIMUM_OUTPUT_TOKENS;
+  const limits = app.spendLimits;
+  if (!hasSpendLimits(limits) || UNMETERED_METHODS.includes(request.method)) return succeed(null);
+  const maximumOutputTokens = limits.maximumOutputTokens ?? DEFAULT_MAXIMUM_OUTPUT_TOKENS;
   const metered = meterRequest({ provider, path, body: await request.text(), maximumOutputTokens });
   if (!metered.ok) return fail(describeMeterFailure(metered.error));
   return reserveWithSlot(app, keyID, metered.value, dependencies);

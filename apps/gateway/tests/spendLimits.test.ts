@@ -18,6 +18,14 @@ const CAPPED_APP: AppRegistration = {
   spendLimits: { dailyDollarLimitPerKey: 0.02, maximumOutputTokens: 1000 }
 };
 
+const UNCAPPED_APP: AppRegistration = {
+  ...CAPPED_APP,
+  appID: 'app_quarry',
+  name: 'Quarry',
+  appSecret: 'app_sk_quarry_8Hn2Wc5Rb7Jx3Ke',
+  spendLimits: {}
+};
+
 function createRecordingSpendCounter() {
   const counter = createMemorySpendCounter();
   const totals = new Map<string, number>();
@@ -43,10 +51,12 @@ function createRecordingSpendCounter() {
 const spending = createRecordingSpendCounter();
 let harness: Awaited<ReturnType<typeof startGatewayHarness>>;
 let handle: string;
+let uncappedHandle: string;
 
 beforeAll(async () => {
-  harness = await startGatewayHarness([CAPPED_APP], undefined, spending.counter);
+  harness = await startGatewayHarness([CAPPED_APP, UNCAPPED_APP], undefined, spending.counter);
   handle = (await harness.storeKey(CAPPED_APP.appID, SAMPLE_API_KEY)).body.data.handle;
+  uncappedHandle = (await harness.storeKey(UNCAPPED_APP.appID, SAMPLE_API_KEY)).body.data.handle;
 });
 
 afterAll(() => harness.stop());
@@ -94,6 +104,18 @@ describe('an app with spend limits', () => {
     const forwarded = JSON.parse(harness.mockProvider.recordedRequests.at(-1)?.body ?? '{}');
     expect(forwarded.stream_options).toEqual({ include_usage: true });
     expect(readKeySpend() - before).toBe(Math.ceil(41 * 0.15 + 17 * 0.6));
+  });
+
+  it('treats an empty spendLimits object as off', async () => {
+    const response = await fetch(`${harness.gatewayURL}/openai/v1/files`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${UNCAPPED_APP.appSecret}`,
+        'x-key-handle': uncappedHandle
+      },
+      body: '{}'
+    });
+    expect(response.status).toBe(404);
   });
 
   it('refuses endpoints that bypass per-request pricing', async () => {
