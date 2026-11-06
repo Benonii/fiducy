@@ -17,7 +17,7 @@ Self-hosting is free. You pay AWS for one Graviton instance with enclaves (about
 - a `c6g.large` instance with Nitro enclaves on, an Elastic IP, and ports 80 and 443 open
 - a DynamoDB table (`KeysTable`) for sealed key records, on demand billing, with deletion protection and point-in-time recovery
 - an IAM role for the host, limited to the bucket, the key, the table and the `/fiducy/*` parameters
-- a key custodian role (`<stack>-key-custodian`) that can only be assumed with MFA. It is the one principal, besides the account root user, that the key policy lets change what the key trusts. A deploy, an IAM admin or the host cannot
+- a key custodian role (`<stack>-key-custodian`) that only the IAM users you name in `FIDUCY_KEY_CUSTODIAN_USER_ARNS` can assume, each with MFA. It is the one principal, besides the account root user, that the key policy lets change what the key trusts. The policy names the role by its unique ID, so deleting it and creating a look-alike does not work. A deploy, an IAM admin or the host cannot
 
 The host runs only the gateway enclave. TLS ends inside the enclave: Caddy runs next to the gateway and keeps its certificate sealed with the KMS key, so the parent host never sees plaintext traffic or a private key. The gateway reads and writes sealed records in `KeysTable` directly and talks to the dashboard over HTTPS with a token kept in Parameter Store (`/fiducy/gateway-token`).
 
@@ -78,8 +78,11 @@ The host keeps running the last pinned image through reboots and crashes. A buil
 ```bash
 export AWS_REGION=us-east-1
 export FIDUCY_CONTROL_PLANE_URL=https://<your-dashboard>
+export FIDUCY_KEY_CUSTODIAN_USER_ARNS=arn:aws:iam::<account-id>:user/<you>
 bash infra/aws/deploy.sh
 ```
+
+`FIDUCY_KEY_CUSTODIAN_USER_ARNS` is only read when the stack is created. To change who may pin later, update the `KeyCustodianUserArns` parameter as an admin; the role-change alert emails you when that happens.
 
 Needs the AWS CLI, `jq`, `openssl` and admin credentials for the first run, which creates the stack. Add `--rotate-token` to replace the gateway token. Trusting the image is the same `pin.sh` step as above.
 

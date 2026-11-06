@@ -14,6 +14,11 @@ Parameters:
     Description: >-
       PCR0 of the enclave image. Only an enclave with this hash can decrypt with the key. Changed
       only by pin.sh, run by the key custodian role with MFA
+  KeyCustodianUserArns:
+    Type: CommaDelimitedList
+    Description: >-
+      ARNs of the IAM users allowed to assume the key custodian role, each with MFA. Name people,
+      not the whole account, so an IAM admin cannot hand themselves the role
 
 Resources:
   DeployBucket:
@@ -84,7 +89,7 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
-            Principal: { AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root' }
+            Principal: { AWS: !Ref KeyCustodianUserArns }
             Action: sts:AssumeRole
             Condition:
               Bool: { aws:MultiFactorAuthPresent: 'true' }
@@ -106,17 +111,24 @@ Resources:
               - Effect: Allow
                 Action: cloudformation:GetTemplateSummary
                 Resource: '*'
+              # By ARN pattern, not !GetAtt: the key policy names this role's unique ID, so a
+              # reference back to the key would be a circular dependency.
               - Effect: Allow
                 Action: [kms:PutKeyPolicy, kms:GetKeyPolicy, kms:DescribeKey]
-                Resource: !GetAtt WrappingKey.Arn
+                Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub '${DeployBucket.Arn}/*'
+              # By tag, not !Ref Host: the host's role reads the key, and the key names this
+              # role, so a direct reference would be a circular dependency.
               - Effect: Allow
                 Action: ssm:SendCommand
-                Resource:
-                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${Host}'
-                  - !Sub 'arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript'
+                Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                Condition:
+                  StringEquals: { ssm:resourceTag/fiducy-stack: !Ref AWS::StackName }
+              - Effect: Allow
+                Action: ssm:SendCommand
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript'
               - Effect: Allow
                 Action: [ssm:GetCommandInvocation, ssm:DescribeInstanceInformation]
                 Resource: '*'
@@ -138,7 +150,7 @@ Resources:
             Action: kms:*
             Resource: '*'
           # Changing what the key trusts, disabling it or scheduling its deletion is reserved for
-          # the custodian role (MFA) and the account root user. IAM admins, the deploy credentials
+          # this stack's custodian role (MFA, named users) and the account root user. IAM admins, the deploy credentials
           # and the host cannot, whatever their IAM policies say. Every attempt lands in CloudTrail.
           - Sid: OnlyTheCustodianChangesTheKey
             Effect: Deny
@@ -149,11 +161,14 @@ Resources:
               - kms:DisableKey
               - kms:CreateGrant
             Resource: '*'
+            # Matched by the role's unique ID, not its name. An admin who deletes the role and
+            # creates a new one with the same name gets a new ID, so the new role is refused.
+            # The root user's aws:userid is the account ID.
             Condition:
-              ArnNotEquals:
-                aws:PrincipalArn:
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-key-custodian'
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              StringNotLike:
+                aws:userid:
+                  - !Sub '${KeyCustodianRole.RoleId}:*'
+                  - !Ref AWS::AccountId
           # Applies to everyone, account admins included. A Decrypt without an attestation
           # document for this exact enclave image is refused. Missing attestation counts as a
           # mismatch, so the parent host and the AWS console cannot decrypt either.
@@ -220,6 +235,7 @@ Resources:
             Encrypted: true
       Tags:
         - { Key: Name, Value: fiducy-prototype }
+        - { Key: fiducy-stack, Value: !Ref AWS::StackName }
 
   HostAddress:
     Type: AWS::EC2::EIP

@@ -25,6 +25,7 @@ deploy_stack() {
     local ami
     ami=$(aws ssm get-parameter --name "$AMI_PARAMETER" --query Parameter.Value --output text)
     overrides+=("AmiId=$ami")
+    overrides+=("KeyCustodianUserArns=${FIDUCY_KEY_CUSTODIAN_USER_ARNS:?Set FIDUCY_KEY_CUSTODIAN_USER_ARNS to the IAM user ARNs (comma separated) that may pin enclave images}")
     log "Creating stack $STACK_NAME with AMI $ami"
   fi
   aws cloudformation deploy --stack-name "$STACK_NAME" --template-file "$TEMPLATE" \
