@@ -8,8 +8,7 @@ import {
   CIPHER_SETTLED_EVERY,
   CIPHER_TOUCH_HOLD_MILLISECONDS,
   encipher,
-  moveToward,
-  pixelFilterID
+  moveToward
 } from '@/lib/cipher';
 
 import type { CipherWordProps } from '@/types';
@@ -58,6 +57,8 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
   }
 
   const isVisible = progress > 0;
+  const isMoving = isVisible && progress < 1;
+  const front = `${progress * 100}%`;
 
   return (
     <span
@@ -66,15 +67,21 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
       onPointerLeave={(event) => hover(event, false)}
       onPointerDown={tap}
     >
-      <span className={isVisible ? 'text-transparent' : undefined}>{word}</span>
+      <span style={isVisible ? { clipPath: `inset(0 0 0 ${front})` } : undefined}>{word}</span>
       {isVisible ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden tracking-[-0.1em] whitespace-nowrap select-none"
-          style={{ filter: `url(#${pixelFilterID(progress)})` }}
+          className="pointer-events-none absolute inset-0 flex items-center overflow-hidden font-mono text-[0.62em] font-extralight tracking-[0.08em] whitespace-pre select-none"
         >
           {glyphs}
         </span>
+      ) : null}
+      {isMoving ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-[0.12em] w-px bg-ink"
+          style={{ left: front }}
+        />
       ) : null}
     </span>
   );
