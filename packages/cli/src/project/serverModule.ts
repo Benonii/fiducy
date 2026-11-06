@@ -10,7 +10,7 @@ const SERVER_MODULE_PATHS: Record<string, string> = {
   'react-router': 'app/lib/fiducy.ts',
   sveltekit: 'src/lib/server/fiducy.ts',
   nuxt: 'server/utils/fiducy.ts',
-  farm: 'src/lib/fiducy.ts'
+  farmjs: 'src/lib/fiducy.ts'
 };
 
 export function chooseServerModulePath(project: ProjectInfo, hasSourceFolder: boolean): string {
@@ -21,7 +21,7 @@ export function chooseServerModulePath(project: ProjectInfo, hasSourceFolder: bo
 }
 
 export function readExportName(project: ProjectInfo): string {
-  return project.framework === 'farm' ? 'fiducyServer' : 'fiducy';
+  return project.framework === 'farmjs' ? 'fiducyServer' : 'fiducy';
 }
 
 export function toImportSpecifier(project: ProjectInfo, fromPath: string, toFile: string): string {

@@ -6,7 +6,7 @@ const FRAMEWORK_NAMES: FrameworkName[] = [
   'react-router',
   'sveltekit',
   'nuxt',
-  'farm',
+  'farmjs',
   'express',
   'hono',
   'node'

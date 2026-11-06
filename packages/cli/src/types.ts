@@ -38,7 +38,7 @@ export type FrameworkName =
   | 'react-router'
   | 'sveltekit'
   | 'nuxt'
-  | 'farm'
+  | 'farmjs'
   | 'express'
   | 'hono'
   | 'node';

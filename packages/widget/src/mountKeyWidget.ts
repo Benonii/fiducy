@@ -27,7 +27,7 @@ function assertWidgetOptions(gatewayURL: string, appID: string): void {
     );
   if (!URL.canParse(gatewayURL))
     throw new Error(
-      `Fiducy: gatewayURL "${gatewayURL}" is not a valid URL. Use the full URL, for example http://localhost:8787.`
+      `Fiducy: gatewayURL "${gatewayURL}" is not a valid URL. Use the full URL, for example http://localhost:3438.`
     );
   if (!appID)
     throw new Error(

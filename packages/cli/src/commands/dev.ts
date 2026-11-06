@@ -11,13 +11,13 @@ import { isOrigin, isPort } from '../validators.ts';
 
 import type { CommandContext, DevGateway, DevOptions, DevState, Output } from '../types.ts';
 
-export const DEV_HELP = `Usage: fiducy dev [--port 8787] [--origin http://localhost:5173] [--mock]
+export const DEV_HELP = `Usage: fiducy dev [--port 3438] [--origin http://localhost:5173] [--mock]
 
 Runs a local Fiducy gateway on 127.0.0.1 for development. It keeps a dev app ID,
 app secret and master key in .fiducy/ (git-ignored, readable only by you), so
 saved keys survive restarts.
 
-  --port     Port for the gateway (default 8787, remembered after the first run)
+  --port     Port for the gateway (default 3438, remembered after the first run)
   --origin   Extra origin allowed to embed the key widget (repeatable)
   --mock     Answer OpenAI and Anthropic calls with a fake model, so no real key is spent`;
 

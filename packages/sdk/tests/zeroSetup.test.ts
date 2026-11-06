@@ -92,7 +92,7 @@ describe('setup from server env', () => {
 
   it('rejects a gateway URL that is not a full URL', async () => {
     setConnectionEnvironment();
-    process.env.FIDUCY_GATEWAY_URL = 'localhost:8787';
+    process.env.FIDUCY_GATEWAY_URL = 'localhost:3438';
     const response = await createFromEnvironment().handler(appRequest('/config', null));
     expect((await readBody(response)).message).toContain('full http(s) URL');
   });

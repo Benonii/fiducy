@@ -18,7 +18,7 @@ const FRAMEWORK_PACKAGES: [string, FrameworkName][] = [
   ['@react-router/dev', 'react-router'],
   ['@sveltejs/kit', 'sveltekit'],
   ['nuxt', 'nuxt'],
-  ['@farm.js/core', 'farm'],
+  ['@farm.js/core', 'farmjs'],
   ['express', 'express'],
   ['hono', 'hono']
 ];

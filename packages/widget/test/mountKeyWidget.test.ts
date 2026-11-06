@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { mountKeyWidget } from '../src/mountKeyWidget.ts';
 
 const baseOptions = {
-  gatewayURL: 'http://localhost:8787',
+  gatewayURL: 'http://localhost:3438',
   appID: 'app_test',
   container: {} as HTMLElement,
   onHandle: () => {}
