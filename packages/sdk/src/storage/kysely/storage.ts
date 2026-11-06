@@ -1,12 +1,15 @@
+import { explainMissingTable } from '../errors.ts';
 import { generateSchema } from '../generateSchema.ts';
 import { fromUserKeyRow, toUserKeyRow } from '../rows.ts';
 import { resolveTableName } from '../sqlSchema.ts';
 import { connectKysely } from './connect.ts';
-import { explainMissingTable } from './errors.ts';
 import { readMigrations } from './migrations.ts';
 
 import type { FiducyStorage, StoredUserKey } from '../../server/types.ts';
 import type { KyselyConnection, KyselyStorageDatabase, KyselyStorageOptions } from './types.ts';
+
+const KYSELY_TABLE_HINT =
+  'Create it with getMigrations() from @fiducy/sdk/storage/kysely, or run the SQL from generateSchema()';
 
 function upsertKey({ db, dialect }: KyselyConnection, tableName: string, key: StoredUserKey) {
   const row = toUserKeyRow(key);
@@ -34,7 +37,7 @@ function selectUserKeys({ db }: KyselyConnection, tableName: string, userID: str
 
 function createUserKeyMethods(connection: KyselyConnection, tableName: string): FiducyStorage {
   const { db } = connection;
-  const rethrowMissingTable = explainMissingTable(tableName);
+  const rethrowMissingTable = explainMissingTable(tableName, KYSELY_TABLE_HINT);
   return {
     saveKey: async (key) => {
       await upsertKey(connection, tableName, key).catch(rethrowMissingTable);

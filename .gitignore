@@ -11,6 +11,7 @@ enclave/enclaver.yaml
 apps/site/.farm/
 .vercel
 .env*
+packages/sdk/tests/storage/.fiducy_test_*
 packages/sdk/tests/browser/.pages
 examples/*/AGENTS.md
 examples/*/.next

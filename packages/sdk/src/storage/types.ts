@@ -1,8 +1,8 @@
 export type SQLDialect = 'sqlite' | 'postgres' | 'mysql';
 
-export type StorageAdapterName = 'kysely';
+export type StorageAdapterName = 'kysely' | 'drizzle';
 
-export type SchemaLanguage = 'sql';
+export type SchemaLanguage = 'sql' | 'typescript';
 
 export interface GenerateSchemaOptions {
   adapter: StorageAdapterName;

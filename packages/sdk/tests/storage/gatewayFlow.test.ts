@@ -5,12 +5,11 @@ import { generateText } from 'ai';
 import { SAMPLE_API_KEY } from '@fiducy/testing';
 import { CHAT_APP, startGatewayHarness } from '../../../../apps/gateway/tests/harness';
 import { createFiducy } from '../../src/server';
-import { getMigrations, kyselyStorage } from '../../src/storage/kysely';
-import { TEST_DATABASES } from './databases';
+import { STORAGE_SETUPS } from './setups';
 
 import type { AppRegistration } from '../../../../apps/gateway/src/types';
 import type { Fiducy } from '../../src/server';
-import type { TestDatabase } from './types';
+import type { OpenedStorage, TestDatabase } from './types';
 
 const OWNED_APP: AppRegistration = {
   appID: 'app_ownstore_storage',
@@ -57,26 +56,27 @@ async function connectKey(fiducy: Fiducy, app: AppRegistration, userID: string) 
   return { handle: body.data.handle, keyID: body.data.handle.slice(3, 25) };
 }
 
-for (const testDatabase of TEST_DATABASES) {
-  describe.skipIf(!testDatabase.isAvailable)(`Fiducy on ${testDatabase.label}`, () => {
+for (const setup of STORAGE_SETUPS) {
+  describe.skipIf(!setup.isAvailable)(`Fiducy with ${setup.label}`, () => {
     let database: TestDatabase;
+    let opened: OpenedStorage;
     const createApp = (app: AppRegistration) =>
       createFiducy({
         gatewayURL: harness.gatewayURL,
         appSecret: app.appSecret,
-        storage: kyselyStorage(database.connection, { tableName: database.tableName }),
+        storage: opened.storage,
         getUserID: (request) => request.headers.get('x-user')
       });
 
     beforeAll(async () => {
-      database = testDatabase.open();
-      const migrations = await getMigrations(database.connection, {
-        tableName: database.tableName
-      });
-      await migrations.runMigrations();
+      database = setup.openDatabase();
+      opened = await setup.openStorage(database);
     });
 
-    afterAll(() => database.close());
+    afterAll(async () => {
+      opened.cleanUp();
+      await database.close();
+    });
 
     it('connects a key, chats with it, and revokes the old key when the user replaces it', async () => {
       const fiducy = createApp(CHAT_APP);
@@ -115,9 +115,7 @@ for (const testDatabase of TEST_DATABASES) {
       ];
       expect((await fiducy.importKeys(input)).imported).toHaveLength(1);
       expect((await fiducy.importKeys(input)).skipped).toHaveLength(1);
-      const [stored] = await kyselyStorage(database.connection, {
-        tableName: database.tableName
-      }).listKeys('user_imported');
+      const [stored] = await opened.storage.listKeys('user_imported');
       expect(stored?.source).toBe('import');
       const settings = await fiducy.providerSettings('openai', { userID: 'user_imported' });
       if (!settings.ok) throw new Error(settings.message);
