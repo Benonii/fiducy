@@ -25,6 +25,8 @@ deploy_stack() {
     local ami
     ami=$(aws ssm get-parameter --name "$AMI_PARAMETER" --query Parameter.Value --output text)
     overrides+=("AmiId=$ami")
+    overrides+=("GitHubRepository=${FIDUCY_GITHUB_REPOSITORY:-fiducy-dev/fiducy}")
+    overrides+=("GitHubOIDCProviderArn=${FIDUCY_GITHUB_OIDC_PROVIDER_ARN:-}")
     log "Creating stack $STACK_NAME with AMI $ami"
   fi
   aws cloudformation deploy --stack-name "$STACK_NAME" --template-file "$TEMPLATE" \
