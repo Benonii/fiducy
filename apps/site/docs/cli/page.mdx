@@ -49,7 +49,7 @@ It also prints where to put the widget and how to call the model. Without a reco
 | --- | --- |
 | `--dry-run` | Print every file and command, write nothing |
 | `--skip-install` | Do not run your package manager |
-| `--framework` | `next`, `tanstack-start`, `react-router`, `sveltekit`, `nuxt`, `farm`, `express`, `hono` or `node` |
+| `--framework` | `next`, `tanstack-start`, `react-router`, `sveltekit`, `nuxt`, `farmjs`, `express`, `hono` or `node` |
 | `--auth` | `better-auth`, `authjs`, `clerk` or `none` |
 
 Running it again is safe: files that exist are kept and reported.
@@ -57,7 +57,7 @@ Running it again is safe: files that exist are kept and reported.
 ## dev
 
 ```bash
-npx fiducy dev [--port 8787] [--origin http://localhost:5173] [--mock]
+npx fiducy dev [--port 3438] [--origin http://localhost:5173] [--mock]
 ```
 
 A real Fiducy gateway for local development, so you don't need to deploy one or clone the repo.
@@ -70,7 +70,7 @@ A real Fiducy gateway for local development, so you don't need to deploy one or 
 
 | Flag | |
 | --- | --- |
-| `--port` | Gateway port. Default `8787` |
+| `--port` | Gateway port. Default `3438` |
 | `--origin` | Extra origin allowed to show the widget |
 | `--mock` | Answer OpenAI and Anthropic calls with a fake model (Chat Completions, Responses and Messages APIs). Any string works as a key |
 

@@ -68,7 +68,7 @@ See [CLI](/docs/cli#generate) for what each writes.
 npx fiducy dev --mock
 ```
 
-This runs a gateway on `http://localhost:8787` for development. On the first run it writes `.env` with `FIDUCY_GATEWAY_URL`, `FIDUCY_APP_ID` and `FIDUCY_APP_SECRET` (or prints them if you already have a `.env`). Restart your dev server so it loads them. `--mock` answers model calls with a fake model, so any string works as a key while you build. Keys survive restarts; delete `.fiducy/` to start fresh.
+This runs a gateway on `http://localhost:3438` for development. On the first run it writes `.env` with `FIDUCY_GATEWAY_URL`, `FIDUCY_APP_ID` and `FIDUCY_APP_SECRET` (or prints them if you already have a `.env`). Restart your dev server so it loads them. `--mock` answers model calls with a fake model, so any string works as a key while you build. Keys survive restarts; delete `.fiducy/` to start fresh.
 
 In production, use your own deployed gateway and the values from its dashboard; see [Self-hosting](/docs/self-hosting).
 
