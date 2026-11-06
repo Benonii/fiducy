@@ -6,10 +6,10 @@ import { Pool } from 'pg';
 
 import type { TestDatabase } from './types';
 
-const POSTGRES_URL = process.env.FIDUCY_TEST_POSTGRES_URL;
-const MYSQL_URL = process.env.FIDUCY_TEST_MYSQL_URL;
+export const POSTGRES_URL = process.env.FIDUCY_TEST_POSTGRES_URL;
+export const MYSQL_URL = process.env.FIDUCY_TEST_MYSQL_URL;
 
-function createUniqueTableName(label: string) {
+export function createUniqueTableName(label: string) {
   return `fiducy_test_${label}_${crypto.randomUUID().replaceAll('-', '').slice(0, 10)}`;
 }
 

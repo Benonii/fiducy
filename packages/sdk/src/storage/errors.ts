@@ -1,4 +1,4 @@
-const MISSING_TABLE_CODES = new Set(['42P01', 'ER_NO_SUCH_TABLE']);
+const MISSING_TABLE_CODES = new Set(['42P01', 'ER_NO_SUCH_TABLE', 'P2021']);
 
 function isMissingTableError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;

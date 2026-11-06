@@ -1,8 +1,8 @@
 export type SQLDialect = 'sqlite' | 'postgres' | 'mysql';
 
-export type StorageAdapterName = 'kysely' | 'drizzle';
+export type StorageAdapterName = 'kysely' | 'drizzle' | 'prisma';
 
-export type SchemaLanguage = 'sql' | 'typescript';
+export type SchemaLanguage = 'sql' | 'typescript' | 'prisma';
 
 export interface GenerateSchemaOptions {
   adapter: StorageAdapterName;
@@ -38,4 +38,14 @@ export interface UserKeyRow {
   record: string | null;
   source: string | null;
   created_at: string;
+}
+
+export interface UserKeyModel {
+  userID: string;
+  keyID: string;
+  provider: string;
+  handle: string;
+  record: string | null;
+  source: string | null;
+  createdAt: string;
 }
