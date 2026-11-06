@@ -1,6 +1,7 @@
 name: AWS deploy
 
-# Run this from main. The deployer role only trusts OIDC tokens from refs/heads/main, there are no
+# Run this from main. The deployer role only trusts OIDC tokens from jobs in the aws-production
+# environment, which should require a reviewer and allow only main. There are no
 # AWS keys in this repository's secrets, and the run can never change which enclave image the KMS
 # key trusts: a new image stops at "built, not yet trusted" until a custodian runs infra/aws/pin.sh.
 on:
@@ -22,6 +23,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-24.04
+    environment: aws-production
     timeout-minutes: 75
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
