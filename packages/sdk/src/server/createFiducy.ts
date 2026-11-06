@@ -123,6 +123,7 @@ export function createFiducy(options: CreateFiducyOptions): Fiducy {
     saveKey: widgetSaveKey,
     revokeKey,
     importKeys,
-    basePath
+    basePath,
+    storage
   };
 }
