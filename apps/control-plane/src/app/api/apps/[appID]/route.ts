@@ -1,6 +1,7 @@
 import { createEndpoint } from '@farm.js/core/api';
 
 import { deleteApp, findOwnedApp, toAppView, updateApp } from '@/lib/appService';
+import { getGatewayClient } from '@/lib/gatewayClient';
 import { requireOwner } from '@/lib/middleware';
 import { respondWith, respondWithFailure } from '@/lib/responses';
 import { getControlStore } from '@/lib/storage';
@@ -18,6 +19,7 @@ export const PATCH = createEndpoint(
     const store = getControlStore();
     const updated = await updateApp(store, context.ownerID, String(params.appID), body);
     if (!updated.ok) return respondWithFailure(updated.error);
+    await getGatewayClient().refreshApps();
     return respondWith(200, updated.value, 'App updated');
   }
 );

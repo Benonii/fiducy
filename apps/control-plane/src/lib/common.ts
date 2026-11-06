@@ -8,3 +8,16 @@ export function groupBy<Item>(items: Item[], toGroupKey: (item: Item) => string)
   }
   return groups;
 }
+
+export function splitIntoBatches<Item>(items: Item[], batchSize: number): Item[][] {
+  const batches: Item[][] = [];
+  for (let start = 0; start < items.length; start += batchSize) {
+    batches.push(items.slice(start, start + batchSize));
+  }
+  return batches;
+}
+
+export function readBearerToken(headers: Headers): string {
+  const authorization = headers.get('authorization') ?? '';
+  return authorization.replace(/^Bearer\s+/i, '').trim();
+}

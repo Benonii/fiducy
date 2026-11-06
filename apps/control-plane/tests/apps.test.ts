@@ -3,6 +3,7 @@ import { describe, expect, it } from 'bun:test';
 import { hashSecret as hashSecretInGateway } from '../../gateway/src/hashing';
 import { createApp, deleteApp, listApps, listGatewayApps } from '../src/lib/appService';
 import { rotateAppSecret, updateApp } from '../src/lib/appService';
+import { freezeAppBySecret, setAppFrozen } from '../src/lib/appService';
 import { hashSecret } from '../src/lib/secrets';
 import { appSettingsSchema, appSettingsUpdateSchema } from '../src/lib/validators';
 import { CHAT_SETTINGS, OTHER_OWNER_ID, OWNER_ID, createTestStore } from './fixtures';
@@ -123,6 +124,38 @@ describe('changing an app', () => {
     expect(await deleteApp(store, OWNER_ID, app.appID)).toMatchObject({ ok: true });
     expect(await listApps(store, OWNER_ID)).toEqual([]);
     expect(await listGatewayApps(store)).toEqual([]);
+  });
+});
+
+describe('freezing an app', () => {
+  it('freezes and unfreezes for the owner and tells the gateway only the flag', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    const frozen = await setAppFrozen(store, OWNER_ID, app.appID, true);
+    expect(frozen).toMatchObject({ ok: true, value: { isFrozen: true } });
+    const [gatewayApp] = await listGatewayApps(store);
+    expect(gatewayApp?.isFrozen).toBe(true);
+    expect(gatewayApp).not.toHaveProperty('frozenAt');
+    await setAppFrozen(store, OWNER_ID, app.appID, false);
+    expect((await store.findApp(app.appID))?.frozenAt).toBeNull();
+  });
+
+  it('lets the app secret freeze its own app but nothing else', async () => {
+    const store = createTestStore();
+    const { app, appSecret } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    const other = await createApp(store, OTHER_OWNER_ID, { ...CHAT_SETTINGS, name: 'Other' });
+    expect(await freezeAppBySecret(store, appSecret)).toEqual({ ok: true, value: app.appID });
+    expect((await store.findApp(app.appID))?.isFrozen).toBe(true);
+    expect((await store.findApp(other.app.appID))?.isFrozen).toBeUndefined();
+    const wrong = await freezeAppBySecret(store, 'fsk_not_a_real_secret');
+    expect(wrong).toMatchObject({ ok: false, error: { status: 401 } });
+  });
+
+  it('refuses a stranger freezing an app they do not own', async () => {
+    const store = createTestStore();
+    const { app } = await createApp(store, OWNER_ID, CHAT_SETTINGS);
+    const attempt = await setAppFrozen(store, OTHER_OWNER_ID, app.appID, true);
+    expect(attempt).toMatchObject({ ok: false, error: { status: 404 } });
   });
 });
 

@@ -182,6 +182,10 @@ export interface AppSettingsFieldsProps {
   defaults?: AppSettings;
 }
 
+export interface FreezeNoticeProps {
+  frozenAt: string | null;
+}
+
 export interface SpendLimitFieldsProps {
   spendLimits?: SpendLimits;
 }
