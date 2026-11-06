@@ -43,6 +43,8 @@ Importing `@fiducy/sdk/element` defines the tag once. The wrappers do this for y
 | `provider` | required | `openai`, `anthropic`, `gemini` or `openrouter` |
 | `base-path` | `/api/fiducy` | Where your key route is mounted |
 | `gateway-url`, `app-id` | from `/config` | Only to skip the config request |
+| `enclave-pcr0` | from `/config` | With `gateway-url`: the PCR0 to expect. The widget checks the gateway's attestation before it shows the key box |
+| `skip-attestation` | off | With `gateway-url`: only for a test gateway that is not in an enclave |
 
 ## Events
 

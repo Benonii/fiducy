@@ -1,3 +1,4 @@
+import { checkGatewayBeforeMount } from './attestGateway.ts';
 import { WIDGET_DEFAULT_HEIGHT, WIDGET_MESSAGE_TYPES } from './constants.ts';
 
 import type { MountKeyWidgetOptions, MountedKeyWidget, WidgetMessage } from './types.ts';
@@ -35,16 +36,13 @@ function assertWidgetOptions(gatewayURL: string, appID: string): void {
     );
 }
 
-export function mountKeyWidget({
-  gatewayURL,
-  appID,
-  container,
-  onHandle,
-  onError
-}: MountKeyWidgetOptions): MountedKeyWidget {
+export function mountKeyWidget(options: MountKeyWidgetOptions): MountedKeyWidget {
+  const { gatewayURL, appID, container, onHandle, onError } = options;
+  const onRefused = options.onRefused ?? onError;
   assertWidgetOptions(gatewayURL, appID);
   const gatewayOrigin = new URL(gatewayURL).origin;
   const iframe = createWidgetFrame(gatewayURL, appID);
+  let isMounted = true;
 
   const handleMessage = (event: MessageEvent<WidgetMessage>) => {
     if (event.origin !== gatewayOrigin || event.source !== iframe.contentWindow) return;
@@ -53,11 +51,19 @@ export function mountKeyWidget({
     if (event.data?.type === WIDGET_MESSAGE_TYPES.error) onError?.(event.data.message);
   };
 
-  window.addEventListener('message', handleMessage);
-  container.appendChild(iframe);
+  const mountAfterCheck = (refusal: string | null) => {
+    if (!isMounted) return;
+    if (refusal) return onRefused?.(refusal);
+    window.addEventListener('message', handleMessage);
+    container.appendChild(iframe);
+  };
+  checkGatewayBeforeMount(options)
+    .catch((error: unknown) => (error instanceof Error ? error.message : String(error)))
+    .then(mountAfterCheck);
   return {
     iframe,
     unmount: () => {
+      isMounted = false;
       window.removeEventListener('message', handleMessage);
       iframe.remove();
     }

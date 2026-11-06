@@ -19,6 +19,8 @@ export function ConnectKeyToolUI({
   addResult,
   gatewayURL,
   appID,
+  enclavePCR0,
+  skipAttestation,
   basePath,
   onConnected
 }: ConnectKeyToolUIProps) {
@@ -38,6 +40,8 @@ export function ConnectKeyToolUI({
       <FiducyKey
         gatewayURL={gatewayURL}
         appID={appID}
+        enclavePCR0={enclavePCR0}
+        skipAttestation={skipAttestation}
         provider={args.provider}
         basePath={basePath}
         className="fiducy-tool-widget"

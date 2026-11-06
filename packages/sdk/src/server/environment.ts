@@ -1,3 +1,5 @@
+import { isPCR0, parsePCR0List } from '@fiducy/core/attestation';
+
 import { PUBLIC_ENVIRONMENT_PREFIXES } from '../constants.ts';
 import { FiducyConfigurationError } from './errors.ts';
 
@@ -36,6 +38,21 @@ function requireGatewayURL(value: string): string {
   );
 }
 
+function requireEnclavePCR0(value: string | undefined): string | null {
+  const pcr0s = parsePCR0List(value);
+  if (pcr0s.length === 0) return null;
+  const invalid = pcr0s.find((pcr0) => !isPCR0(pcr0));
+  if (!invalid) return pcr0s.join(',');
+  throw new FiducyConfigurationError(
+    `FIDUCY_ENCLAVE_PCR0 must be the 96-character hex PCR0 your deploy printed (comma-separate several during a rollover), not "${invalid}".`
+  );
+}
+
+function readSkipAttestation(options: CreateFiducyOptions): boolean {
+  if (options.skipAttestation !== undefined) return options.skipAttestation;
+  return readEnvironmentVariable('FIDUCY_SKIP_ATTESTATION', options.env) === 'true';
+}
+
 export function resolveConnection(options: CreateFiducyOptions): FiducyConnection {
   const variables = options.env;
   const exposedSecret = findExposedSecret(variables);
@@ -49,7 +66,11 @@ export function resolveConnection(options: CreateFiducyOptions): FiducyConnectio
   return {
     gatewayURL: requireGatewayURL(requireValue(gatewayURL, 'FIDUCY_GATEWAY_URL', 'gatewayURL')),
     appSecret: requireValue(appSecret, 'FIDUCY_APP_SECRET', 'appSecret'),
-    appID: options.appID ?? readEnvironmentVariable('FIDUCY_APP_ID', variables) ?? null
+    appID: options.appID ?? readEnvironmentVariable('FIDUCY_APP_ID', variables) ?? null,
+    enclavePCR0: requireEnclavePCR0(
+      options.enclavePCR0 ?? readEnvironmentVariable('FIDUCY_ENCLAVE_PCR0', variables)
+    ),
+    skipAttestation: readSkipAttestation(options)
   };
 }
 

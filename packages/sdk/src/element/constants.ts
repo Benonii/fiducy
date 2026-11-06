@@ -1,4 +1,11 @@
-export const FIDUCY_KEY_ATTRIBUTES = ['provider', 'base-path', 'gateway-url', 'app-id'];
+export const FIDUCY_KEY_ATTRIBUTES = [
+  'provider',
+  'base-path',
+  'gateway-url',
+  'app-id',
+  'enclave-pcr0',
+  'skip-attestation'
+];
 
 export const FIDUCY_KEY_TAG = 'fiducy-key';
 

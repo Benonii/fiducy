@@ -32,12 +32,16 @@ export function toElementAttributes({
   provider,
   basePath,
   gatewayURL,
-  appID
+  appID,
+  enclavePCR0,
+  skipAttestation
 }: FiducyKeyOptions): Record<string, string> {
   const attributes: Record<string, string> = { provider };
   if (basePath) attributes['base-path'] = basePath;
   if (gatewayURL) attributes['gateway-url'] = gatewayURL;
   if (appID) attributes['app-id'] = appID;
+  if (enclavePCR0) attributes['enclave-pcr0'] = enclavePCR0;
+  if (skipAttestation) attributes['skip-attestation'] = '';
   return attributes;
 }
 

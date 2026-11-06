@@ -3,7 +3,15 @@ import { useEffect, useRef } from 'react';
 
 import type { KeyWidgetProps } from './types.ts';
 
-export function KeyWidget({ gatewayURL, appID, onHandle, onError, className }: KeyWidgetProps) {
+export function KeyWidget({
+  gatewayURL,
+  appID,
+  enclavePCR0,
+  skipAttestation,
+  onHandle,
+  onError,
+  className
+}: KeyWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onHandleRef = useRef(onHandle);
   const onErrorRef = useRef(onError);
@@ -16,12 +24,14 @@ export function KeyWidget({ gatewayURL, appID, onHandle, onError, className }: K
     const widget = mountKeyWidget({
       gatewayURL,
       appID,
+      enclavePCR0,
+      skipAttestation,
       container,
       onHandle: (handle, record) => onHandleRef.current(handle, record),
       onError: (message) => onErrorRef.current?.(message)
     });
     return widget.unmount;
-  }, [gatewayURL, appID]);
+  }, [gatewayURL, appID, enclavePCR0, skipAttestation]);
 
   return <div ref={containerRef} className={className} />;
 }

@@ -27,5 +27,5 @@ Steps:
 
 When you are done, give me a short report: files changed, and what I still have to do myself:
 - for production, deploy a gateway (https://fiducy.dev/docs/self-hosting), create the app in its dashboard and add my production origin
-- set FIDUCY_GATEWAY_URL, FIDUCY_APP_ID and FIDUCY_APP_SECRET on my host
+- set FIDUCY_GATEWAY_URL, FIDUCY_APP_ID, FIDUCY_APP_SECRET and FIDUCY_ENCLAVE_PCR0 (the PCR0 the gateway deploy printed) on my host
 - connect a test key in the browser and send one message`;
