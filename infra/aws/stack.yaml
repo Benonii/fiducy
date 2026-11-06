@@ -17,13 +17,18 @@ Parameters:
   GitHubRepository:
     Type: String
     Default: fiducy-dev/fiducy
-    Description: owner/name of the repository whose main branch may assume the deployer role
+    Description: owner/name of the repository whose aws-production environment may assume the deployer role
   GitHubOIDCProviderArn:
     Type: String
     Default: ''
     Description: >-
       ARN of an existing GitHub OIDC provider in this account. Leave empty to create one; an
       account can only hold one for token.actions.githubusercontent.com
+  KeyCustodianUserArns:
+    Type: CommaDelimitedList
+    Description: >-
+      ARNs of the IAM users allowed to assume the key custodian role, each with MFA. Name people,
+      not the whole account, so an IAM admin cannot hand themselves the role
 
   AlertEmail:
     Type: String
@@ -113,7 +118,7 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
-            Principal: { AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root' }
+            Principal: { AWS: !Ref KeyCustodianUserArns }
             Action: sts:AssumeRole
             Condition:
               Bool: { aws:MultiFactorAuthPresent: 'true' }
@@ -135,17 +140,24 @@ Resources:
               - Effect: Allow
                 Action: cloudformation:GetTemplateSummary
                 Resource: '*'
+              # By ARN pattern, not !GetAtt: the key policy names this role's unique ID, so a
+              # reference back to the key would be a circular dependency.
               - Effect: Allow
                 Action: [kms:PutKeyPolicy, kms:GetKeyPolicy, kms:DescribeKey]
-                Resource: !GetAtt WrappingKey.Arn
+                Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub '${DeployBucket.Arn}/*'
+              # By tag, not !Ref Host: the host's role reads the key, and the key names this
+              # role, so a direct reference would be a circular dependency.
               - Effect: Allow
                 Action: ssm:SendCommand
-                Resource:
-                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${Host}'
-                  - !Sub 'arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript'
+                Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                Condition:
+                  StringEquals: { ssm:resourceTag/fiducy-stack: !Ref AWS::StackName }
+              - Effect: Allow
+                Action: ssm:SendCommand
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript'
               - Effect: Allow
                 Action: [ssm:GetCommandInvocation, ssm:DescribeInstanceInformation]
                 Resource: '*'
@@ -160,8 +172,9 @@ Resources:
         - 6938fd4d98bab03faadb97b34396831e3780aea1
         - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
-  # GitHub Actions assumes this role with a short-lived OIDC token from the main branch of the
-  # repository above, so no AWS key is stored anywhere. It can ship a release and build on the
+  # GitHub Actions assumes this role with a short-lived OIDC token from a job in the repository's
+  # aws-production environment (required reviewers, main only), so no AWS key is stored anywhere
+  # and no other workflow on main can borrow it. It can ship a release and build on the
   # host. It cannot touch the key policy, IAM, or the stack's deletion, and it cannot assume the
   # custodian role (no MFA).
   DeployerRole:
@@ -183,7 +196,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepository}:ref:refs/heads/main'
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepository}:environment:aws-production'
       Policies:
         - PolicyName: fiducy-deployer
           PolicyDocument:
@@ -246,7 +259,7 @@ Resources:
             Action: kms:*
             Resource: '*'
           # Changing what the key trusts, disabling it or scheduling its deletion is reserved for
-          # the custodian role (MFA) and the account root user. IAM admins, the deploy credentials
+          # this stack's custodian role (MFA, named users) and the account root user. IAM admins, the deploy credentials
           # and the host cannot, whatever their IAM policies say. Every attempt lands in CloudTrail.
           - Sid: OnlyTheCustodianChangesTheKey
             Effect: Deny
@@ -257,11 +270,14 @@ Resources:
               - kms:DisableKey
               - kms:CreateGrant
             Resource: '*'
+            # Matched by the role's unique ID, not its name. An admin who deletes the role and
+            # creates a new one with the same name gets a new ID, so the new role is refused.
+            # The root user's aws:userid is the account ID.
             Condition:
-              ArnNotEquals:
-                aws:PrincipalArn:
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-key-custodian'
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              StringNotLike:
+                aws:userid:
+                  - !Sub '${KeyCustodianRole.RoleId}:*'
+                  - !Ref AWS::AccountId
           # Applies to everyone, account admins included. A Decrypt without an attestation
           # document for this exact enclave image is refused. Missing attestation counts as a
           # mismatch, so the parent host and the AWS console cannot decrypt either.
@@ -328,6 +344,7 @@ Resources:
             Encrypted: true
       Tags:
         - { Key: Name, Value: fiducy-prototype }
+        - { Key: fiducy-stack, Value: !Ref AWS::StackName }
 
   HostAddress:
     Type: AWS::EC2::EIP
