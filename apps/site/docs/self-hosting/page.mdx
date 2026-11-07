@@ -49,6 +49,8 @@ aws ssm get-parameter --name /fiducy/gateway-token --with-decryption --query Par
 
 To replace the token, run the workflow by hand with **rotate_token** ticked, then put the new value in the dashboard's `FIDUCY_GATEWAY_TOKEN` and restart it. The old token stops working, and the gateway can't load app settings until the dashboard has the new one.
 
+Set `FIDUCY_ENCLAVE_PCR0` and `FIDUCY_ENCLAVE_PCR16` on every app that uses this gateway to the values in the deploy output, so the widget and `importKeys` refuse any other enclave. A deploy that changes the enclave image changes `PCR0`: add the new value next to the old one (comma-separated) before the rollout, then remove the old one.
+
 ## Deploy from your machine
 
 ```bash

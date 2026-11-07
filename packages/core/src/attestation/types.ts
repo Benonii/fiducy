@@ -92,3 +92,27 @@ export type AttestationError =
   | 'debug_mode_enclave'
   | 'unexpected_pcr0'
   | 'unexpected_pcr16';
+
+export type GatewayAttestationError = AttestationError | 'attestation_unavailable';
+
+export type AttestationDecision = 'verify' | 'skip' | 'refuse';
+
+export type FetchAttestation = (url: string) => Promise<Response>;
+
+export interface AttestationPolicyInput {
+  gatewayURL: string;
+  enclavePCR0?: string | null;
+  enclavePCR16?: string | null;
+  skipAttestation?: boolean;
+}
+
+export interface VerifyGatewayInput {
+  gatewayURL: string;
+  enclavePCR0: string;
+  enclavePCR16?: string | null;
+  fetch?: FetchAttestation;
+}
+
+export interface AttestationResponseBody {
+  data: { format?: string; document?: string } | null;
+}
