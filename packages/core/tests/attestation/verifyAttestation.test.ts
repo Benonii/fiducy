@@ -89,6 +89,32 @@ describe('verifying an attestation document', () => {
   });
 });
 
+describe('checking the deployment config in PCR16', () => {
+  const pcr16 = '11'.repeat(48);
+  const verifyWithPCR16 = (expectedPCR16s: string[]) =>
+    buildDocument().then((document) =>
+      verifyAttestationWithRoot(
+        { document, nonce: TEST_NONCE, expectedPCR0s: [TEST_PCR0], expectedPCR16s },
+        TEST_ROOT_FINGERPRINT
+      )
+    );
+
+  it('accepts the genuine image running the expected deployment config', async () => {
+    const result = await verifyWithPCR16([pcr16]);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.pcr16).toBe(pcr16);
+  });
+
+  it('refuses the genuine image running another deployment config', async () => {
+    const result = await verifyWithPCR16(['22'.repeat(48)]);
+    expect(result).toEqual({ ok: false, error: 'unexpected_pcr16' });
+  });
+
+  it('does not check PCR16 when no value is expected', async () => {
+    expect((await verifyWithPCR16([])).ok).toBe(true);
+  });
+});
+
 describe('checking who signed the document', () => {
   it('refuses a document signed with a key other than the leaf certificate', async () => {
     const document = await buildDocument({ privateKey: TEST_NON_AUTHORITY_PRIVATE_KEY });

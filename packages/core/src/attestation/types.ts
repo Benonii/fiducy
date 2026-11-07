@@ -70,10 +70,12 @@ export interface VerifyAttestationInput {
   document: Bytes;
   nonce: Bytes;
   expectedPCR0s: string[];
+  expectedPCR16s?: string[];
 }
 
 export interface VerifiedAttestation {
   pcr0: string;
+  pcr16: string;
   moduleID: string;
   timestamp: Date;
   userData: Bytes | null;
@@ -88,4 +90,5 @@ export type AttestationError =
   | 'invalid_signature'
   | 'nonce_mismatch'
   | 'debug_mode_enclave'
-  | 'unexpected_pcr0';
+  | 'unexpected_pcr0'
+  | 'unexpected_pcr16';

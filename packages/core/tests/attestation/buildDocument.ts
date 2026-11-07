@@ -43,7 +43,7 @@ export function encodeCbor(value: CborValue): Bytes {
 
 function createPCRs(pcr0: string): Map<number, Bytes> {
   const pcrs = new Map<number, Bytes>();
-  for (let index = 0; index < 16; index += 1) pcrs.set(index, new Uint8Array(48).fill(index + 1));
+  for (let index = 0; index < 24; index += 1) pcrs.set(index, new Uint8Array(48).fill(index + 1));
   pcrs.set(
     0,
     Uint8Array.from(pcr0.match(/../g) ?? [], (pair) => Number.parseInt(pair, 16))
