@@ -7,6 +7,7 @@ export function KeyWidget({
   gatewayURL,
   appID,
   enclavePCR0,
+  enclavePCR16,
   skipAttestation,
   onHandle,
   onError,
@@ -25,13 +26,14 @@ export function KeyWidget({
       gatewayURL,
       appID,
       enclavePCR0,
+      enclavePCR16,
       skipAttestation,
       container,
       onHandle: (handle, record) => onHandleRef.current(handle, record),
       onError: (message) => onErrorRef.current?.(message)
     });
     return widget.unmount;
-  }, [gatewayURL, appID, enclavePCR0, skipAttestation]);
+  }, [gatewayURL, appID, enclavePCR0, enclavePCR16, skipAttestation]);
 
   return <div ref={containerRef} className={className} />;
 }

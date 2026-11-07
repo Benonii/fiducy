@@ -14,6 +14,7 @@ export interface MountKeyWidgetOptions {
   onError?: (message: string) => void;
   onRefused?: (message: string) => void;
   enclavePCR0?: string | null;
+  enclavePCR16?: string | null;
   skipAttestation?: boolean;
 }
 

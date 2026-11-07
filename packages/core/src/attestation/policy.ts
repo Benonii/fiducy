@@ -1,5 +1,5 @@
 import { ATTESTATION_ERROR_MESSAGES, LOCAL_GATEWAY_HOSTNAMES } from './constants.ts';
-import { parsePCR0List } from './pcr.ts';
+import { parsePCRList } from './pcr.ts';
 
 import type { AttestationDecision, AttestationPolicyInput } from './types.ts';
 import type { GatewayAttestationError } from './types.ts';
@@ -14,7 +14,7 @@ export function decideAttestation({
   enclavePCR0,
   skipAttestation
 }: AttestationPolicyInput): AttestationDecision {
-  if (parsePCR0List(enclavePCR0 ?? undefined).length > 0) return 'verify';
+  if (parsePCRList(enclavePCR0 ?? undefined).length > 0) return 'verify';
   if (skipAttestation || isLocalGateway(gatewayURL)) return 'skip';
   return 'refuse';
 }

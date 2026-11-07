@@ -14,6 +14,7 @@ export const ECDSA_P384_COORDINATE_LENGTH = 48;
 export const ECDSA_WITH_SHA384_OID = '2a8648ce3d040303';
 export const BASIC_CONSTRAINTS_OID = '551d13';
 export const DEBUG_MODE_PCR_INDEXES = [0, 1, 2] as const;
+export const DEPLOYMENT_CONFIG_PCR_INDEX = 16;
 export const EC_P384_IMPORT_PARAMETERS = { name: 'ECDSA', namedCurve: 'P-384' } as const;
 export const ECDSA_SHA384_PARAMETERS = { name: 'ECDSA', hash: 'SHA-384' } as const;
 export const DER_TAGS = {
@@ -42,5 +43,6 @@ export const ATTESTATION_ERROR_MESSAGES = {
   invalid_signature: 'the attestation signature does not match',
   nonce_mismatch: 'the attestation does not answer this request (nonce mismatch)',
   debug_mode_enclave: 'the enclave runs in debug mode',
-  unexpected_pcr0: 'the enclave runs a different image than FIDUCY_ENCLAVE_PCR0 names'
+  unexpected_pcr0: 'the enclave runs a different image than FIDUCY_ENCLAVE_PCR0 names',
+  unexpected_pcr16: 'the enclave runs a different deployment config than FIDUCY_ENCLAVE_PCR16 names'
 } as const;

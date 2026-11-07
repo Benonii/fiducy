@@ -95,8 +95,9 @@ export function createFiducyKeyElement(): CustomElementConstructor {
       const appID = this.getAttribute('app-id');
       if (!gatewayURL || !appID) return fetchBrowserConfig(this.basePath);
       const enclavePCR0 = this.getAttribute('enclave-pcr0');
+      const enclavePCR16 = this.getAttribute('enclave-pcr16');
       const skipAttestation = this.hasAttribute('skip-attestation');
-      return { gatewayURL, appID, enclavePCR0, skipAttestation };
+      return { gatewayURL, appID, enclavePCR0, enclavePCR16, skipAttestation };
     }
 
     #showSignedOut(provider: GatewayProvider) {

@@ -15,6 +15,7 @@ export interface FiducyToolkitOptions {
   gatewayURL?: string;
   appID?: string;
   enclavePCR0?: string;
+  enclavePCR16?: string;
   skipAttestation?: boolean;
   /** Where the app mounted its Fiducy handler. Defaults to /api/fiducy. */
   basePath?: string;
