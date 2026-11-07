@@ -4,6 +4,7 @@ export const FIDUCY_KEY_ATTRIBUTES = [
   'gateway-url',
   'app-id',
   'enclave-pcr0',
+  'enclave-pcr16',
   'skip-attestation'
 ];
 

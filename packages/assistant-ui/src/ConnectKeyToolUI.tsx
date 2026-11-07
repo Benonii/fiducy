@@ -20,6 +20,7 @@ export function ConnectKeyToolUI({
   gatewayURL,
   appID,
   enclavePCR0,
+  enclavePCR16,
   skipAttestation,
   basePath,
   onConnected
@@ -41,6 +42,7 @@ export function ConnectKeyToolUI({
         gatewayURL={gatewayURL}
         appID={appID}
         enclavePCR0={enclavePCR0}
+        enclavePCR16={enclavePCR16}
         skipAttestation={skipAttestation}
         provider={args.provider}
         basePath={basePath}

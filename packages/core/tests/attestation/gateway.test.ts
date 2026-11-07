@@ -53,6 +53,18 @@ describe('verifying a gateway', () => {
     expect(result).toEqual({ ok: false, error: 'unexpected_pcr0' });
   });
 
+  it('refuses the genuine image when PCR16 names another deployment config', async () => {
+    const { fetchAttestation } = createEnclaveFetch();
+    const input = {
+      gatewayURL: GATEWAY_URL,
+      enclavePCR0: TEST_PCR0,
+      enclavePCR16: '22'.repeat(48),
+      fetch: fetchAttestation
+    };
+    const result = await verifyGatewayWithRoot(input, TEST_ROOT_FINGERPRINT);
+    expect(result).toEqual({ ok: false, error: 'unexpected_pcr16' });
+  });
+
   it('trusts only the AWS root by default', async () => {
     const { fetchAttestation } = createEnclaveFetch();
     const input = { gatewayURL: GATEWAY_URL, enclavePCR0: TEST_PCR0, fetch: fetchAttestation };

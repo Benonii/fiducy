@@ -34,6 +34,7 @@ export function toElementAttributes({
   gatewayURL,
   appID,
   enclavePCR0,
+  enclavePCR16,
   skipAttestation
 }: FiducyKeyOptions): Record<string, string> {
   const attributes: Record<string, string> = { provider };
@@ -41,6 +42,7 @@ export function toElementAttributes({
   if (gatewayURL) attributes['gateway-url'] = gatewayURL;
   if (appID) attributes['app-id'] = appID;
   if (enclavePCR0) attributes['enclave-pcr0'] = enclavePCR0;
+  if (enclavePCR16) attributes['enclave-pcr16'] = enclavePCR16;
   if (skipAttestation) attributes['skip-attestation'] = '';
   return attributes;
 }

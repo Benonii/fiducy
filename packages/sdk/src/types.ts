@@ -51,6 +51,7 @@ export interface GatewayResponseBody<T> {
 
 export interface GatewayAttestationOptions {
   enclavePCR0?: string | null;
+  enclavePCR16?: string | null;
   skipAttestation?: boolean;
 }
 

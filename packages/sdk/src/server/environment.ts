@@ -1,4 +1,4 @@
-import { isPCR0, parsePCR0List } from '@fiducy/core/attestation';
+import { isPCR, parsePCRList } from '@fiducy/core/attestation';
 
 import { PUBLIC_ENVIRONMENT_PREFIXES } from '../constants.ts';
 import { FiducyConfigurationError } from './errors.ts';
@@ -38,14 +38,26 @@ function requireGatewayURL(value: string): string {
   );
 }
 
-function requireEnclavePCR0(value: string | undefined): string | null {
-  const pcr0s = parsePCR0List(value);
-  if (pcr0s.length === 0) return null;
-  const invalid = pcr0s.find((pcr0) => !isPCR0(pcr0));
-  if (!invalid) return pcr0s.join(',');
+function requirePCRList(value: string | undefined, register: string): string | null {
+  const measurements = parsePCRList(value);
+  if (measurements.length === 0) return null;
+  const invalid = measurements.find((measurement) => !isPCR(measurement));
+  if (!invalid) return measurements.join(',');
   throw new FiducyConfigurationError(
-    `FIDUCY_ENCLAVE_PCR0 must be the 96-character hex PCR0 your deploy printed (comma-separate several during a rollover), not "${invalid}".`
+    `FIDUCY_ENCLAVE_${register} must be the 96-character hex ${register} your deploy printed (comma-separate several during a rollover), not "${invalid}".`
   );
+}
+
+function readEnclavePCRs(
+  options: CreateFiducyOptions
+): Pick<FiducyConnection, 'enclavePCR0' | 'enclavePCR16'> {
+  const variables = options.env;
+  const pcr0 = options.enclavePCR0 ?? readEnvironmentVariable('FIDUCY_ENCLAVE_PCR0', variables);
+  const pcr16 = options.enclavePCR16 ?? readEnvironmentVariable('FIDUCY_ENCLAVE_PCR16', variables);
+  return {
+    enclavePCR0: requirePCRList(pcr0, 'PCR0'),
+    enclavePCR16: requirePCRList(pcr16, 'PCR16')
+  };
 }
 
 function readSkipAttestation(options: CreateFiducyOptions): boolean {
@@ -67,9 +79,7 @@ export function resolveConnection(options: CreateFiducyOptions): FiducyConnectio
     gatewayURL: requireGatewayURL(requireValue(gatewayURL, 'FIDUCY_GATEWAY_URL', 'gatewayURL')),
     appSecret: requireValue(appSecret, 'FIDUCY_APP_SECRET', 'appSecret'),
     appID: options.appID ?? readEnvironmentVariable('FIDUCY_APP_ID', variables) ?? null,
-    enclavePCR0: requireEnclavePCR0(
-      options.enclavePCR0 ?? readEnvironmentVariable('FIDUCY_ENCLAVE_PCR0', variables)
-    ),
+    ...readEnclavePCRs(options),
     skipAttestation: readSkipAttestation(options)
   };
 }

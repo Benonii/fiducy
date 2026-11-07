@@ -70,10 +70,12 @@ export interface VerifyAttestationInput {
   document: Bytes;
   nonce: Bytes;
   expectedPCR0s: string[];
+  expectedPCR16s?: string[];
 }
 
 export interface VerifiedAttestation {
   pcr0: string;
+  pcr16: string;
   moduleID: string;
   timestamp: Date;
   userData: Bytes | null;
@@ -88,7 +90,8 @@ export type AttestationError =
   | 'invalid_signature'
   | 'nonce_mismatch'
   | 'debug_mode_enclave'
-  | 'unexpected_pcr0';
+  | 'unexpected_pcr0'
+  | 'unexpected_pcr16';
 
 export type GatewayAttestationError = AttestationError | 'attestation_unavailable';
 
@@ -99,12 +102,14 @@ export type FetchAttestation = (url: string) => Promise<Response>;
 export interface AttestationPolicyInput {
   gatewayURL: string;
   enclavePCR0?: string | null;
+  enclavePCR16?: string | null;
   skipAttestation?: boolean;
 }
 
 export interface VerifyGatewayInput {
   gatewayURL: string;
   enclavePCR0: string;
+  enclavePCR16?: string | null;
   fetch?: FetchAttestation;
 }
 

@@ -14,6 +14,7 @@ const ENVIRONMENT_NAMES = [
   'FIDUCY_APP_SECRET',
   'NEXT_PUBLIC_FIDUCY_APP_SECRET',
   'FIDUCY_ENCLAVE_PCR0',
+  'FIDUCY_ENCLAVE_PCR16',
   'FIDUCY_SKIP_ATTESTATION'
 ];
 
@@ -81,6 +82,7 @@ describe('setup from server env', () => {
       appID: CHAT_APP.appID,
       basePath: '/api/fiducy',
       enclavePCR0: null,
+      enclavePCR16: null,
       skipAttestation: false
     });
     expect(JSON.stringify(body)).not.toContain(CHAT_APP.appSecret);
@@ -91,9 +93,11 @@ describe('setup from server env', () => {
     setConnectionEnvironment();
     const rollover = `${'AB'.repeat(48)}, ${'cd'.repeat(48)}`;
     process.env.FIDUCY_ENCLAVE_PCR0 = rollover;
+    process.env.FIDUCY_ENCLAVE_PCR16 = '11'.repeat(48);
     process.env.FIDUCY_SKIP_ATTESTATION = 'true';
     const body = await readBody(await createFromEnvironment().handler(appRequest('/config', null)));
     expect(body.data?.enclavePCR0).toBe(`${'ab'.repeat(48)},${'cd'.repeat(48)}`);
+    expect(body.data?.enclavePCR16).toBe('11'.repeat(48));
     expect(body.data?.skipAttestation).toBe(true);
   });
 

@@ -8,7 +8,7 @@ import type { FetchGateway } from '../types.ts';
 import type { FiducyConnection } from './types.ts';
 
 export async function assertGatewayAttested(
-  { gatewayURL, enclavePCR0, skipAttestation }: FiducyConnection,
+  { gatewayURL, enclavePCR0, enclavePCR16, skipAttestation }: FiducyConnection,
   fetchGateway: FetchGateway = fetch
 ): Promise<void> {
   const decision = decideAttestation({ gatewayURL, enclavePCR0, skipAttestation });
@@ -18,7 +18,8 @@ export async function assertGatewayAttested(
     return;
   }
   const fetchAttestation = (url: string) => fetchGateway(url, { method: 'GET' });
-  const input = { gatewayURL, enclavePCR0: enclavePCR0 ?? '', fetch: fetchAttestation };
+  const expected = { enclavePCR0: enclavePCR0 ?? '', enclavePCR16 };
+  const input = { gatewayURL, ...expected, fetch: fetchAttestation };
   const verified = await verifyGatewayAttestation(input);
   if (!verified.ok) throw new FiducyGatewayError(describeAttestationError(verified.error));
 }
