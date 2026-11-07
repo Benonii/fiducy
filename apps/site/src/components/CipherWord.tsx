@@ -8,7 +8,8 @@ import {
   CIPHER_SETTLED_EVERY,
   CIPHER_TOUCH_HOLD_MILLISECONDS,
   encipher,
-  moveToward
+  moveToward,
+  pixelNoise
 } from '@/lib/cipher';
 
 import type { CipherWordProps } from '@/types';
@@ -19,6 +20,7 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
   const [isHeld, setIsHeld] = useState(false);
   const [progress, setProgress] = useState(0);
   const [glyphs, setGlyphs] = useState(word);
+  const [noise, setNoise] = useState('none');
   const progressRef = useRef(0);
   const releaseRef = useRef(0);
   const isSealed = isHeld || isHinted;
@@ -28,6 +30,7 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
       progressRef.current = isSealed ? 1 : 0;
       setProgress(progressRef.current);
       setGlyphs(encipher(word, progressRef.current));
+      setNoise(pixelNoise(word));
       return;
     }
     let tick = 0;
@@ -38,6 +41,7 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
       progressRef.current = moveToward(progressRef.current, isSealed);
       setProgress(progressRef.current);
       setGlyphs(encipher(word, progressRef.current));
+      setNoise(pixelNoise(word));
       if (!isSealed && progressRef.current === 0) window.clearInterval(timer);
     }, CIPHER_FRAME_MILLISECONDS);
     return () => window.clearInterval(timer);
@@ -71,7 +75,14 @@ export function CipherWord({ word, isHinted }: CipherWordProps) {
       {isVisible ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-center overflow-hidden font-mono text-[0.62em] font-extralight tracking-[0.08em] whitespace-pre select-none"
+          className="pointer-events-none absolute inset-x-0 inset-y-[0.12em] bg-size-[100%_100%]"
+          style={{ backgroundImage: noise, clipPath: `inset(0 calc(100% - ${front}) 0 0)` }}
+        />
+      ) : null}
+      {isVisible ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden font-mono text-[0.62em] font-light tracking-[0.08em] text-ink-body whitespace-pre select-none"
         >
           {glyphs}
         </span>
