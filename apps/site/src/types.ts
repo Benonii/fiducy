@@ -198,3 +198,8 @@ export interface ShaderBoxProps {
   viewWidth: number;
   viewHeight: number;
 }
+
+export interface CipherWordProps {
+  word: string;
+  isHinted: boolean;
+}
